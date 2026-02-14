@@ -198,7 +198,7 @@ class CineCastProducer:
                     rendered_chunks += 1
                 
                 # 显示进度
-                if rendered_chunks % 50 == 0:
+                if rendered_chunks > 0 and rendered_chunks % 50 == 0:
                     logger.info(f"   🎵 进度: {rendered_chunks}/{total_chunks} 片段已渲染")
         
         # 释放 MLX 模型显存

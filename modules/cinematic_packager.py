@@ -123,7 +123,7 @@ class CinematicPackager:
         
         # 检查是否达到目标时长
         if len(self.buffer) >= self.target_duration_ms:
-            self.export_volume(chime)
+            self.export_volume(chime=chime)
     
     def export_volume(self, ambient: Optional[AudioSegment] = None,
                      chime: Optional[AudioSegment] = None):
@@ -199,7 +199,7 @@ class CinematicPackager:
             self._merge_with_previous(ambient, chime)
         else:
             # 独立导出为新的一卷
-            self.export_volume(chime)
+            self.export_volume(ambient=ambient, chime=chime)
     
     def _merge_with_previous(self, ambient: Optional[AudioSegment] = None,
                              chime: Optional[AudioSegment] = None):
@@ -216,7 +216,7 @@ class CinematicPackager:
             
             if not os.path.exists(prev_file):
                 logger.warning(f"前一个文件不存在: {prev_file}，独立导出尾部")
-                self.export_volume(chime)
+                self.export_volume(chime=chime)
                 return
             
             logger.info(f"🔗 尾部合并: {len(self.buffer)/1000/60:.1f}分钟追加到 {prev_file}")
@@ -243,7 +243,7 @@ class CinematicPackager:
         except Exception as e:
             logger.error(f"❌ 尾部合并失败: {e}")
             # 失败时仍然独立导出
-            self.export_volume(chime)
+            self.export_volume(chime=chime)
     
     def get_buffer_status(self) -> dict:
         """

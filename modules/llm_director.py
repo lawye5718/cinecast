@@ -176,7 +176,14 @@ class LLMScriptDirector:
             content = re.sub(r'\s*```$', '', content.strip())
             
             script = json.loads(content)
-            return script if isinstance(script, list) else self._fallback_regex_parse(text_chunk)
+            if isinstance(script, list):
+                return script
+            # Handle case where model returns {"result": [...]} or similar wrapper
+            if isinstance(script, dict):
+                for value in script.values():
+                    if isinstance(value, list):
+                        return value
+            return self._fallback_regex_parse(text_chunk)
             
         except Exception as e:
             logger.error(f"❌ Ollama 解析失败，触发正则降级: {e}")
