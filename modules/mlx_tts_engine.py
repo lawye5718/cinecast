@@ -52,7 +52,7 @@ class MLXRenderEngine:
     
     def render_unit(self, content: str, voice_cfg: Dict) -> AudioSegment:
         """
-        渲染单个剧本单元
+        渲染单个剧本单元（增强版：动态语速与音高控制）
         
         Args:
             content: 待渲染的文本内容
@@ -76,7 +76,7 @@ class MLXRenderEngine:
             try:
                 logger.debug(f"🔄 处理片段 {i+1}/{len(chunks)}: {len(chunk)}字符")
                 
-                # MLX 推理
+                # 1. MLX 极速推理
                 results = list(self.model.generate(
                     text=chunk,
                     ref_audio=voice_cfg["audio"],
@@ -84,30 +84,33 @@ class MLXRenderEngine:
                 ))
                 
                 audio_array = results[0].audio
-                
-                # MLX 惰性求值与显存清理
                 mx.eval(audio_array)
                 audio_data = np.array(audio_array)
                 
-                # 转换为AudioSegment
                 buffer = io.BytesIO()
                 sf.write(buffer, audio_data, self.sample_rate, format='WAV')
                 buffer.seek(0)
-                
                 segment = AudioSegment.from_file(buffer, format="wav")
                 
-                # 语速微调 (通过Pydub的帧率调整实现)
+                # 🌟 2. 电影级语速与音调控制 (Dynamic Speed & Pitch)
                 speed_factor = voice_cfg.get("speed", 1.0)
                 if speed_factor != 1.0:
+                    # 通过改变采样率实现物理降速/加速
+                    # 速度 < 1.0: 语速变慢，音高变低，适合大标题的"一字一顿"、"严肃沉稳"
+                    # 速度 > 1.0: 语速变快，音高变高，适合年轻角色的欢快对白
+                    new_frame_rate = int(segment.frame_rate * speed_factor)
                     segment = segment._spawn(segment.raw_data, overrides={
-                        "frame_rate": int(segment.frame_rate * speed_factor)
-                    }).set_frame_rate(segment.frame_rate)
+                        "frame_rate": new_frame_rate
+                    }).set_frame_rate(self.sample_rate) # 重采样回标准频率，防止拼接报错
                 
-                # 添加到整体音频
                 unit_audio += segment
                 
-                # 添加动态停顿
+                # 🌟 3. 动态标点停顿
                 pause_duration = self._get_dynamic_pause(chunk)
+                # 如果配置中要求"一字一顿"(速度极慢)，我们人为增加标点停顿的长度
+                if speed_factor <= 0.85:
+                    pause_duration = int(pause_duration * 1.5)
+                    
                 unit_audio += AudioSegment.silent(duration=pause_duration)
                 
                 logger.debug(f"✅ 片段 {i+1} 处理完成")

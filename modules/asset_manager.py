@@ -22,36 +22,38 @@ class AssetManager:
         self.voices = {
             "narrator": {
                 "audio": f"{self.asset_dir}/voices/narrator.wav", 
-                "text": "沉稳的旁白", 
+                "text": "沉稳旁白", 
                 "speed": 1.0
             },
+            # 1.4.1 章节题目：严肃一字一顿，速度调至 0.8
             "title": {
-                "audio": f"{self.asset_dir}/voices/narrator.wav", 
-                "text": "沉稳的旁白", 
+                "audio": f"{self.asset_dir}/voices/title.wav", 
+                "text": "严肃标题", 
                 "speed": 0.8
-            },  # 减速一字一顿
+            },
+            # 1.4.2 小标题：严肃但比正文慢，速度调至 0.9
             "subtitle": {
-                "audio": f"{self.asset_dir}/voices/narrator.wav", 
-                "text": "沉稳的旁白", 
+                "audio": f"{self.asset_dir}/voices/title.wav", 
+                "text": "严肃标题", 
                 "speed": 0.9
             },
             "male_pool": [
                 {
                     "audio": f"{self.asset_dir}/voices/m1.wav", 
-                    "text": "男声一号", 
-                    "speed": 1.05
+                    "text": "男声1", 
+                    "speed": 1.0
                 },
                 {
                     "audio": f"{self.asset_dir}/voices/m2.wav", 
-                    "text": "男声二号", 
-                    "speed": 1.0
+                    "text": "男声2", 
+                    "speed": 1.05  # 年轻男声加快
                 }
             ],
             "female_pool": [
                 {
                     "audio": f"{self.asset_dir}/voices/f1.wav", 
-                    "text": "女声一号", 
-                    "speed": 1.05
+                    "text": "女声1", 
+                    "speed": 1.0
                 }
             ]
         }
@@ -83,28 +85,34 @@ class AssetManager:
             return random.choice(pool)
     
     def get_ambient_sound(self, theme="default") -> AudioSegment:
-        """
-        获取沉浸式声场
-        如果用户未上传则返回静音
-        """
-        path = f"{self.asset_dir}/ambient/{theme}.wav"
-        if os.path.exists(path):
-            try:
-                return AudioSegment.from_file(path)
-            except Exception as e:
-                logger.warning(f"无法加载环境音 {path}: {e}")
-                return AudioSegment.silent(duration=100)  # Fallback
-        return AudioSegment.silent(duration=100)  # Fallback
+        """强化：支持用户动态上传环境音"""
+        # 寻找 assets/ambient 下所有可用的音频
+        ambient_dir = f"{self.asset_dir}/ambient"
+        # 允许用户上传任意支持的格式
+        for ext in ['.wav', '.mp3', '.m4a', '.flac']:
+            path = f"{ambient_dir}/{theme}{ext}"
+            if os.path.exists(path):
+                try:
+                    return AudioSegment.from_file(path)
+                except Exception as e:
+                    logger.warning(f"无法加载环境音 {path}: {e}")
+                    continue
+        logger.info(f"未找到环境音 {theme}，使用静音回退")
+        return AudioSegment.silent(duration=100)
     
     def get_transition_chime(self) -> AudioSegment:
-        """获取防惊跳柔和过渡音"""
-        path = f"{self.asset_dir}/transitions/soft_chime.wav"
-        if os.path.exists(path):
-            try:
-                return AudioSegment.from_file(path)
-            except Exception as e:
-                logger.warning(f"无法加载过渡音 {path}: {e}")
-                return AudioSegment.silent(duration=500)  # 默认半秒空白
+        """获取防惊跳柔和过渡音（支持多种格式）"""
+        transitions_dir = f"{self.asset_dir}/transitions"
+        # 支持多种音频格式
+        for filename in ['soft_chime.wav', 'soft_chime.mp3', 'chime.wav', 'transition.wav']:
+            path = os.path.join(transitions_dir, filename)
+            if os.path.exists(path):
+                try:
+                    return AudioSegment.from_file(path)
+                except Exception as e:
+                    logger.warning(f"无法加载过渡音 {path}: {e}")
+                    continue
+        logger.info("未找到过渡音，使用默认静音")
         return AudioSegment.silent(duration=500)  # 默认半秒空白
     
     def scan_voice_assets(self):
