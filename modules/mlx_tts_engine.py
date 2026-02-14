@@ -7,16 +7,12 @@ CineCast MLX底层渲染引擎
 """
 
 import gc
-import io
 import os
-import re
 import numpy as np
 import soundfile as sf
 import mlx.core as mx
 from mlx_audio.tts.utils import load_model
-from pydub import AudioSegment
 import logging
-from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -77,133 +73,6 @@ class MLXRenderEngine:
             if 'audio_data' in locals(): del audio_data
             mx.metal.clear_cache()
             gc.collect()
-    
-    def render_unit(self, content: str, voice_cfg: Dict) -> AudioSegment:
-        """
-        渲染单个剧本单元为AudioSegment（兼容旧接口）
-
-        与 render_dry_chunk 的区别:
-        - render_dry_chunk: 三段式架构推荐方法，直接写入磁盘WAV文件，
-          支持断点续传，内存占用更低
-        - render_unit: 旧接口，返回内存中的AudioSegment对象，
-          适用于需要直接操作音频数据的场景
-
-        Args:
-            content: 要渲染的文本内容
-            voice_cfg: 音色配置字典，包含 audio, text, speed 等字段
-
-        Returns:
-            AudioSegment: 渲染后的音频片段，失败时返回空AudioSegment
-        """
-        logger.warning("⚠️  使用旧接口render_unit，建议迁移到render_dry_chunk")
-        try:
-            chunks = self._micro_chunk(content)
-            unit_audio = AudioSegment.empty()
-
-            for chunk in chunks:
-                if not chunk.strip():
-                    continue
-
-                results = list(self.model.generate(
-                    text=chunk,
-                    ref_audio=voice_cfg["audio"],
-                    ref_text=voice_cfg["text"]
-                ))
-
-                audio_array = results[0].audio
-                mx.eval(audio_array)
-                audio_data = np.array(audio_array)
-
-                buffer = io.BytesIO()
-                sf.write(buffer, audio_data, self.sample_rate, format='WAV')
-                buffer.seek(0)
-                segment = AudioSegment.from_file(buffer, format="wav")
-
-                speed_factor = voice_cfg.get("speed", 1.0)
-                if speed_factor != 1.0:
-                    new_frame_rate = int(segment.frame_rate * speed_factor)
-                    segment = segment._spawn(segment.raw_data, overrides={
-                        "frame_rate": new_frame_rate
-                    }).set_frame_rate(self.sample_rate)
-
-                unit_audio += segment
-
-                del results, audio_array, audio_data
-                mx.metal.clear_cache()
-                gc.collect()
-
-            return unit_audio
-        except Exception as e:
-            logger.error(f"❌ render_unit失败: {e}")
-            return AudioSegment.empty()
-    
-    def _micro_chunk(self, text: str) -> list:
-        """
-        多级微切片算法
-        确保每个片段都不超过安全长度限制
-        """
-        if not text.strip():
-            return []
-        
-        # 第一级：按句号/换行符粗切分
-        raw_sentences = re.split(r'([。！？；\n])', text)
-        sub_chunks = []
-        
-        # 拼接标点与句子
-        temp_sentence = ""
-        for part in raw_sentences:
-            if not part.strip():
-                continue
-            if re.match(r'^[。！？；\n]$', part.strip()):
-                temp_sentence += part
-                sub_chunks.append(temp_sentence)
-                temp_sentence = ""
-            else:
-                if temp_sentence:
-                    sub_chunks.append(temp_sentence)
-                temp_sentence = part
-        if temp_sentence:
-            sub_chunks.append(temp_sentence)
-        
-        # 第二级：强制细分超长句
-        fine_chunks = []
-        for sentence in sub_chunks:
-            if len(sentence) > self.max_chars:
-                # 按逗号或顿号进一步肢解
-                comma_parts = re.split(r'([，、：])', sentence)
-                temp_comma = ""
-                for cp in comma_parts:
-                    if re.match(r'^[，、：]$', cp.strip()):
-                        temp_comma += cp
-                        fine_chunks.append(temp_comma)
-                        temp_comma = ""
-                    else:
-                        temp_comma += cp
-                        if len(temp_comma) >= self.max_chars:
-                            fine_chunks.append(temp_comma)
-                            temp_comma = ""
-                if temp_comma:
-                    fine_chunks.append(temp_comma)
-            else:
-                fine_chunks.append(sentence)
-        
-        # 第三级：智能回填合并过短片段
-        final_chunks = []
-        current_chunk = ""
-        for fc in fine_chunks:
-            fc = fc.strip()
-            if not fc:
-                continue
-            if len(current_chunk) + len(fc) <= self.max_chars:
-                current_chunk += " " + fc if current_chunk else fc
-            else:
-                if current_chunk:
-                    final_chunks.append(current_chunk.strip())
-                current_chunk = fc
-        if current_chunk:
-            final_chunks.append(current_chunk.strip())
-        
-        return [chunk for chunk in final_chunks if chunk.strip()]
 
 if __name__ == "__main__":
     # 测试代码
@@ -220,11 +89,15 @@ if __name__ == "__main__":
             "speed": 1.0
         }
         
-        # 测试渲染
+        # 测试渲染（使用三段式架构的 render_dry_chunk）
         test_content = "这是一个测试文本，用来验证MLX渲染引擎是否正常工作。"
-        audio_result = engine.render_unit(test_content, test_voice_cfg)
+        test_save_path = "/tmp/cinecast_test_dry.wav"
+        success = engine.render_dry_chunk(test_content, test_voice_cfg, test_save_path)
         
-        print(f"✅ 渲染成功，音频时长: {len(audio_result)/1000:.2f}秒")
+        if success:
+            print(f"✅ 渲染成功，干音文件已写入: {test_save_path}")
+        else:
+            print("❌ 渲染失败")
         
     except Exception as e:
         print(f"❌ 测试失败: {e}")

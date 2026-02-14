@@ -128,16 +128,19 @@ class Phase2PerformanceTester:
             logger.info(f"🎵 环境音: fountain ({len(ambient_bgm)}ms)")
             logger.info(f"🎵 过渡音: soft_chime ({len(chime_sound)}ms)")
             
-            # 开始渲染测试
+            # 开始渲染测试（三段式架构：阶段二只做干音渲染）
             test_start_time = time.time()
             total_units_processed = 0
             successful_units = 0
             
             logger.info("\n" + "="*50)
-            logger.info("🎙️ 开始音频渲染测试")
+            logger.info("🎙️ [阶段二] 纯净干音渲染")
             logger.info("="*50)
             
             self.collect_metrics("渲染开始")
+            
+            cache_dir = os.path.join("./output/Audiobooks", "temp_wav_cache")
+            os.makedirs(cache_dir, exist_ok=True)
             
             # 按章节顺序处理
             for script_data in scripts_data:
@@ -151,7 +154,7 @@ class Phase2PerformanceTester:
                 chapter_start_time = time.time()
                 chapter_successful = 0
                 
-                # 处理每个单元
+                # 处理每个单元（只做干音渲染和落盘）
                 for i, unit in enumerate(script_content, 1):
                     try:
                         unit_start_time = time.time()
@@ -163,18 +166,17 @@ class Phase2PerformanceTester:
                             unit.get("gender", "male")
                         )
                         
-                        # 渲染音频单元
-                        unit_audio = engine.render_unit(unit["content"], voice_cfg)
-                        
-                        # 添加到打包器
-                        packager.add_audio(unit_audio, ambient=ambient_bgm, chime=chime_sound)
+                        # 渲染干音到磁盘（断点续传：已存在则跳过）
+                        save_path = os.path.join(cache_dir, f"{unit['chunk_id']}.wav")
+                        success = engine.render_dry_chunk(unit["content"], voice_cfg, save_path)
                         
                         unit_duration = time.time() - unit_start_time
-                        chapter_successful += 1
+                        if success:
+                            chapter_successful += 1
+                            successful_units += 1
                         total_units_processed += 1
-                        successful_units += 1
                         
-                        logger.info(f"   ✓ 单元 {i}/{unit_count}: {unit['type']} - {unit.get('speaker', 'N/A')} ({len(unit_audio)}ms, {unit_duration:.2f}s)")
+                        logger.info(f"   ✓ 单元 {i}/{unit_count}: {unit['type']} - {unit.get('speaker', 'N/A')} ({unit_duration:.2f}s)")
                         
                         # 每处理10个单元收集一次系统指标
                         if i % 10 == 0:
@@ -188,9 +190,22 @@ class Phase2PerformanceTester:
                 success_rate = (chapter_successful / unit_count) * 100 if unit_count > 0 else 0
                 logger.info(f"챕터完成: 成功率 {success_rate:.1f}% ({chapter_successful}/{unit_count}), 耗时 {chapter_duration:.2f}s")
             
-            # 完成打包
-            logger.info("\n📦 完成音频打包...")
-            packager.finalize(ambient=ambient_bgm, chime=chime_sound)
+            # 释放 MLX 模型显存
+            del engine
+            import mlx.core as mx
+            mx.metal.clear_cache()
+            logger.info("✅ 阶段二完成，MLX 已从内存中安全撤离！")
+            self.collect_metrics("阶段二完成")
+            
+            # 阶段三：后期混音（Pydub 独占内存）
+            logger.info("\n" + "="*50)
+            logger.info("🎛️ [阶段三] 电影级后期混音")
+            logger.info("="*50)
+            
+            for script_data in scripts_data:
+                script_content = script_data['content']
+                packager.process_from_cache(script_content, cache_dir, assets, ambient_bgm, chime_sound)
+            
             self.collect_metrics("打包完成")
             
             # 总体统计
