@@ -87,8 +87,11 @@ class OptimizedContinuationTest:
             successful_units = 0
             
             logger.info("\n" + "="*50)
-            logger.info("🎙️ 处理已完成的优质章节")
+            logger.info("🎙️ [阶段二] 纯净干音渲染")
             logger.info("="*50)
+            
+            cache_dir = os.path.join("./output/Audiobooks", "temp_wav_cache")
+            os.makedirs(cache_dir, exist_ok=True)
             
             for script_filename in self.completed_scripts:
                 script_path = os.path.join(self.script_dir, script_filename)
@@ -108,7 +111,7 @@ class OptimizedContinuationTest:
                 chapter_start_time = time.time()
                 chapter_successful = 0
                 
-                # 处理每个单元
+                # 处理每个单元（三段式架构：只做干音渲染和落盘）
                 for i, unit in enumerate(script_content, 1):
                     try:
                         # 获取音色配置
@@ -118,15 +121,13 @@ class OptimizedContinuationTest:
                             unit.get("gender", "male")
                         )
                         
-                        # 渲染音频
-                        unit_audio = engine.render_unit(unit["content"], voice_cfg)
+                        # 渲染干音到磁盘（断点续传：已存在则跳过）
+                        save_path = os.path.join(cache_dir, f"{unit['chunk_id']}.wav")
+                        if engine.render_dry_chunk(unit["content"], voice_cfg, save_path):
+                            chapter_successful += 1
+                            successful_units += 1
                         
-                        # 添加到打包器
-                        packager.add_audio(unit_audio, ambient=ambient_bgm, chime=chime_sound)
-                        
-                        chapter_successful += 1
                         total_units += 1
-                        successful_units += 1
                         
                         # 显示进度
                         if i % 5 == 0 or i == unit_count:
@@ -140,9 +141,24 @@ class OptimizedContinuationTest:
                 success_rate = (chapter_successful / unit_count) * 100
                 logger.info(f"챕터完成: {success_rate:.1f}% 成功率, 耗时 {chapter_duration:.2f}s")
             
-            # 完成打包
-            logger.info("\n📦 完成音频打包...")
-            packager.finalize(ambient=ambient_bgm, chime=chime_sound)
+            # 释放 MLX 模型显存
+            del engine
+            import mlx.core as mx
+            mx.metal.clear_cache()
+            logger.info("✅ 阶段二完成，MLX 已从内存中安全撤离！")
+            
+            # 阶段三：后期混音（Pydub 独占内存）
+            logger.info("\n" + "="*50)
+            logger.info("🎛️ [阶段三] 电影级后期混音")
+            logger.info("="*50)
+            
+            for script_filename in self.completed_scripts:
+                script_path = os.path.join(self.script_dir, script_filename)
+                if not os.path.exists(script_path):
+                    continue
+                with open(script_path, 'r', encoding='utf-8') as f:
+                    script_content = json.load(f)
+                packager.process_from_cache(script_content, cache_dir, assets, ambient_bgm, chime_sound)
             
             total_duration = time.time() - test_start_time
             overall_success_rate = (successful_units / total_units) * 100 if total_units > 0 else 0
