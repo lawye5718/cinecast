@@ -7,11 +7,14 @@ CineCast MLX底层渲染引擎
 """
 
 import gc
+import io
 import os
+import re
 import numpy as np
 import soundfile as sf
 import mlx.core as mx
 from mlx_audio.tts.utils import load_model
+from pydub import AudioSegment
 import logging
 from typing import Dict
 
@@ -29,6 +32,7 @@ class MLXRenderEngine:
         try:
             self.model = load_model(model_path)
             self.sample_rate = 22050
+            self.max_chars = 60  # 微切片安全长度上限
             logger.info("✅ MLX渲染引擎初始化成功")
         except Exception as e:
             logger.error(f"❌ MLX渲染引擎初始化失败: {e}")
@@ -76,13 +80,62 @@ class MLXRenderEngine:
     
     def render_unit(self, content: str, voice_cfg: Dict) -> AudioSegment:
         """
-        兼容旧接口：渲染单个剧本单元（保持向后兼容）
+        渲染单个剧本单元为AudioSegment（兼容旧接口）
+
+        与 render_dry_chunk 的区别:
+        - render_dry_chunk: 三段式架构推荐方法，直接写入磁盘WAV文件，
+          支持断点续传，内存占用更低
+        - render_unit: 旧接口，返回内存中的AudioSegment对象，
+          适用于需要直接操作音频数据的场景
+
+        Args:
+            content: 要渲染的文本内容
+            voice_cfg: 音色配置字典，包含 audio, text, speed 等字段
+
+        Returns:
+            AudioSegment: 渲染后的音频片段，失败时返回空AudioSegment
         """
-        # 这里保留旧接口以保证兼容性
-        # 实际生产中应该使用render_dry_chunk方法
         logger.warning("⚠️  使用旧接口render_unit，建议迁移到render_dry_chunk")
-        # 可以在这里实现向后兼容逻辑
-        pass
+        try:
+            chunks = self._micro_chunk(content)
+            unit_audio = AudioSegment.empty()
+
+            for chunk in chunks:
+                if not chunk.strip():
+                    continue
+
+                results = list(self.model.generate(
+                    text=chunk,
+                    ref_audio=voice_cfg["audio"],
+                    ref_text=voice_cfg["text"]
+                ))
+
+                audio_array = results[0].audio
+                mx.eval(audio_array)
+                audio_data = np.array(audio_array)
+
+                buffer = io.BytesIO()
+                sf.write(buffer, audio_data, self.sample_rate, format='WAV')
+                buffer.seek(0)
+                segment = AudioSegment.from_file(buffer, format="wav")
+
+                speed_factor = voice_cfg.get("speed", 1.0)
+                if speed_factor != 1.0:
+                    new_frame_rate = int(segment.frame_rate * speed_factor)
+                    segment = segment._spawn(segment.raw_data, overrides={
+                        "frame_rate": new_frame_rate
+                    }).set_frame_rate(self.sample_rate)
+
+                unit_audio += segment
+
+                del results, audio_array, audio_data
+                mx.metal.clear_cache()
+                gc.collect()
+
+            return unit_audio
+        except Exception as e:
+            logger.error(f"❌ render_unit失败: {e}")
+            return AudioSegment.empty()
     
     def _micro_chunk(self, text: str) -> list:
         """

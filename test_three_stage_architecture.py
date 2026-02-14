@@ -92,7 +92,7 @@ class ThreeStageArchitectureTest:
         try:
             # 初始化组件
             assets = AssetManager("./assets")
-            engine = MLXRenderEngine("../qwentts/models/Qwen3-TTS-MLX-0.6B")
+            engine = MLXRenderEngine(os.environ.get("CINECAST_MODEL_PATH", "../qwentts/models/Qwen3-TTS-MLX-0.6B"))
             
             # 读取微切片剧本
             script_path = os.path.join(self.script_dir, "test_chapter_micro.json")

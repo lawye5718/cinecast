@@ -15,10 +15,11 @@ from typing import List, Dict
 logger = logging.getLogger(__name__)
 
 class LLMScriptDirector:
-    def __init__(self, ollama_url="http://127.0.0.1:11434"):
+    def __init__(self, ollama_url="http://127.0.0.1:11434", use_local_mlx_lm=False):
         self.api_url = f"{ollama_url}/api/chat"
         self.model_name = "qwen14b-pro"
         self.max_chars_per_chunk = 60 # 微切片红线
+        self.use_local_mlx_lm = use_local_mlx_lm
         
         # 测试Ollama连接
         self._test_ollama_connection()
@@ -175,7 +176,15 @@ class LLMScriptDirector:
             content = re.sub(r'\s*```$', '', content.strip())
             
             script = json.loads(content)
-            return script if isinstance(script, list) else self._fallback_regex_parse(text_chunk)
+            if isinstance(script, list):
+                return script
+            # Handle case where model returns {"result": [...]} or similar wrapper.
+            # The first list value found is used since the prompt requests a single array.
+            if isinstance(script, dict):
+                for value in script.values():
+                    if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
+                        return value
+            return self._fallback_regex_parse(text_chunk)
             
         except Exception as e:
             logger.error(f"❌ Ollama 解析失败，触发正则降级: {e}")

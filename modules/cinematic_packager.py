@@ -123,13 +123,19 @@ class CinematicPackager:
         
         # 检查是否达到目标时长
         if len(self.buffer) >= self.target_duration_ms:
-            self.export_volume(chime)
+            self.export_volume(chime=chime)
     
-    def export_volume(self, chime: Optional[AudioSegment] = None):
+    def export_volume(self, ambient: Optional[AudioSegment] = None,
+                     chime: Optional[AudioSegment] = None):
         """
         导出一卷（一个完整的MP3）
+
+        当通过 process_from_cache 调用时，ambient 在此处混入整卷音频。
+        当通过 add_audio 调用时，ambient 已在 add_audio 中按片段混入，
+        此处不应再传入 ambient 以避免重复混音。
         
         Args:
+            ambient: 环境音背景（可选，仅在 process_from_cache 流程中使用）
             chime: 开头过渡音效（可选）
         """
         if len(self.buffer) == 0:
@@ -138,6 +144,10 @@ class CinematicPackager:
         
         try:
             final_audio = self.buffer
+            
+            # 0. 混入环境音（如果有）
+            if ambient:
+                final_audio = self.mix_ambient(final_audio, ambient)
             
             # 1. 睡眠唤醒防惊跳：添加Chime，并对主干开头做淡入
             fade_in_ms = min(self.FADE_IN_MS, len(final_audio))
@@ -193,7 +203,7 @@ class CinematicPackager:
             self._merge_with_previous(ambient, chime)
         else:
             # 独立导出为新的一卷
-            self.export_volume(chime)
+            self.export_volume(ambient=ambient, chime=chime)
     
     def _merge_with_previous(self, ambient: Optional[AudioSegment] = None,
                              chime: Optional[AudioSegment] = None):
@@ -210,7 +220,7 @@ class CinematicPackager:
             
             if not os.path.exists(prev_file):
                 logger.warning(f"前一个文件不存在: {prev_file}，独立导出尾部")
-                self.export_volume(chime)
+                self.export_volume(chime=chime)
                 return
             
             logger.info(f"🔗 尾部合并: {len(self.buffer)/1000/60:.1f}分钟追加到 {prev_file}")
@@ -237,7 +247,7 @@ class CinematicPackager:
         except Exception as e:
             logger.error(f"❌ 尾部合并失败: {e}")
             # 失败时仍然独立导出
-            self.export_volume(chime)
+            self.export_volume(chime=chime)
     
     def get_buffer_status(self) -> dict:
         """

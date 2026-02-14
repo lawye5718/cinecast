@@ -102,11 +102,11 @@ class ProductionTestMonitor:
             producer = CineCastProducer()
             self.collect_metrics("初始化完成")
             
-            # 获取EPUB文件路径
-            epub_path = "../qwentts/tests/鱼没有脚 (约恩卡尔曼斯特凡松) (Z-Library)-2024-04-30-09-13-38.epub"
+            # 获取EPUB文件路径（通过环境变量或默认路径）
+            epub_path = os.environ.get("CINECAST_EPUB_PATH", "./input/test.epub")
             
             if not os.path.exists(epub_path):
-                raise FileNotFoundError(f"EPUB文件不存在: {epub_path}")
+                raise FileNotFoundError(f"EPUB文件不存在: {epub_path}，请设置 CINECAST_EPUB_PATH 环境变量")
             
             logger.info(f"📚 使用EPUB文件: {epub_path}")
             logger.info(f"📁 文件大小: {os.path.getsize(epub_path) / (1024*1024):.2f} MB")

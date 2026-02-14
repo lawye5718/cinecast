@@ -4,7 +4,7 @@
 
 **项目名称**: CineCast - 电影级有声书生产线  
 **创建时间**: 2026-02-14  
-**项目位置**: /Users/yuanliang/superstar/superstar3.1/projects/cinecast  
+**项目位置**: ./cinecast  
 **架构理念**: "编剧 -> 选角 -> 录音 -> 混音 -> 发行" 五车间标准化生产
 
 ## 🎯 实现目标
@@ -122,7 +122,7 @@ cinecast/
 ### 快速开始
 ```bash
 # 进入项目目录
-cd /Users/yuanliang/superstar/superstar3.1/projects/cinecast
+cd cinecast
 
 # 激活虚拟环境
 source ../qwentts/venv/bin/activate

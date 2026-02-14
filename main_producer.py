@@ -198,13 +198,16 @@ class CineCastProducer:
                     rendered_chunks += 1
                 
                 # 显示进度
-                if rendered_chunks % 50 == 0:
+                if rendered_chunks > 0 and rendered_chunks % 50 == 0:
                     logger.info(f"   🎵 进度: {rendered_chunks}/{total_chunks} 片段已渲染")
         
         # 释放 MLX 模型显存
         del engine
-        import mlx.core as mx
-        mx.metal.clear_cache()
+        try:
+            import mlx.core as mx
+            mx.metal.clear_cache()
+        except ImportError:
+            pass
         logger.info(f"✅ 阶段二完成 ({rendered_chunks}/{total_chunks} 片段)，MLX 已从内存中安全撤离！")
         
     # ==========================================
@@ -229,10 +232,11 @@ class CineCastProducer:
 def main():
     """主函数 - 严格的三段式串行处理，彻底切断内存重叠"""
     producer = CineCastProducer()
-    # 支持EPUB文件输入
-    epub_path = "../qwentts/tests/鱼没有脚 (约恩卡尔曼斯特凡松) (Z-Library)-2024-04-30-09-13-38.epub" 
     
-    if os.path.exists(epub_path):
+    # 支持EPUB文件输入（通过命令行参数或配置）
+    epub_path = sys.argv[1] if len(sys.argv) > 1 else None
+    
+    if epub_path and os.path.exists(epub_path):
         input_source = epub_path
         logger.info(f"📚 检测到EPUB文件: {epub_path}")
     else:
@@ -241,7 +245,7 @@ def main():
         os.makedirs(input_dir, exist_ok=True)
         if not os.listdir(input_dir):
             logger.warning(f"⚠️ 请先在 {input_dir} 文件夹中放入测试用的 .txt 章节！")
-            with open(os.path.join(input_dir, "第一章_测试.txt"), 'w') as f:
+            with open(os.path.join(input_dir, "第一章_测试.txt"), 'w', encoding='utf-8') as f:
                 f.write("第一章 风雪\n1976年\n夜幕降临港口。\"你相信命运吗？\"老渔夫问。\n\"我不信。\"年轻人回答。")
         input_source = input_dir
         logger.info(f"📝 使用TXT目录模式: {input_dir}")
