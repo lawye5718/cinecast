@@ -12,6 +12,9 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 class CinematicPackager:
+    FADE_IN_MS = 3000   # 淡入时长（毫秒）
+    FADE_OUT_MS = 2000  # 淡出时长（毫秒）
+
     def __init__(self, output_dir="output"):
         """
         初始化混音打包器
@@ -97,13 +100,15 @@ class CinematicPackager:
         try:
             final_audio = self.buffer
             
-            # 1. 睡眠唤醒防惊跳：添加Chime，并对主干开头做3秒淡入
-            final_audio = final_audio.fade_in(3000)
+            # 1. 睡眠唤醒防惊跳：添加Chime，并对主干开头做淡入
+            fade_in_ms = min(self.FADE_IN_MS, len(final_audio))
+            final_audio = final_audio.fade_in(fade_in_ms)
             if chime and len(chime) > 500:
                 final_audio = chime + final_audio
                 
             # 2. 尾部淡出，防止突兀结束
-            final_audio = final_audio.fade_out(2000)
+            fade_out_ms = min(self.FADE_OUT_MS, len(final_audio))
+            final_audio = final_audio.fade_out(fade_out_ms)
             
             # 3. 导出文件
             file_name = f"Audiobook_Part_{self.file_index:03d}.mp3"
@@ -146,17 +151,19 @@ class CinematicPackager:
         
         if remaining_ms < self.min_tail_ms and self.file_index > 1:
             # 尾部不足10分钟，追加到上一个文件
-            self._merge_with_previous(ambient)
+            self._merge_with_previous(ambient, chime)
         else:
             # 独立导出为新的一卷
             self.export_volume(chime)
     
-    def _merge_with_previous(self, ambient: Optional[AudioSegment] = None):
+    def _merge_with_previous(self, ambient: Optional[AudioSegment] = None,
+                             chime: Optional[AudioSegment] = None):
         """
         将尾部音频合并到上一个文件
         
         Args:
             ambient: 环境音背景（可选）
+            chime: 过渡音效（可选）
         """
         try:
             prev_index = self.file_index - 1
@@ -164,7 +171,7 @@ class CinematicPackager:
             
             if not os.path.exists(prev_file):
                 logger.warning(f"前一个文件不存在: {prev_file}，独立导出尾部")
-                self.export_volume()
+                self.export_volume(chime)
                 return
             
             logger.info(f"🔗 尾部合并: {len(self.buffer)/1000/60:.1f}分钟追加到 {prev_file}")
@@ -191,7 +198,7 @@ class CinematicPackager:
         except Exception as e:
             logger.error(f"❌ 尾部合并失败: {e}")
             # 失败时仍然独立导出
-            self.export_volume()
+            self.export_volume(chime)
     
     def get_buffer_status(self) -> dict:
         """
