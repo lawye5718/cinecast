@@ -178,10 +178,11 @@ class LLMScriptDirector:
             script = json.loads(content)
             if isinstance(script, list):
                 return script
-            # Handle case where model returns {"result": [...]} or similar wrapper
+            # Handle case where model returns {"result": [...]} or similar wrapper.
+            # The first list value found is used since the prompt requests a single array.
             if isinstance(script, dict):
                 for value in script.values():
-                    if isinstance(value, list):
+                    if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
                         return value
             return self._fallback_regex_parse(text_chunk)
             

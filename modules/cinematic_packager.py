@@ -129,9 +129,13 @@ class CinematicPackager:
                      chime: Optional[AudioSegment] = None):
         """
         导出一卷（一个完整的MP3）
+
+        当通过 process_from_cache 调用时，ambient 在此处混入整卷音频。
+        当通过 add_audio 调用时，ambient 已在 add_audio 中按片段混入，
+        此处不应再传入 ambient 以避免重复混音。
         
         Args:
-            ambient: 环境音背景（可选）
+            ambient: 环境音背景（可选，仅在 process_from_cache 流程中使用）
             chime: 开头过渡音效（可选）
         """
         if len(self.buffer) == 0:

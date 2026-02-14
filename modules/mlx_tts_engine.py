@@ -80,8 +80,20 @@ class MLXRenderEngine:
     
     def render_unit(self, content: str, voice_cfg: Dict) -> AudioSegment:
         """
-        兼容旧接口：渲染单个剧本单元（保持向后兼容）
-        将文本渲染为AudioSegment并返回
+        渲染单个剧本单元为AudioSegment（兼容旧接口）
+
+        与 render_dry_chunk 的区别:
+        - render_dry_chunk: 三段式架构推荐方法，直接写入磁盘WAV文件，
+          支持断点续传，内存占用更低
+        - render_unit: 旧接口，返回内存中的AudioSegment对象，
+          适用于需要直接操作音频数据的场景
+
+        Args:
+            content: 要渲染的文本内容
+            voice_cfg: 音色配置字典，包含 audio, text, speed 等字段
+
+        Returns:
+            AudioSegment: 渲染后的音频片段，失败时返回空AudioSegment
         """
         logger.warning("⚠️  使用旧接口render_unit，建议迁移到render_dry_chunk")
         try:
