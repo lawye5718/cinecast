@@ -1,0 +1,11 @@
+{
+    "assets_dir": "./assets",
+    "output_dir": "./output/local_test",
+    "model_path": "../qwentts/models/Qwen3-TTS-MLX-0.6B",
+    "ambient_theme": "iceland_wind",
+    "target_duration_min": 30,
+    "min_tail_min": 10,
+    "use_local_llm": true,
+    "ollama_host": "http://localhost:11434",
+    "local_model_name": "qwen14b-pro"
+}
