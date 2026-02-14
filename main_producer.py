@@ -191,8 +191,8 @@ class CineCastProducer:
                             "pause_ms": 1500
                         }
                         # 将提要插入到本章剧本的最开头（在标题之后，正文之前）
-                        micro_script.insert(1, recap_unit)
                         micro_script.insert(1, intro_unit)
+                        micro_script.insert(2, recap_unit)
                 
                 # 保存当前章的原始文本，供下一章使用
                 prev_chapter_content = content

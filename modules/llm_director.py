@@ -184,6 +184,7 @@ class LLMScriptDirector:
         
         try:
             response = requests.post(self.api_url, json=payload, timeout=60)
+            response.raise_for_status()
             return response.json().get('message', {}).get('content', '').strip()
         except Exception as e:
             logger.error(f"摘要生成失败: {e}")
