@@ -60,61 +60,76 @@ class LLMScriptDirector:
             logger.warning(f"检查Ollama模型时出错: {e}")
             return False
     
+    def _chunk_text_for_llm(self, text: str, max_length: int = 1500) -> List[str]:
+        """🌟 防止章节过长，按段落切分为安全大小给 LLM 处理"""
+        paragraphs = text.split('\n')
+        chunks, current_chunk = [], ""
+        for para in paragraphs:
+            if not para.strip(): continue
+            if len(current_chunk) + len(para) > max_length and current_chunk:
+                chunks.append(current_chunk)
+                current_chunk = para + "\n"
+            else:
+                current_chunk += para + "\n"
+        if current_chunk:
+            chunks.append(current_chunk)
+        return chunks
+    
     def parse_text_to_script(self, text: str) -> List[Dict]:
-        """调用本地 Ollama 14B 进行专业剧本拆解"""
-        logger.info(f"🧠 请求 Ollama ({self.model_name}) 拆解剧本...")
+        """🌟 将任意长度的章节拆解为剧本（支持长章节完整处理）"""
+        # 🌟 修复截断漏洞：按段落切分长章节
+        text_chunks = self._chunk_text_for_llm(text)
+        full_script = []
         
+        for i, chunk in enumerate(text_chunks):
+            logger.info(f"   🧠 正在解析剧情片段 {i+1}/{len(text_chunks)}...")
+            chunk_script = self._request_ollama(chunk)
+            full_script.extend(chunk_script)
+            
+        return full_script
+    
+    def _request_ollama(self, text_chunk: str) -> List[Dict]:
+        """向Ollama发送单个文本块请求"""
         system_prompt = """
-        你是一位顶级的有声书导演。请将提供的小说文本拆解为专业的广播剧JSON剧本。
-        
-        【角色规则】
-        1. type 必须是 "title"(章节标题), "subtitle"(小标题), "narration"(旁白), "dialogue"(对白) 之一。
-        2. 对于 dialogue，必须推断出具体的 speaker（人名）和 gender（male/female）。
-        3. speaker 字段必须统一，如果同一个人说话，名字必须完全一致。
-        
-        【输出要求】
-        必须且只能输出一个合法的 JSON 数组，格式如下：
-        [
-          {"type": "title", "speaker": "narrator", "content": "第一章 风雪"},
-          {"type": "subtitle", "speaker": "narrator", "content": "1976年"},
-          {"type": "narration", "speaker": "narrator", "content": "夜幕降临。"},
-          {"type": "dialogue", "speaker": "老渔夫", "gender": "male", "content": "你相信命运吗？"}
-        ]
+        你是一位顶级的有声书导演。请将提供的小说文本拆解为严格的 JSON 数组。
+        【字段要求】
+        - "type": "title"(标题), "subtitle"(小标题), "narration"(旁白), "dialogue"(对白)
+        - "speaker": 旁白和标题填 "narrator"，对白填具体人名（需推断，且上下文统一）。
+        - "gender": "male" 或 "female" 或 "unknown"。
+        - "content": 台词或描述，去除外层引号。
+        【输出格式】只输出合法的 JSON 数组，不包含任何 Markdown 标记。
         """
         
         payload = {
             "model": self.model_name,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"请拆解以下文本：\n{text[:2500]}"}
+                {"role": "user", "content": f"请拆解以下剧情：\n\n{text_chunk}"}
             ],
-            "format": "json",       # 强制 Ollama 输出 JSON
+            "format": "json",
             "stream": False,
-            "keep_alive": 0         # 🌟 核心防冲突：生成完毕后，立即将 14B 模型从 M4 内存中卸载！
+            "keep_alive": "10m",  # 🌟 修复潮汐漏洞：保持模型在内存中 10 分钟
+            "options": {
+                "num_ctx": 8192,  # 🌟 修复截断漏洞：扩大上下文窗口
+                "temperature": 0.1 # 降低温度，确保 JSON 格式稳定
+            }
         }
 
         try:
-            response = requests.post(self.api_url, json=payload, timeout=300)
+            response = requests.post(self.api_url, json=payload, timeout=180)
             response.raise_for_status()
-            result = response.json()
+            content = response.json().get('message', {}).get('content', '[]')
             
-            # 提取并解析 JSON
-            content = result.get('message', {}).get('content', '[]')
-            
-            # 🌟 幻觉防御：强力剥离 Markdown 代码块
+            # 🌟 强力剥离 Markdown 代码块（防止 LLM 幻觉）
             content = re.sub(r'^```(?:json)?\s*', '', content.strip(), flags=re.IGNORECASE)
             content = re.sub(r'\s*```$', '', content.strip())
             
             script = json.loads(content)
-            
-            # 兜底校验
-            if not isinstance(script, list):
-                raise ValueError("Ollama 返回的不是 JSON 数组")
-            return script
+            return script if isinstance(script, list) else self._fallback_regex_parse(text_chunk)
             
         except Exception as e:
-            logger.error(f"❌ Ollama 解析失败，触发降级方案: {e}")
-            return self._fallback_regex_parse(text)
+            logger.error(f"❌ Ollama 解析失败，触发正则降级: {e}")
+            return self._fallback_regex_parse(text_chunk)
     
     def _fallback_regex_parse(self, text: str) -> List[Dict]:
         """🌟 降级正则方案：当大模型解析失败时的保底方案"""

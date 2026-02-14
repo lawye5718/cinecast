@@ -8,6 +8,9 @@ import os
 import sys
 import json
 import logging
+import requests
+from bs4 import BeautifulSoup
+from ebooklib import epub
 from pathlib import Path
 
 # 添加项目根目录到Python路径
@@ -47,7 +50,7 @@ class CineCastProducer:
         """获取默认配置"""
         return {
             "assets_dir": "./assets",
-            "output_dir": "./output/Fish_No_Feet",
+            "output_dir": "./output/Audiobooks",
             "model_path": "../qwentts/models/Qwen3-TTS-MLX-0.6B",  # 相对于cinecast目录
             "ambient_theme": "iceland_wind",  # 环境音主题
             "target_duration_min": 30,  # 目标时长（分钟）
@@ -88,37 +91,74 @@ class CineCastProducer:
             logger.error(f"❌ 组件初始化失败: {e}")
             raise
     
+    def _extract_epub_chapters(self, epub_path: str) -> dict:
+        """🌟 从 EPUB 提取干净的章节文本字典 {章节名: 文本内容}"""
+        logger.info(f"📖 正在解析 EPUB 文件: {epub_path}")
+        book = epub.read_epub(epub_path)
+        chapters = {}
+        for idx, item in enumerate(book.get_items_of_type(9)): # 9 = ITEM_DOCUMENT
+            soup = BeautifulSoup(item.get_content(), 'html.parser')
+            text = soup.get_text(separator='\n')
+            clean_text = '\n'.join([line.strip() for line in text.split('\n') if line.strip()])
+            if len(clean_text) > 100: # 过滤极短废页
+                title = f"Chapter_{idx:03d}"
+                chapters[title] = clean_text
+        return chapters
+    
+    def _eject_ollama_memory(self):
+        """🌟 核心绝招：强行弹射 Ollama 模型，清空 M4 显存"""
+        logger.info("🧹 正在卸载 Ollama 模型释放显存...")
+        try:
+            requests.post(
+                "http://127.0.0.1:11434/api/generate",
+                json={"model": "qwen14b-pro", "prompt": "bye", "keep_alive": 0},
+                timeout=10
+            )
+            logger.info("✅ 14B 大模型已成功从统一内存中弹射！")
+        except Exception as e:
+            logger.warning(f"⚠️ 弹射 Ollama 失败，可能已自动释放: {e}")
+    
     # ==========================================
     # 🌟 阶段一：编剧期 (Ollama 14B 独占内存)
     # ==========================================
-    def phase_1_generate_scripts(self, txt_dir: str):
+    def phase_1_generate_scripts(self, input_source):
         """🌟 阶段一：启动编剧引擎 (Ollama 14B 独占内存)"""
         logger.info("\n" + "="*50 + "\n🎬 [阶段一] 启动编剧引擎 (Ollama 14B)...\n" + "="*50)
-        director = LLMScriptDirector()
-            
-        text_files = sorted([f for f in os.listdir(txt_dir) if f.endswith(('.txt', '.md'))])
-        if not text_files:
-            logger.error(f"❌ 目录 {txt_dir} 为空，无法生成剧本！")
-            return False
+        
+        # 🌟 支持EPUB和TXT两种输入格式
+        if input_source.endswith('.epub'):
+            chapters = self._extract_epub_chapters(input_source)
+            if not chapters:
+                logger.error("❌ EPUB 解析失败或无有效文本！")
+                return False
+        else:
+            # 处理TXT目录
+            text_files = sorted([f for f in os.listdir(input_source) if f.endswith(('.txt', '.md'))])
+            if not text_files:
+                logger.error(f"❌ 目录 {input_source} 为空，无法生成剧本！")
+                return False
+            chapters = {}
+            for file_name in text_files:
+                with open(os.path.join(input_source, file_name), 'r', encoding='utf-8') as f:
+                    chapters[os.path.splitext(file_name)[0]] = f.read()
     
-        for file_name in text_files:
-            chapter_name = os.path.splitext(file_name)[0]
+        director = LLMScriptDirector()
+        
+        for chapter_name, content in chapters.items():
             script_path = os.path.join(self.script_dir, f"{chapter_name}.json")
-                
             if os.path.exists(script_path):
                 logger.info(f"⏭️ 剧本已存在，跳过: {chapter_name}")
                 continue
-                    
-            with open(os.path.join(txt_dir, file_name), 'r', encoding='utf-8') as f:
-                content = f.read()
-                    
-            script = director.parse_text_to_script(content)
                 
+            logger.info(f"✍️ 正在构思剧本: {chapter_name} (字数: {len(content)})")
+            script = director.parse_text_to_script(content)
+            
             with open(script_path, 'w', encoding='utf-8') as f:
                 json.dump(script, f, ensure_ascii=False, indent=2)
                 logger.info(f"✅ 生成剧本: {script_path}")
-                    
-        logger.info("🎉 阶段一完成！Ollama 已释放内存。进入阶段二...")
+                
+        # 🌟 阶段一结束，立即弹射内存
+        self._eject_ollama_memory()
         return True
     
     # ==========================================
@@ -156,19 +196,25 @@ class CineCastProducer:
 def main():
     """主函数"""
     producer = CineCastProducer()
-    input_dir = "./input_chapters" # 确保你在运行前建立这个文件夹，并放入你要读的TXT章节
-    os.makedirs(input_dir, exist_ok=True)
+    # 🌟 支持EPUB文件输入
+    epub_path = "../qwentts/tests/鱼没有脚 (约恩卡尔曼斯特凡松) (Z-Library)-2024-04-30-09-13-38.epub" 
     
-    # 检查是否放了测试文件
-    if not os.listdir(input_dir):
-        logger.warning(f"⚠️ 请先在 {input_dir} 文件夹中放入测试用的 .txt 章节，然后再运行本程序！")
-        # 创建一个测试文件
-        with open(os.path.join(input_dir, "第一章_测试.txt"), 'w') as f:
-            f.write("第一章 风雪\n1976年\n夜幕降临港口。\"你相信命运吗？\"老渔夫问。\n\"我不信。\"年轻人回答。")
+    if os.path.exists(epub_path):
+        input_source = epub_path
+        logger.info(f"📚 检测到EPUB文件: {epub_path}")
+    else:
+        # 回退到TXT目录模式
+        input_dir = "./input_chapters"
+        os.makedirs(input_dir, exist_ok=True)
+        if not os.listdir(input_dir):
+            logger.warning(f"⚠️ 请先在 {input_dir} 文件夹中放入测试用的 .txt 章节！")
+            with open(os.path.join(input_dir, "第一章_测试.txt"), 'w') as f:
+                f.write("第一章 风雪\n1976年\n夜幕降临港口。\"你相信命运吗？\"老渔夫问。\n\"我不信。\"年轻人回答。")
+        input_source = input_dir
+        logger.info(f"📝 使用TXT目录模式: {input_dir}")
     
     try:
-        # 执行工业级两阶段流水线
-        if producer.phase_1_generate_scripts(input_dir):
+        if producer.phase_1_generate_scripts(input_source):
             producer.phase_2_render_audio()
     except Exception as e:
         logger.error(f"💥 生产线崩溃: {e}")
