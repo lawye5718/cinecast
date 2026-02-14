@@ -21,11 +21,14 @@ class LLMScriptDirector:
             self._initialize_local_model()
     
     def _initialize_local_model(self):
-        """初始化本地MLX模型"""
+        """初始化本地模型（优先使用Ollama Qwen14B）"""
+        # 首先尝试使用本地Ollama Qwen14B模型
+        if self._try_ollama_qwen():
+            return
+            
+        # 如果Ollama不可用，则尝试MLX模型
         try:
             from mlx_lm import load
-            # 这里使用您系统中可能存在的Qwen模型
-            # 您可以根据实际情况调整模型路径
             model_names = [
                 "Qwen/Qwen1.5-4B-Chat-MLX",
                 "qwen/Qwen1.5-4B-Chat-MLX",
@@ -34,12 +37,12 @@ class LLMScriptDirector:
             
             for model_name in model_names:
                 try:
-                    logger.info(f"尝试加载模型: {model_name}")
+                    logger.info(f"尝试加载MLX模型: {model_name}")
                     self.model, self.tokenizer = load(model_name)
-                    logger.info(f"✅ 成功加载本地模型: {model_name}")
+                    logger.info(f"✅ 成功加载MLX模型: {model_name}")
                     return
                 except Exception as e:
-                    logger.warning(f"加载模型 {model_name} 失败: {e}")
+                    logger.warning(f"加载MLX模型 {model_name} 失败: {e}")
                     continue
             
             logger.error("❌ 未能加载任何本地Qwen模型")
@@ -51,6 +54,30 @@ class LLMScriptDirector:
         except Exception as e:
             logger.error(f"初始化本地模型失败: {e}")
             self.use_local = False
+    
+    def _try_ollama_qwen(self) -> bool:
+        """尝试使用Ollama的Qwen14B模型"""
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["ollama", "list"], 
+                capture_output=True, 
+                text=True, 
+                timeout=10
+            )
+            
+            if result.returncode == 0 and "qwen14b-pro" in result.stdout:
+                logger.info("✅ 成功检测到本地Ollama Qwen14B模型")
+                self.model_type = "ollama"
+                self.model_name = "qwen14b-pro"
+                return True
+            else:
+                logger.info("未找到Ollama Qwen14B模型")
+                return False
+                
+        except Exception as e:
+            logger.warning(f"检查Ollama模型时出错: {e}")
+            return False
     
     def parse_text_to_script(self, text: str) -> List[Dict]:
         """
@@ -64,12 +91,24 @@ class LLMScriptDirector:
     
     def _parse_with_local_llm(self, text: str) -> List[Dict]:
         """
-        使用本地Qwen模型进行智能解析
+        使用本地模型进行智能解析（优先Ollama Qwen14B）
         """
         try:
-            from mlx_lm import generate
-            
-            prompt = f"""
+            if hasattr(self, 'model_type') and self.model_type == "ollama":
+                return self._parse_with_ollama(text)
+            else:
+                return self._parse_with_mlx(text)
+                
+        except Exception as e:
+            logger.error(f"本地LLM解析失败: {e}")
+            return self._fallback_regex_parse(text)
+    
+    def _parse_with_ollama(self, text: str) -> List[Dict]:
+        """使用Ollama Qwen14B模型解析"""
+        import subprocess
+        import json
+        
+        prompt = f"""
 请作为一个专业的广播剧导演，将以下小说文本转化为JSON格式的剧本。
 必须识别出：旁白(narration)、对白(dialogue)、标题(title)。
 对于对白，必须推断出说话人(speaker)和性别(gender)。
@@ -83,20 +122,57 @@ class LLMScriptDirector:
 ]
 只返回JSON数组，不要其他废话。
 """
-            
-            response = generate(self.model, self.tokenizer, prompt, max_tokens=1000)
-            
+        
+        result = subprocess.run(
+            ["ollama", "run", self.model_name, prompt],
+            capture_output=True,
+            text=True,
+            timeout=120  # 2分钟超时
+        )
+        
+        if result.returncode == 0:
+            response = result.stdout.strip()
             # 提取JSON内容
             json_match = re.search(r'\[[\s\S]*\]', response)
             if json_match:
                 json_str = json_match.group(0)
                 return json.loads(json_str)
             else:
-                logger.warning("模型输出中未找到有效JSON，使用降级方案")
+                logger.warning("Ollama模型输出中未找到有效JSON，使用降级方案")
                 return self._fallback_regex_parse(text)
-                
-        except Exception as e:
-            logger.error(f"本地LLM解析失败: {e}")
+        else:
+            error_msg = result.stderr.strip() if result.stderr else "未知错误"
+            logger.error(f"Ollama模型调用失败: {error_msg}")
+            return self._fallback_regex_parse(text)
+    
+    def _parse_with_mlx(self, text: str) -> List[Dict]:
+        """使用MLX模型解析"""
+        from mlx_lm import generate
+        
+        prompt = f"""
+请作为一个专业的广播剧导演，将以下小说文本转化为JSON格式的剧本。
+必须识别出：旁白(narration)、对白(dialogue)、标题(title)。
+对于对白，必须推断出说话人(speaker)和性别(gender)。
+
+文本：{text[:2000]}  # 限制长度避免模型负担
+
+返回格式示例：
+[
+  {{"type": "narration", "speaker": "narrator", "content": "夜幕降临..."}},
+  {{"type": "dialogue", "speaker": "老渔夫", "gender": "male", "content": "你相信命运吗？"}}
+]
+只返回JSON数组，不要其他废话。
+"""
+        
+        response = generate(self.model, self.tokenizer, prompt, max_tokens=1000)
+        
+        # 提取JSON内容
+        json_match = re.search(r'\[[\s\S]*\]', response)
+        if json_match:
+            json_str = json_match.group(0)
+            return json.loads(json_str)
+        else:
+            logger.warning("MLX模型输出中未找到有效JSON，使用降级方案")
             return self._fallback_regex_parse(text)
     
     def _fallback_regex_parse(self, text: str) -> List[Dict]:
