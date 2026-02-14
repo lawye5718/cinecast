@@ -12,6 +12,9 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 class CinematicPackager:
+    FADE_IN_MS = 3000   # 淡入时长（毫秒）
+    FADE_OUT_MS = 2000  # 淡出时长（毫秒）
+
     def __init__(self, output_dir="output"):
         """
         初始化混音打包器
@@ -98,13 +101,13 @@ class CinematicPackager:
             final_audio = self.buffer
             
             # 1. 睡眠唤醒防惊跳：添加Chime，并对主干开头做淡入
-            fade_in_ms = min(3000, len(final_audio))
+            fade_in_ms = min(self.FADE_IN_MS, len(final_audio))
             final_audio = final_audio.fade_in(fade_in_ms)
             if chime and len(chime) > 500:
                 final_audio = chime + final_audio
                 
             # 2. 尾部淡出，防止突兀结束
-            fade_out_ms = min(2000, len(final_audio))
+            fade_out_ms = min(self.FADE_OUT_MS, len(final_audio))
             final_audio = final_audio.fade_out(fade_out_ms)
             
             # 3. 导出文件

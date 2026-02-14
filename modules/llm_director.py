@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 class LLMScriptDirector:
     def __init__(self, ollama_host="http://localhost:11434", use_local_mlx_lm=True):
         self.api_url = f"{ollama_host}/api/chat"
-        # 请确保你在 ollama 中运行的模型名称与此一致，例如 "qwen2.5:14b"
-        self.model_name = "qwen14b-pro" 
+        # 请确保你在 ollama 中运行的模型名称与此一致
+        self.model_name = "qwen14b-pro"
         self.use_local = use_local_mlx_lm  # 是否使用本地Ollama
         
         # 测试Ollama连接
