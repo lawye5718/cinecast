@@ -14,9 +14,14 @@ logger = logging.getLogger(__name__)
 class AssetManager:
     def __init__(self, asset_dir="./assets"):
         self.asset_dir = asset_dir
+        self.target_sr = 22050  # Qwen-TTS 标准采样率
         self._initialize_default_voices()
         self.role_voice_map = {}  # 记忆已分配角色的音色
         
+    def _normalize_audio(self, audio: AudioSegment) -> AudioSegment:
+        """🌟 核心防御：将外部音频归一化为 22050Hz 单声道，杜绝混音时的内存爆炸"""
+        return audio.set_frame_rate(self.target_sr).set_channels(1)
+    
     def _initialize_default_voices(self):
         """初始化默认音色配置"""
         self.voices = {
@@ -27,14 +32,14 @@ class AssetManager:
             },
             # 1.4.1 章节题目：严肃一字一顿，速度调至 0.8
             "title": {
-                "audio": f"{self.asset_dir}/voices/title.wav", 
-                "text": "严肃标题", 
+                "audio": f"{self.asset_dir}/voices/narrator.wav", 
+                "text": "沉稳旁白", 
                 "speed": 0.8
             },
             # 1.4.2 小标题：严肃但比正文慢，速度调至 0.9
             "subtitle": {
-                "audio": f"{self.asset_dir}/voices/title.wav", 
-                "text": "严肃标题", 
+                "audio": f"{self.asset_dir}/voices/narrator.wav", 
+                "text": "沉稳旁白", 
                 "speed": 0.9
             },
             "male_pool": [
@@ -85,7 +90,7 @@ class AssetManager:
             return random.choice(pool)
     
     def get_ambient_sound(self, theme="default") -> AudioSegment:
-        """强化：支持用户动态上传环境音"""
+        """🌟 防采样率爆炸：支持用户动态上传环境音并强制归一化"""
         # 寻找 assets/ambient 下所有可用的音频
         ambient_dir = f"{self.asset_dir}/ambient"
         # 允许用户上传任意支持的格式
@@ -93,7 +98,9 @@ class AssetManager:
             path = f"{ambient_dir}/{theme}{ext}"
             if os.path.exists(path):
                 try:
-                    return AudioSegment.from_file(path)
+                    logger.info(f"✅ 加载环境音: {path}")
+                    audio = AudioSegment.from_file(path)
+                    return self._normalize_audio(audio)
                 except Exception as e:
                     logger.warning(f"无法加载环境音 {path}: {e}")
                     continue
@@ -101,14 +108,16 @@ class AssetManager:
         return AudioSegment.silent(duration=100)
     
     def get_transition_chime(self) -> AudioSegment:
-        """获取防惊跳柔和过渡音（支持多种格式）"""
+        """🌟 防采样率爆炸：获取防惊跳柔和过渡音并强制归一化"""
         transitions_dir = f"{self.asset_dir}/transitions"
         # 支持多种音频格式
         for filename in ['soft_chime.wav', 'soft_chime.mp3', 'chime.wav', 'transition.wav']:
             path = os.path.join(transitions_dir, filename)
             if os.path.exists(path):
                 try:
-                    return AudioSegment.from_file(path)
+                    logger.info(f"✅ 加载过渡音: {path}")
+                    audio = AudioSegment.from_file(path)
+                    return self._normalize_audio(audio)
                 except Exception as e:
                     logger.warning(f"无法加载过渡音 {path}: {e}")
                     continue

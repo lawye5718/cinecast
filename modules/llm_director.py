@@ -94,12 +94,17 @@ class LLMScriptDirector:
         }
 
         try:
-            response = requests.post(self.api_url, json=payload, timeout=120)
+            response = requests.post(self.api_url, json=payload, timeout=300)
             response.raise_for_status()
             result = response.json()
             
             # 提取并解析 JSON
             content = result.get('message', {}).get('content', '[]')
+            
+            # 🌟 幻觉防御：强力剥离 Markdown 代码块
+            content = re.sub(r'^```(?:json)?\s*', '', content.strip(), flags=re.IGNORECASE)
+            content = re.sub(r'\s*```$', '', content.strip())
+            
             script = json.loads(content)
             
             # 兜底校验
@@ -108,53 +113,11 @@ class LLMScriptDirector:
             return script
             
         except Exception as e:
-            logger.error(f"❌ Ollama 解析失败，使用降级方案: {e}")
+            logger.error(f"❌ Ollama 解析失败，触发降级方案: {e}")
             return self._fallback_regex_parse(text)
     
-    # 保留原有的降级方法
     def _fallback_regex_parse(self, text: str) -> List[Dict]:
-        """
-        当大模型解析失败或未启用时的保底方案
-        """
-        units = []
-        lines = text.split('\n')
-        
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-            
-            # 检测标题（章节标题通常较短且有特定格式）
-            if self._is_title(line):
-                units.append({
-                    "type": "title", 
-                    "speaker": "narrator", 
-                    "content": line
-                })
-            # 检测对话
-            elif self._is_dialogue(line):
-                speaker, content = self._extract_dialogue_components(line)
-                gender = self._predict_gender(speaker)
-                units.append({
-                    "type": "dialogue", 
-                    "speaker": speaker, 
-                    "gender": gender, 
-                    "content": content
-                })
-            # 默认为旁白
-            else:
-                units.append({
-                    "type": "narration", 
-                    "speaker": "narrator", 
-                    "content": line
-                })
-        
-        return units
-    
-    def _fallback_regex_parse(self, text: str) -> List[Dict]:
-        """
-        当大模型解析失败或未启用时的保底方案
-        """
+        """🌟 降级正则方案：当大模型解析失败时的保底方案"""
         units = []
         lines = text.split('\n')
         

@@ -89,86 +89,89 @@ class CineCastProducer:
             raise
     
     # ==========================================
-    # 阶段一：编剧期 (调用 Ollama 14B)
+    # 🌟 阶段一：编剧期 (Ollama 14B 独占内存)
     # ==========================================
-    def phase_1_generate_scripts(self, text_files: list):
-        """阶段一：启动编剧引擎 (Ollama 14B)"""
-        logger.info("🎬 [阶段一] 启动编剧引擎 (Ollama 14B)...")
-        director = LLMScriptDirector() # 内部使用 keep_alive=0 自动回收内存
-        
-        for file_path in text_files:
-            chapter_name = os.path.splitext(os.path.basename(file_path))[0]
-            script_path = os.path.join(self.script_dir, f"{chapter_name}.json")
+    def phase_1_generate_scripts(self, txt_dir: str):
+        """🌟 阶段一：启动编剧引擎 (Ollama 14B 独占内存)"""
+        logger.info("\n" + "="*50 + "\n🎬 [阶段一] 启动编剧引擎 (Ollama 14B)...\n" + "="*50)
+        director = LLMScriptDirector()
             
+        text_files = sorted([f for f in os.listdir(txt_dir) if f.endswith(('.txt', '.md'))])
+        if not text_files:
+            logger.error(f"❌ 目录 {txt_dir} 为空，无法生成剧本！")
+            return False
+    
+        for file_name in text_files:
+            chapter_name = os.path.splitext(file_name)[0]
+            script_path = os.path.join(self.script_dir, f"{chapter_name}.json")
+                
             if os.path.exists(script_path):
                 logger.info(f"⏭️ 剧本已存在，跳过: {chapter_name}")
                 continue
-                
-            with open(file_path, 'r', encoding='utf-8') as f:
+                    
+            with open(os.path.join(txt_dir, file_name), 'r', encoding='utf-8') as f:
                 content = f.read()
-                
-            logger.info(f"✍️ 正在拆解剧本: {chapter_name}")
+                    
             script = director.parse_text_to_script(content)
-            
+                
             with open(script_path, 'w', encoding='utf-8') as f:
                 json.dump(script, f, ensure_ascii=False, indent=2)
-                
-        logger.info("✅ 阶段一完成！建议人工审阅 scripts/ 下的剧本文件。")
-
+                logger.info(f"✅ 生成剧本: {script_path}")
+                    
+        logger.info("🎉 阶段一完成！Ollama 已释放内存。进入阶段二...")
+        return True
+    
     # ==========================================
-    # 阶段二：渲染期 (独占调用 MLX TTS)
+    # 🌟 阶段二：录音与混音期 (MLX 独占内存)
     # ==========================================
     def phase_2_render_audio(self):
-        """阶段二：启动录音棚 (MLX TTS 引擎)"""
-        logger.info("🎬 [阶段二] 启动录音棚 (MLX TTS 引擎)...")
-        # 此时 Ollama 已经释放内存，M4 的 24GB 全部归 MLX 所有！
+        """🌟 阶段二：启动录音棚 (MLX TTS 引擎 独占内存)"""
+        logger.info("\n" + "="*50 + "\n🎬 [阶段二] 启动录音棚 (MLX TTS 引擎)...\n" + "="*50)
         engine = MLXRenderEngine(self.config["model_path"])
         packager = CinematicPackager(self.config["output_dir"])
-        
+            
         ambient_bgm = self.assets.get_ambient_sound(self.config["ambient_theme"])
         chime_sound = self.assets.get_transition_chime()
-        
+            
         script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('.json')])
-        
+            
         for file in script_files:
             with open(os.path.join(self.script_dir, file), 'r', encoding='utf-8') as f:
                 script = json.load(f)
-                
-            logger.info(f"🎙️ 正在录制: {file}")
+                    
+            logger.info(f"🎙️ 正在录制剧本: {file}")
             for unit in script:
-                # 获取音色并渲染
-                voice_cfg = self.assets.get_voice_for_role(
-                    unit["type"], unit.get("speaker"), unit.get("gender", "male")
-                )
-                unit_audio = engine.render_unit(unit["content"], voice_cfg)
-                packager.add_audio(unit_audio, ambient=ambient_bgm, chime=chime_sound)
-                
-        # 最终封包尾部音频
+                try:
+                    voice_cfg = self.assets.get_voice_for_role(
+                        unit["type"], unit.get("speaker"), unit.get("gender", "male")
+                    )
+                    unit_audio = engine.render_unit(unit["content"], voice_cfg)
+                    packager.add_audio(unit_audio, ambient=ambient_bgm, chime=chime_sound)
+                except Exception as e:
+                    logger.error(f"❌ 渲染单元失败跳过: {e}")
+                        
         packager.finalize(ambient=ambient_bgm, chime=chime_sound)
-        logger.info("🎉 阶段二完成！全书压制完毕！")
+        logger.info("🎉 阶段二完成！全书压制完毕，请前往 output 目录查收。")
     
 def main():
     """主函数"""
     producer = CineCastProducer()
-    
-    # 假设你的 txt 章节放在 ./input/chapters 目录下
-    input_dir = "./input/chapters"
+    input_dir = "./input_chapters" # 确保你在运行前建立这个文件夹，并放入你要读的TXT章节
     os.makedirs(input_dir, exist_ok=True)
     
-    # 获取需要处理的文件列表
-    text_files = sorted([os.path.join(input_dir, f) for f in os.listdir(input_dir) if f.endswith('.txt')])
+    # 检查是否放了测试文件
+    if not os.listdir(input_dir):
+        logger.warning(f"⚠️ 请先在 {input_dir} 文件夹中放入测试用的 .txt 章节，然后再运行本程序！")
+        # 创建一个测试文件
+        with open(os.path.join(input_dir, "第一章_测试.txt"), 'w') as f:
+            f.write("第一章 风雪\n1976年\n夜幕降临港口。\"你相信命运吗？\"老渔夫问。\n\"我不信。\"年轻人回答。")
     
-    if not text_files:
-        logger.error("❌ input/chapters 目录下没有TXT文件。请放入章节文件后重试。")
-        return
-
-    # 完美的解耦流水线
     try:
-        producer.phase_1_generate_scripts(text_files)
-        # 你甚至可以在这里加一个 input("请人工审阅剧本后，按回车键开始录制...")
-        producer.phase_2_render_audio()
+        # 执行工业级两阶段流水线
+        if producer.phase_1_generate_scripts(input_dir):
+            producer.phase_2_render_audio()
     except Exception as e:
-        logger.error(f"💥 生产线运行失败: {e}")
+        logger.error(f"💥 生产线崩溃: {e}")
 
 if __name__ == "__main__":
     main()
