@@ -10,6 +10,7 @@ import json
 import logging
 import requests
 from bs4 import BeautifulSoup
+import ebooklib
 from ebooklib import epub
 from pathlib import Path
 
@@ -54,7 +55,8 @@ class CineCastProducer:
             "model_path": "../qwentts/models/Qwen3-TTS-MLX-0.6B",  # 相对于cinecast目录
             "ambient_theme": "iceland_wind",  # 环境音主题
             "target_duration_min": 30,  # 目标时长（分钟）
-            "min_tail_min": 10  # 最小尾部时长（分钟）
+            "min_tail_min": 10,  # 最小尾部时长（分钟）
+            "use_local_llm": True  # 是否使用本地LLM
         }
     
     def _initialize_components(self):
@@ -96,7 +98,7 @@ class CineCastProducer:
         logger.info(f"📖 正在解析 EPUB 文件: {epub_path}")
         book = epub.read_epub(epub_path)
         chapters = {}
-        for idx, item in enumerate(book.get_items_of_type(9)): # 9 = ITEM_DOCUMENT
+        for idx, item in enumerate(book.get_items_of_type(ebooklib.ITEM_DOCUMENT)):
             soup = BeautifulSoup(item.get_content(), 'html.parser')
             text = soup.get_text(separator='\n')
             clean_text = '\n'.join([line.strip() for line in text.split('\n') if line.strip()])

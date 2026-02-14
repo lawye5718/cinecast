@@ -13,14 +13,15 @@ from typing import List, Dict
 logger = logging.getLogger(__name__)
 
 class LLMScriptDirector:
-    def __init__(self, ollama_host="http://localhost:11434"):
+    def __init__(self, ollama_host="http://localhost:11434", use_local_mlx_lm=True):
         self.api_url = f"{ollama_host}/api/chat"
         # 请确保你在 ollama 中运行的模型名称与此一致，例如 "qwen2.5:14b"
         self.model_name = "qwen14b-pro" 
-        self.use_local = True  # 默认使用Ollama
+        self.use_local = use_local_mlx_lm  # 是否使用本地Ollama
         
         # 测试Ollama连接
-        self._test_ollama_connection()
+        if self.use_local:
+            self._test_ollama_connection()
     
     def _test_ollama_connection(self):
         """测试Ollama服务连接"""
@@ -77,6 +78,11 @@ class LLMScriptDirector:
     
     def parse_text_to_script(self, text: str) -> List[Dict]:
         """🌟 将任意长度的章节拆解为剧本（支持长章节完整处理）"""
+        if not self.use_local:
+            # 未启用本地模型时，直接使用正则降级方案
+            logger.info("   🔄 使用正则降级方案解析...")
+            return self._fallback_regex_parse(text)
+
         # 🌟 修复截断漏洞：按段落切分长章节
         text_chunks = self._chunk_text_for_llm(text)
         full_script = []

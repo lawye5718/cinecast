@@ -43,11 +43,8 @@ def test_phase_1_script_generation():
     # 初始化生产者
     producer = CineCastProducer()
     
-    # 获取文本文件列表
-    text_files = sorted([os.path.join(input_dir, f) for f in os.listdir(input_dir) if f.endswith('.txt')])
-    
     # 执行阶段一
-    producer.phase_1_generate_scripts(text_files)
+    producer.phase_1_generate_scripts(input_dir)
     
     # 验证剧本文件生成
     script_files = os.listdir(producer.script_dir)

@@ -72,7 +72,9 @@ class MLXRenderEngine:
         for i, chunk in enumerate(chunks):
             if not chunk.strip():
                 continue
-                
+            
+            results = None
+            audio_array = None
             try:
                 logger.debug(f"🔄 处理片段 {i+1}/{len(chunks)}: {len(chunk)}字符")
                 
@@ -121,9 +123,9 @@ class MLXRenderEngine:
                 unit_audio += AudioSegment.silent(duration=1000)
             finally:
                 # 清理内存
-                if 'results' in locals():
+                if results is not None:
                     del results
-                if 'audio_array' in locals():
+                if audio_array is not None:
                     del audio_array
                 mx.metal.clear_cache()
                 gc.collect()
