@@ -111,7 +111,7 @@ class Phase2PerformanceTester:
             self.collect_metrics("资产管理系统初始化")
             
             # 初始化MLX渲染引擎
-            model_path = "../qwentts/models/Qwen3-TTS-MLX-0.6B"
+            model_path = os.environ.get("CINECAST_MODEL_PATH", "../qwentts/models/Qwen3-TTS-MLX-0.6B")
             engine = MLXRenderEngine(model_path)
             self.collect_metrics("MLX渲染引擎初始化")
             

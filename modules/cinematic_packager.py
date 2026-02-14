@@ -125,11 +125,13 @@ class CinematicPackager:
         if len(self.buffer) >= self.target_duration_ms:
             self.export_volume(chime)
     
-    def export_volume(self, chime: Optional[AudioSegment] = None):
+    def export_volume(self, ambient: Optional[AudioSegment] = None,
+                     chime: Optional[AudioSegment] = None):
         """
         导出一卷（一个完整的MP3）
         
         Args:
+            ambient: 环境音背景（可选）
             chime: 开头过渡音效（可选）
         """
         if len(self.buffer) == 0:
@@ -138,6 +140,10 @@ class CinematicPackager:
         
         try:
             final_audio = self.buffer
+            
+            # 0. 混入环境音（如果有）
+            if ambient:
+                final_audio = self.mix_ambient(final_audio, ambient)
             
             # 1. 睡眠唤醒防惊跳：添加Chime，并对主干开头做淡入
             fade_in_ms = min(self.FADE_IN_MS, len(final_audio))

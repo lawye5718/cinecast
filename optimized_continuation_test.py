@@ -68,7 +68,7 @@ class OptimizedContinuationTest:
             logger.info("🔧 初始化测试组件...")
             
             assets = AssetManager("./assets")
-            model_path = "../qwentts/models/Qwen3-TTS-MLX-0.6B"
+            model_path = os.environ.get("CINECAST_MODEL_PATH", "../qwentts/models/Qwen3-TTS-MLX-0.6B")
             engine = MLXRenderEngine(model_path)
             packager = CinematicPackager("./output/Audiobooks")
             

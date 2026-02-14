@@ -35,6 +35,7 @@ Thumbs.db
 
 # 本地配置
 config.local.py
+config.local.json
 .env
 
 # 资产文件（大型二进制文件）
