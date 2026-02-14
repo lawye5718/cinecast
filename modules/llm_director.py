@@ -77,8 +77,13 @@ class LLMScriptDirector:
             chunks.append(current_chunk)
         return chunks
     
-    def parse_and_micro_chunk(self, text: str) -> List[Dict]:
-        """宏观剧本解析 -> 自动展开为微切片剧本"""
+    def parse_and_micro_chunk(self, text: str, chapter_prefix: str = "chunk") -> List[Dict]:
+        """宏观剧本解析 -> 自动展开为微切片剧本
+        
+        Args:
+            text: 待处理的章节文本
+            chapter_prefix: 章节名称前缀，用于避免文件名冲突
+        """
         # 第一步：生成宏观剧本
         macro_script = self.parse_text_to_script(text)
         micro_script = []
@@ -106,8 +111,9 @@ class LLMScriptDirector:
                 is_para_end = (idx == len(valid_chunks) - 1)
                 pause_ms = self._calculate_pause(chunk, is_para_end)
                 
+                # 🌟 修复：将章节名称前缀加入ID，杜绝文件覆盖！
                 micro_script.append({
-                    "chunk_id": f"{chunk_id:05d}",
+                    "chunk_id": f"{chapter_prefix}_{chunk_id:05d}",
                     "type": unit["type"],
                     "speaker": unit["speaker"],
                     "gender": unit.get("gender", "male"),

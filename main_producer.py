@@ -156,8 +156,8 @@ class CineCastProducer:
                 continue
                 
             logger.info(f"✍️ 正在生成微切片剧本: {chapter_name} (字数: {len(content)})")
-            # 🌟 直接生成包含 chunk_id、停顿时间的微切片剧本
-            micro_script = director.parse_and_micro_chunk(content)
+            # 🌟 修复：传入 chapter_name 作为 ID 前缀，避免文件名冲突
+            micro_script = director.parse_and_micro_chunk(content, chapter_prefix=chapter_name)
             
             with open(script_path, 'w', encoding='utf-8') as f:
                 json.dump(micro_script, f, ensure_ascii=False, indent=2)

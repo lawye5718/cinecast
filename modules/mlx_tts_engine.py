@@ -67,12 +67,16 @@ class MLXRenderEngine:
             return False
             
         finally:
-            # 清理内存
+            # 清理内存 (保留局部变量删除和 mx 的缓存清理)
             if 'results' in locals(): del results
             if 'audio_array' in locals(): del audio_array
             if 'audio_data' in locals(): del audio_data
             mx.metal.clear_cache()
-            gc.collect()
+            
+            # 🌟 优化：移除全局的 gc.collect()。
+            # Python 的引用计数已经能自动清理大部分局部变量，
+            # mx.metal.clear_cache() 足以防止 MLX 显存泄漏。
+            # 如果不放心，可以引入一个计数器，每处理 50 个 chunk 才调用一次 gc.collect()。
 
 if __name__ == "__main__":
     # 测试代码
