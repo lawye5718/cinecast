@@ -60,7 +60,13 @@ class AssetManager:
                     "text": "女声1", 
                     "speed": 1.0
                 }
-            ]
+            ],
+            # 新增：前情摘要专属音色 (可稍微加速，带出回顾的紧凑感)
+            "recap": {
+                "audio": f"{self.asset_dir}/voices/talkover.wav", 
+                "text": "前情提要专用声音", 
+                "speed": 1.1
+            },
         }
     
     def get_voice_for_role(self, role_type, speaker_name=None, gender="male"):
@@ -73,7 +79,7 @@ class AssetManager:
             gender: 性别 (male, female)
         """
         # 处理非对话角色
-        if role_type in ["title", "subtitle", "narration"]:
+        if role_type in ["title", "subtitle", "narration", "recap"]:
             return self.voices.get(role_type, self.voices["narrator"])
             
         # 对话角色音色记忆

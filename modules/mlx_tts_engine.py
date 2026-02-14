@@ -34,11 +34,20 @@ class MLXRenderEngine:
             logger.error(f"❌ MLX渲染引擎初始化失败: {e}")
             raise
     
-    def render_dry_chunk(self, content: str, voice_cfg: dict, save_path: str) -> bool:
+    def render_dry_chunk(self, content: str, voice_cfg: dict, save_path: str, emotion: str = "平静") -> bool:
         """
         只负责将文本变成 WAV 文件，绝不维护状态
         🌟 断点续传核心：已存在则直接跳过！
+        
+        Args:
+            content: 要渲染的文本内容
+            voice_cfg: 音色配置
+            save_path: 保存路径
+            emotion: 情感标签（预留参数，当前版本暂不使用）
         """
+        # TODO: [CineCast 2.0 预留] 当前 Qwen3-TTS 暂不支持细粒度情感参数
+        # 未来接入 CosyVoice/ChatTTS 时，将 emotion 传入模型 prompt
+        # current_prompt = f"<{emotion}> {content}"
         if os.path.exists(save_path):
             logger.debug(f"⏭️  文件已存在，跳过渲染: {save_path}")
             return True # 🌟 断点续传核心：已存在则直接跳过！
