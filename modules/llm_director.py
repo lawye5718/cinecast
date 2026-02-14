@@ -147,28 +147,71 @@ class LLMScriptDirector:
     
     def _request_ollama(self, text_chunk: str) -> List[Dict]:
         """向Ollama发送单个文本块请求"""
+        # 🌟 全新升级的工程级 System Prompt
         system_prompt = """
-        你是一位顶级的有声书导演。请将提供的小说文本拆解为严格的 JSON 数组。
-        【字段要求】
-        - "type": "title"(标题), "subtitle"(小标题), "narration"(旁白), "dialogue"(对白)
-        - "speaker": 旁白和标题填 "narrator"，对白填具体人名（需推断，且上下文统一）。
-        - "gender": "male" 或 "female" 或 "unknown"。
-        - "content": 台词或描述，去除外层引号。
-        【输出格式】只输出合法的 JSON 数组，不包含任何 Markdown 标记。
+        你是一位顶级的有声书导演兼数据清洗专家，负责将原始小说文本转换为标准化的录音剧本。
+        你必须严格遵守以下四大纪律，任何违反都将导致系统崩溃：
+
+        【一、 绝对忠实原则（Iron Rule）】
+        - 必须 100% 逐字保留原文内容！
+        - 严禁任何形式的概括、改写、缩写、续写或润色！
+        - 严禁自行添加原文中不存在的台词或动作描写！
+
+        【二、 字符净化原则】
+        - 剔除所有不可发音的特殊符号（如 Emoji表情、Markdown标记 * _ ~ #、制表符 \t、不可见控制字符）。
+        - 仅保留基础标点符号（，。！？：；、“”‘’（））。
+        - 数字、英文字母允许保留，但禁止出现复杂的数学公式符号。
+
+        【三、 粒度拆分原则】
+        - 必须将"对白"和"旁白/动作描写"严格剥离为独立的对象！
+        - 例如原文："你好，"老渔夫笑着说。
+          必须拆分为两个对象：1. 角色对白("你好，") 2. 旁白描述("老渔夫笑着说。")
+
+        【四、 JSON 格式规范】
+        必须且只能输出合法的 JSON 数组，禁止任何解释性前言或后缀（如"好的，以下是..."），禁止输出 Markdown 代码块标记（```json）。
+        数组元素字段要求：
+        - "type": 仅限 "title"(章节名), "subtitle"(小标题), "narration"(旁白), "dialogue"(对白)。
+        - "speaker": 对白填具体的角色名（需根据上下文推断并保持全书统一）；旁白和标题统一填 "narrator"。
+        - "gender": 仅限 "male"、"female" 或 "unknown"。对白请推测性别；旁白固定为 "male"。
+        - "content": 纯净的文本内容。如果 type 是 "dialogue"，必须去掉最外层的引号（如""或""）。
+
+        【输出格式示例（One-Shot）】
+        [
+          {
+            "type": "narration",
+            "speaker": "narrator",
+            "gender": "male",
+            "content": "夜幕降临，港口的灯火开始闪烁。"
+          },
+          {
+            "type": "dialogue",
+            "speaker": "老渔夫",
+            "gender": "male",
+            "content": "你相信命运吗？"
+          },
+          {
+            "type": "narration",
+            "speaker": "narrator",
+            "gender": "male",
+            "content": "老渔夫说道。"
+          }
+        ]
         """
         
         payload = {
             "model": self.model_name,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"请拆解以下剧情：\n\n{text_chunk}"}
+                # 🌟 User 提示词也可以加一层强化
+                {"role": "user", "content": f"请严格按照规范，将以下文本拆解为纯净的 JSON 剧本（绝不改写原意）：\n\n{text_chunk}"}
             ],
-            "format": "json",
+            "format": "json", # Ollama 原生支持强制输出 JSON 格式
             "stream": False,
-            "keep_alive": "10m",  # 🌟 修复潮汐漏洞：保持模型在内存中 10 分钟
+            "keep_alive": "10m",
             "options": {
-                "num_ctx": 8192,  # 🌟 修复截断漏洞：扩大上下文窗口
-                "temperature": 0.1 # 降低温度，确保 JSON 格式稳定
+                "num_ctx": 8192,
+                "temperature": 0.0, # 🌟 建议将温度降为 0.0，彻底消除大模型的创造力，只做苦力提取
+                "top_p": 0.1
             }
         }
 
@@ -183,18 +226,55 @@ class LLMScriptDirector:
             
             script = json.loads(content)
             if isinstance(script, list):
-                return script
+                # 验证每个元素都有必需的字段
+                validated_script = self._validate_script_elements(script)
+                return validated_script
             # Handle case where model returns {"result": [...]} or similar wrapper.
             # The first list value found is used since the prompt requests a single array.
             if isinstance(script, dict):
                 for value in script.values():
                     if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
-                        return value
+                        validated_script = self._validate_script_elements(value)
+                        return validated_script
             return self._fallback_regex_parse(text_chunk)
             
         except Exception as e:
             logger.error(f"❌ Ollama 解析失败，触发正则降级: {e}")
             return self._fallback_regex_parse(text_chunk)
+    
+    def _validate_script_elements(self, script: List[Dict]) -> List[Dict]:
+        """验证并修复脚本元素，确保包含所有必需字段"""
+        required_fields = ['type', 'speaker', 'content']
+        validated_script = []
+        
+        for i, element in enumerate(script):
+            # 确保是字典类型
+            if not isinstance(element, dict):
+                logger.warning(f"⚠️ 脚本元素 {i} 不是字典类型，跳过: {element}")
+                continue
+                
+            # 检查并补充缺失的字段
+            fixed_element = element.copy()
+            
+            # 确保必需字段存在
+            for field in required_fields:
+                if field not in fixed_element:
+                    if field == 'type':
+                        fixed_element['type'] = 'narration'  # 默认为旁白
+                    elif field == 'speaker':
+                        fixed_element['speaker'] = 'narrator'  # 默认说话者
+                    elif field == 'content':
+                        fixed_element['content'] = ''  # 空内容
+                    logger.warning(f"⚠️ 补充缺失字段 '{field}' 在元素 {i}: {element}")
+            
+            # 确保 gender 字段存在
+            if 'gender' not in fixed_element:
+                fixed_element['gender'] = 'unknown'
+                logger.warning(f"⚠️ 补充缺失字段 'gender' 在元素 {i}: {element}")
+            
+            validated_script.append(fixed_element)
+            
+        return validated_script
     
     def _fallback_regex_parse(self, text: str) -> List[Dict]:
         """🌟 降级正则方案：当大模型解析失败时的保底方案"""
@@ -211,6 +291,7 @@ class LLMScriptDirector:
                 units.append({
                     "type": "title", 
                     "speaker": "narrator", 
+                    "gender": "unknown",
                     "content": line
                 })
             # 检测对话
@@ -228,10 +309,12 @@ class LLMScriptDirector:
                 units.append({
                     "type": "narration", 
                     "speaker": "narrator", 
+                    "gender": "unknown",
                     "content": line
                 })
         
-        return units
+        # 验证并修复返回的数据
+        return self._validate_script_elements(units)
     
     def _is_title(self, text: str) -> bool:
         """判断是否为标题"""

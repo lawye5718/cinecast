@@ -156,12 +156,32 @@ class CineCastProducer:
                 continue
                 
             logger.info(f"✍️ 正在生成微切片剧本: {chapter_name} (字数: {len(content)})")
-            # 🌟 修复：传入 chapter_name 作为 ID 前缀，避免文件名冲突
-            micro_script = director.parse_and_micro_chunk(content, chapter_prefix=chapter_name)
-            
-            with open(script_path, 'w', encoding='utf-8') as f:
-                json.dump(micro_script, f, ensure_ascii=False, indent=2)
-                logger.info(f"✅ 生成微切片剧本: {script_path} ({len(micro_script)}个片段)")
+            try:
+                # 🌟 修复：传入 chapter_name 作为 ID 前缀，避免文件名冲突
+                micro_script = director.parse_and_micro_chunk(content, chapter_prefix=chapter_name)
+                
+                # 验证生成的剧本数据结构
+                if not micro_script:
+                    logger.error(f"❌ {chapter_name} 生成的微切片剧本为空！")
+                    return False
+                
+                # 验证每个片段都有必需的字段
+                for i, item in enumerate(micro_script):
+                    required_fields = ['chunk_id', 'type', 'speaker', 'content']
+                    missing_fields = [field for field in required_fields if field not in item]
+                    if missing_fields:
+                        logger.error(f"❌ {chapter_name} 第{i+1}个片段缺少字段: {missing_fields}")
+                        logger.error(f"   片段内容: {item}")
+                        return False
+                
+                with open(script_path, 'w', encoding='utf-8') as f:
+                    json.dump(micro_script, f, ensure_ascii=False, indent=2)
+                    logger.info(f"✅ 生成微切片剧本: {script_path} ({len(micro_script)}个片段)")
+            except Exception as e:
+                logger.error(f"❌ 处理章节 {chapter_name} 时发生错误: {e}")
+                import traceback
+                logger.error(f"详细错误信息:\n{traceback.format_exc()}")
+                return False
                 
         # 强制弹射Ollama内存
         self._eject_ollama_memory()
