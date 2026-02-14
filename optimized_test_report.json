@@ -1,0 +1,16 @@
+{
+  "test_summary": {
+    "test_start_time": "2026-02-14T05:49:04.341879",
+    "test_end_time": "2026-02-14T05:56:48.384586",
+    "total_duration_seconds": 464.0425658226013,
+    "processed_scripts": [
+      "Chapter_002.json",
+      "Chapter_005.json",
+      "Chapter_006.json"
+    ],
+    "total_units": 77,
+    "successful_units": 77,
+    "success_rate": 100.0
+  },
+  "report_generated_at": "2026-02-14T05:56:48.422318"
+}

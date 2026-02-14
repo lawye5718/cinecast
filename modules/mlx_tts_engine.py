@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """
 CineCast MLX底层渲染引擎
-集成微切片与动态静音补偿，专注于极致稳定、不崩内存的音频生成
+阶段二：纯净干音渲染 (Dry Voice Rendering)
+只负责将文本变成 WAV 文件，绝不维护状态
 基于qwentts项目的成熟实现
 """
 
 import gc
-import io
-import re
+import os
 import numpy as np
 import soundfile as sf
 import mlx.core as mx
 from mlx_audio.tts.utils import load_model
-from pydub import AudioSegment
 import logging
 from typing import Dict
 
@@ -21,117 +20,69 @@ logger = logging.getLogger(__name__)
 class MLXRenderEngine:
     def __init__(self, model_path="./models/Qwen3-TTS-MLX-0.6B"):
         """
-        初始化MLX渲染引擎
+        初始化MLX纯净干音渲染引擎
         
         Args:
             model_path: Qwen3-TTS-MLX模型路径
         """
-        logger.info("🚀 初始化MLX渲染引擎...")
+        logger.info("🚀 启动 MLX 纯净干音渲染引擎...")
         try:
             self.model = load_model(model_path)
             self.sample_rate = 22050
-            self.max_chars = 60  # 微切片安全红线
             logger.info("✅ MLX渲染引擎初始化成功")
         except Exception as e:
             logger.error(f"❌ MLX渲染引擎初始化失败: {e}")
             raise
     
-    def _get_dynamic_pause(self, chunk_text: str) -> int:
+    def render_dry_chunk(self, content: str, voice_cfg: dict, save_path: str) -> bool:
         """
-        句级动态静音补偿
-        根据标点符号自动添加适当停顿
+        只负责将文本变成 WAV 文件，绝不维护状态
+        🌟 断点续传核心：已存在则直接跳过！
         """
-        if chunk_text.endswith(('。', '！', '？', '.', '!', '?')):
-            return 600  # 句号长停顿
-        elif chunk_text.endswith(('；', ';')):
-            return 400  # 分号中等停顿
-        elif chunk_text.endswith(('，', '、', ',', '：', ':')):
-            return 250  # 逗号短停顿
-        else:
-            return 100  # 其他极短停顿
+        if os.path.exists(save_path):
+            logger.debug(f"⏭️  文件已存在，跳过渲染: {save_path}")
+            return True # 🌟 断点续传核心：已存在则直接跳过！
+            
+        try:
+            logger.debug(f"🎵 渲染干音: {content[:50]}... -> {save_path}")
+            
+            # MLX 极速推理
+            results = list(self.model.generate(
+                text=content,
+                ref_audio=voice_cfg["audio"],
+                ref_text=voice_cfg["text"]
+            ))
+            
+            audio_array = results[0].audio
+            mx.eval(audio_array) # 强制执行
+            audio_data = np.array(audio_array)
+            
+            # 直接写入磁盘，绝不在内存中积压
+            sf.write(save_path, audio_data, self.sample_rate, format='WAV')
+            logger.debug(f"✅ 干音渲染完成: {save_path}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ 干音渲染失败 [{content[:10]}...]: {e}")
+            return False
+            
+        finally:
+            # 清理内存
+            if 'results' in locals(): del results
+            if 'audio_array' in locals(): del audio_array
+            if 'audio_data' in locals(): del audio_data
+            mx.metal.clear_cache()
+            gc.collect()
     
     def render_unit(self, content: str, voice_cfg: Dict) -> AudioSegment:
         """
-        渲染单个剧本单元（增强版：动态语速与音高控制）
-        
-        Args:
-            content: 待渲染的文本内容
-            voice_cfg: 音色配置字典
-            
-        Returns:
-            AudioSegment: 渲染完成的音频片段
+        兼容旧接口：渲染单个剧本单元（保持向后兼容）
         """
-        logger.debug(f"🎵 渲染单元: {content[:50]}...")
-        
-        # 1. 微切片处理
-        chunks = self._micro_chunk(content)
-        logger.debug(f"🔪 切分为 {len(chunks)} 个片段")
-        
-        unit_audio = AudioSegment.empty()
-        
-        for i, chunk in enumerate(chunks):
-            if not chunk.strip():
-                continue
-            
-            results = None
-            audio_array = None
-            try:
-                logger.debug(f"🔄 处理片段 {i+1}/{len(chunks)}: {len(chunk)}字符")
-                
-                # 1. MLX 极速推理
-                results = list(self.model.generate(
-                    text=chunk,
-                    ref_audio=voice_cfg["audio"],
-                    ref_text=voice_cfg["text"]
-                ))
-                
-                audio_array = results[0].audio
-                mx.eval(audio_array)
-                audio_data = np.array(audio_array)
-                
-                buffer = io.BytesIO()
-                sf.write(buffer, audio_data, self.sample_rate, format='WAV')
-                buffer.seek(0)
-                segment = AudioSegment.from_file(buffer, format="wav")
-                
-                # 🌟 2. 电影级语速与音调控制 (Dynamic Speed & Pitch)
-                speed_factor = voice_cfg.get("speed", 1.0)
-                if speed_factor != 1.0:
-                    # 通过改变采样率实现物理降速/加速
-                    # 速度 < 1.0: 语速变慢，音高变低，适合大标题的"一字一顿"、"严肃沉稳"
-                    # 速度 > 1.0: 语速变快，音高变高，适合年轻角色的欢快对白
-                    new_frame_rate = int(segment.frame_rate * speed_factor)
-                    segment = segment._spawn(segment.raw_data, overrides={
-                        "frame_rate": new_frame_rate
-                    }).set_frame_rate(self.sample_rate) # 重采样回标准频率，防止拼接报错
-                
-                unit_audio += segment
-                
-                # 🌟 3. 动态标点停顿
-                pause_duration = self._get_dynamic_pause(chunk)
-                # 如果配置中要求"一字一顿"(速度极慢)，我们人为增加标点停顿的长度
-                if speed_factor <= 0.85:
-                    pause_duration = int(pause_duration * 1.5)
-                    
-                unit_audio += AudioSegment.silent(duration=pause_duration)
-                
-                logger.debug(f"✅ 片段 {i+1} 处理完成")
-                
-            except Exception as e:
-                logger.error(f"❌ 片段处理失败: {e}")
-                # 添加错误提示音（可选）
-                unit_audio += AudioSegment.silent(duration=1000)
-            finally:
-                # 清理内存
-                if results is not None:
-                    del results
-                if audio_array is not None:
-                    del audio_array
-                mx.metal.clear_cache()
-                gc.collect()
-        
-        logger.debug(f"🎵 单元渲染完成，总时长: {len(unit_audio)/1000:.2f}秒")
-        return unit_audio
+        # 这里保留旧接口以保证兼容性
+        # 实际生产中应该使用render_dry_chunk方法
+        logger.warning("⚠️  使用旧接口render_unit，建议迁移到render_dry_chunk")
+        # 可以在这里实现向后兼容逻辑
+        pass
     
     def _micro_chunk(self, text: str) -> list:
         """

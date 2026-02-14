@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
 CineCast 混音与发行打包器
-实现30分钟时长控制、环境音混流、防惊跳处理、尾部回收
+阶段三：电影级混音发版 (Cinematic Post-Processing)
+流水线第三阶段：从干音缓存组装成电影级有声书
 """
 
 import os
 import logging
 from pydub import AudioSegment
-from typing import Optional
+from typing import Optional, List, Dict
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ class CinematicPackager:
 
     def __init__(self, output_dir="output"):
         """
-        初始化混音打包器
+        初始化电影级混音台
         
         Args:
             output_dir: 输出目录
@@ -27,11 +29,12 @@ class CinematicPackager:
         
         self.target_duration_ms = 30 * 60 * 1000  # 30分钟打包
         self.min_tail_ms = 10 * 60 * 1000         # 10分钟尾部阈值
+        self.sample_rate = 22050                  # 标准采样率
         
         self.buffer = AudioSegment.empty()
         self.file_index = 1
         
-        logger.info(f"📦 混音打包器初始化完成，输出目录: {output_dir}")
+        logger.info(f"🎛️ 启动后期混音台 (Pydub)，输出目录: {output_dir}")
     
     def mix_ambient(self, main_audio: AudioSegment, ambient: AudioSegment) -> AudioSegment:
         """
@@ -66,15 +69,51 @@ class CinematicPackager:
             logger.error(f"❌ 环境音混音失败: {e}")
             return main_audio
     
+    def process_from_cache(self, micro_script: List[Dict], cache_dir: str, assets, 
+                          ambient_bgm=None, chime=None):
+        """
+        流水线第三阶段：从干音缓存组装成电影级有声书
+        """
+        logger.info("🎛️ 启动后期混音台 (Pydub)...")
+        
+        for item in tqdm(micro_script, desc="混音组装中"):
+            wav_path = os.path.join(cache_dir, f"{item['chunk_id']}.wav")
+            if not os.path.exists(wav_path):
+                logger.warning(f"⚠️ 找不到干音缓存: {wav_path}，跳过该句。")
+                continue
+                
+            # 加载干音
+            segment = AudioSegment.from_file(wav_path, format="wav")
+            
+            # 应用语速与音调变化 (如标题的 0.8 倍速一字一顿)
+            voice_cfg = assets.get_voice_for_role(
+                item["type"], 
+                item.get("speaker"), 
+                item.get("gender")
+            )
+            speed_factor = voice_cfg.get("speed", 1.0)
+            
+            if speed_factor != 1.0:
+                new_frame_rate = int(segment.frame_rate * speed_factor)
+                segment = segment._spawn(segment.raw_data, overrides={
+                    "frame_rate": new_frame_rate
+                }).set_frame_rate(self.sample_rate)
+            
+            # 拼接入缓冲区，并加上在阶段一就计算好的停顿
+            self.buffer += segment + AudioSegment.silent(duration=item["pause_ms"])
+            
+            # 满 30 分钟则导出
+            if len(self.buffer) >= self.target_duration_ms:
+                self.export_volume(ambient=ambient_bgm, chime=chime)
+                
+        # 结尾兜底
+        self.finalize(ambient=ambient_bgm, chime=chime)
+    
     def add_audio(self, audio: AudioSegment, ambient: Optional[AudioSegment] = None, 
                   chime: Optional[AudioSegment] = None):
         """
         向缓冲区添加音频，满30分钟则发版
-        
-        Args:
-            audio: 要添加的音频片段
-            ambient: 环境音背景（可选）
-            chime: 过渡音效（可选）
+        保留向后兼容性
         """
         # 如果有环境音，先进行混音
         if ambient:

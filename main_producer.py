@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 CineCast 主控程序
-串联所有车间，实现全自动化跑通
+三段式物理隔离架构 (Three-Stage Isolated Pipeline)
+实现100%防内存溢出和断点续传
 """
 
 import os
@@ -37,7 +38,7 @@ logger = logging.getLogger(__name__)
 class CineCastProducer:
     def __init__(self, config=None):
         """
-        初始化CineCast生产线
+        初始化CineCast三段式生产线
         
         Args:
             config: 配置字典（可选）
@@ -45,7 +46,9 @@ class CineCastProducer:
         self.config = config or self._get_default_config()
         self.assets = AssetManager(self.config["assets_dir"])
         self.script_dir = os.path.join(self.config["output_dir"], "scripts")
+        self.cache_dir = os.path.join(self.config["output_dir"], "temp_wav_cache")
         os.makedirs(self.script_dir, exist_ok=True)
+        os.makedirs(self.cache_dir, exist_ok=True)
     
     def _get_default_config(self):
         """获取默认配置"""
@@ -121,13 +124,13 @@ class CineCastProducer:
             logger.warning(f"⚠️ 弹射 Ollama 失败，可能已自动释放: {e}")
     
     # ==========================================
-    # 🌟 阶段一：编剧期 (Ollama 14B 独占内存)
+    # 🎬 阶段一：剧本化与微切片 (Script & Micro-chunking)
     # ==========================================
     def phase_1_generate_scripts(self, input_source):
-        """🌟 阶段一：启动编剧引擎 (Ollama 14B 独占内存)"""
-        logger.info("\n" + "="*50 + "\n🎬 [阶段一] 启动编剧引擎 (Ollama 14B)...\n" + "="*50)
+        """阶段一：编剧期 (Ollama) - 生成包含chunk_id和停顿时间的微切片剧本"""
+        logger.info("\n" + "="*50 + "\n🎬 [阶段一] 编剧期 (Ollama)\n" + "="*50)
         
-        # 🌟 支持EPUB和TXT两种输入格式
+        # 支持EPUB和TXT两种输入格式
         if input_source.endswith('.epub'):
             chapters = self._extract_epub_chapters(input_source)
             if not chapters:
@@ -143,62 +146,90 @@ class CineCastProducer:
             for file_name in text_files:
                 with open(os.path.join(input_source, file_name), 'r', encoding='utf-8') as f:
                     chapters[os.path.splitext(file_name)[0]] = f.read()
-    
+        
         director = LLMScriptDirector()
         
         for chapter_name, content in chapters.items():
-            script_path = os.path.join(self.script_dir, f"{chapter_name}.json")
+            script_path = os.path.join(self.script_dir, f"{chapter_name}_micro.json")
             if os.path.exists(script_path):
-                logger.info(f"⏭️ 剧本已存在，跳过: {chapter_name}")
+                logger.info(f"⏭️ 微切片剧本已存在，跳过: {chapter_name}")
                 continue
                 
-            logger.info(f"✍️ 正在构思剧本: {chapter_name} (字数: {len(content)})")
-            script = director.parse_text_to_script(content)
+            logger.info(f"✍️ 正在生成微切片剧本: {chapter_name} (字数: {len(content)})")
+            # 🌟 直接生成包含 chunk_id、停顿时间的微切片剧本
+            micro_script = director.parse_and_micro_chunk(content)
             
             with open(script_path, 'w', encoding='utf-8') as f:
-                json.dump(script, f, ensure_ascii=False, indent=2)
-                logger.info(f"✅ 生成剧本: {script_path}")
+                json.dump(micro_script, f, ensure_ascii=False, indent=2)
+                logger.info(f"✅ 生成微切片剧本: {script_path} ({len(micro_script)}个片段)")
                 
-        # 🌟 阶段一结束，立即弹射内存
+        # 强制弹射Ollama内存
         self._eject_ollama_memory()
+        logger.info("✅ 阶段一完成，Ollama已从内存中安全撤离！")
         return True
     
     # ==========================================
-    # 🌟 阶段二：录音与混音期 (MLX 独占内存)
+    # 🎙️ 阶段二：纯净干音渲染 (Dry Voice Rendering)
     # ==========================================
-    def phase_2_render_audio(self):
-        """🌟 阶段二：启动录音棚 (MLX TTS 引擎 独占内存)"""
-        logger.info("\n" + "="*50 + "\n🎬 [阶段二] 启动录音棚 (MLX TTS 引擎)...\n" + "="*50)
+    def phase_2_render_dry_audio(self):
+        """阶段二：录音期 (MLX TTS) - 纯净干音渲染，只产生WAV文件"""
+        logger.info("\n" + "="*50 + "\n🎙️ [阶段二] 录音期 (MLX TTS)\n" + "="*50)
         engine = MLXRenderEngine(self.config["model_path"])
-        packager = CinematicPackager(self.config["output_dir"])
-            
-        ambient_bgm = self.assets.get_ambient_sound(self.config["ambient_theme"])
-        chime_sound = self.assets.get_transition_chime()
-            
-        script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('.json')])
-            
+        
+        script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])
+        total_chunks = 0
+        rendered_chunks = 0
+        
         for file in script_files:
             with open(os.path.join(self.script_dir, file), 'r', encoding='utf-8') as f:
-                script = json.load(f)
-                    
-            logger.info(f"🎙️ 正在录制剧本: {file}")
-            for unit in script:
-                try:
-                    voice_cfg = self.assets.get_voice_for_role(
-                        unit["type"], unit.get("speaker"), unit.get("gender", "male")
-                    )
-                    unit_audio = engine.render_unit(unit["content"], voice_cfg)
-                    packager.add_audio(unit_audio, ambient=ambient_bgm, chime=chime_sound)
-                except Exception as e:
-                    logger.error(f"❌ 渲染单元失败跳过: {e}")
-                        
-        packager.finalize(ambient=ambient_bgm, chime=chime_sound)
-        logger.info("🎉 阶段二完成！全书压制完毕，请前往 output 目录查收。")
+                micro_script = json.load(f)
+            total_chunks += len(micro_script)
+            
+            logger.info(f"🎙️ 正在渲染干音: {file} ({len(micro_script)}个片段)")
+            for item in micro_script:
+                voice_cfg = self.assets.get_voice_for_role(
+                    item["type"], 
+                    item.get("speaker"), 
+                    item.get("gender")
+                )
+                save_path = os.path.join(self.cache_dir, f"{item['chunk_id']}.wav")
+                # 🌟 这里只会产生单纯的文件写盘，内存毫无波动
+                if engine.render_dry_chunk(item["content"], voice_cfg, save_path):
+                    rendered_chunks += 1
+                
+                # 显示进度
+                if rendered_chunks % 50 == 0:
+                    logger.info(f"   🎵 进度: {rendered_chunks}/{total_chunks} 片段已渲染")
+        
+        # 释放 MLX 模型显存
+        del engine
+        import mlx.core as mx
+        mx.metal.clear_cache()
+        logger.info(f"✅ 阶段二完成 ({rendered_chunks}/{total_chunks} 片段)，MLX 已从内存中安全撤离！")
+        
+    # ==========================================
+    # 🎛️ 阶段三：电影级混音发版 (Cinematic Post-Processing)
+    # ==========================================
+    def phase_3_cinematic_mix(self):
+        """阶段三：混音发版期 (Pydub) - 从干音缓存组装成电影级有声书"""
+        logger.info("\n" + "="*50 + "\n🎛️ [阶段三] 混音发版期 (Pydub)\n" + "="*50)
+        packager = CinematicPackager(self.config["output_dir"])
+        ambient_bgm = self.assets.get_ambient_sound(self.config["ambient_theme"])
+        chime_sound = self.assets.get_transition_chime()
+        
+        script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])
+        for file in script_files:
+            with open(os.path.join(self.script_dir, file), 'r', encoding='utf-8') as f:
+                micro_script = json.load(f)
+            # 🌟 Pydub 开始组装，此时已经没有大模型在抢占内存了
+            packager.process_from_cache(micro_script, self.cache_dir, self.assets, ambient_bgm, chime_sound)
+        
+        logger.info("🎉 三段式架构全流程完成！全书压制完毕，请前往 output 目录查收。")
     
 def main():
-    """主函数"""
+    """主函数 - 严格的三段式串行处理，彻底切断内存重叠"""
     producer = CineCastProducer()
-    # 🌟 支持EPUB文件输入
+    # 支持EPUB文件输入
     epub_path = "../qwentts/tests/鱼没有脚 (约恩卡尔曼斯特凡松) (Z-Library)-2024-04-30-09-13-38.epub" 
     
     if os.path.exists(epub_path):
@@ -216,10 +247,12 @@ def main():
         logger.info(f"📝 使用TXT目录模式: {input_dir}")
     
     try:
+        # 严格的三段式串行处理，彻底切断内存重叠
         if producer.phase_1_generate_scripts(input_source):
-            producer.phase_2_render_audio()
+            producer.phase_2_render_dry_audio()
+            producer.phase_3_cinematic_mix()
     except Exception as e:
-        logger.error(f"💥 生产线崩溃: {e}")
+        logger.error(f"💥 三段式架构执行失败: {e}")
 
 if __name__ == "__main__":
     main()

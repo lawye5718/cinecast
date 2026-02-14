@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 """
 CineCast 大模型剧本预处理器
-利用本地Qwen模型将小说文本转化为结构化剧本
+阶段一：剧本化与微切片 (Script & Micro-chunking)
+实现宏观剧本解析 -> 自动展开为微切片剧本
 """
 
 import json
 import re
 import logging
 import requests
+import os
 from typing import List, Dict
 
 logger = logging.getLogger(__name__)
 
 class LLMScriptDirector:
-    def __init__(self, ollama_host="http://localhost:11434", use_local_mlx_lm=True):
-        self.api_url = f"{ollama_host}/api/chat"
-        # 请确保你在 ollama 中运行的模型名称与此一致
+    def __init__(self, ollama_url="http://127.0.0.1:11434"):
+        self.api_url = f"{ollama_url}/api/chat"
         self.model_name = "qwen14b-pro"
-        self.use_local = use_local_mlx_lm  # 是否使用本地Ollama
+        self.max_chars_per_chunk = 60 # 微切片红线
         
         # 测试Ollama连接
-        if self.use_local:
-            self._test_ollama_connection()
+        self._test_ollama_connection()
     
     def _test_ollama_connection(self):
         """测试Ollama服务连接"""
@@ -76,13 +76,57 @@ class LLMScriptDirector:
             chunks.append(current_chunk)
         return chunks
     
-    def parse_text_to_script(self, text: str) -> List[Dict]:
-        """🌟 将任意长度的章节拆解为剧本（支持长章节完整处理）"""
-        if not self.use_local:
-            # 未启用本地模型时，直接使用正则降级方案
-            logger.info("   🔄 使用正则降级方案解析...")
-            return self._fallback_regex_parse(text)
+    def parse_and_micro_chunk(self, text: str) -> List[Dict]:
+        """宏观剧本解析 -> 自动展开为微切片剧本"""
+        # 第一步：生成宏观剧本
+        macro_script = self.parse_text_to_script(text)
+        micro_script = []
+        chunk_id = 1
+        
+        for unit in macro_script:
+            # 实施微切片
+            raw_sentences = re.split(r'([。！？；，、：])', unit["content"])
+            chunks, temp = [], ""
+            for part in raw_sentences:
+                if not part.strip(): continue
+                if re.match(r'^[。！？；，、：]$', part.strip()):
+                    chunks.append(temp + part)
+                    temp = ""
+                else:
+                    temp += part
+                    if len(temp) >= self.max_chars_per_chunk:
+                        chunks.append(temp)
+                        temp = ""
+            if temp: chunks.append(temp)
+            
+            # 清理空块并计算停顿
+            valid_chunks = [c.strip() for c in chunks if c.strip()]
+            for idx, chunk in enumerate(valid_chunks):
+                is_para_end = (idx == len(valid_chunks) - 1)
+                pause_ms = self._calculate_pause(chunk, is_para_end)
+                
+                micro_script.append({
+                    "chunk_id": f"{chunk_id:05d}",
+                    "type": unit["type"],
+                    "speaker": unit["speaker"],
+                    "gender": unit.get("gender", "male"),
+                    "content": chunk,
+                    "pause_ms": pause_ms
+                })
+                chunk_id += 1
+                
+        return micro_script
 
+    def _calculate_pause(self, chunk_text: str, is_para_end: bool) -> int:
+        """提前计算好物理停顿时间"""
+        if is_para_end: return 1000
+        if chunk_text.endswith(('。', '！', '？', '.', '!', '?')): return 600
+        elif chunk_text.endswith(('；', ';')): return 400
+        elif chunk_text.endswith(('，', '、', ',', '：', ':')): return 250
+        else: return 100
+
+    def parse_text_to_script(self, text: str) -> List[Dict]:
+        """阶段一：宏观剧本解析（保持原有逻辑）"""
         # 🌟 修复截断漏洞：按段落切分长章节
         text_chunks = self._chunk_text_for_llm(text)
         full_script = []
