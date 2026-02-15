@@ -436,8 +436,14 @@ class TestAudacityExportWiring:
         )
         with open(main_path, "r", encoding="utf-8") as f:
             source = f.read()
-        # Find the method body
-        assert "export_audacity" in source
+        # Extract phase_3_cinematic_mix method body
+        start = source.index("def phase_3_cinematic_mix")
+        # Find the next top-level def or class (un-indented)
+        rest = source[start:]
+        import re as _re
+        m = _re.search(r'\n(?:def |class )', rest[1:])
+        method_body = rest[: m.start() + 1] if m else rest
+        assert "export_audacity" in method_body
 
 
 # ---------------------------------------------------------------------------
@@ -453,7 +459,14 @@ class TestEmotionParameterPassing:
         )
         with open(main_path, "r", encoding="utf-8") as f:
             source = f.read()
-        assert 'emotion=' in source
+        # Extract phase_2_render_dry_audio method body
+        start = source.index("def phase_2_render_dry_audio")
+        rest = source[start:]
+        import re as _re
+        m = _re.search(r'\n(?:    def |class )', rest[1:])
+        method_body = rest[: m.start() + 1] if m else rest
+        assert 'emotion=' in method_body
+        assert 'render_dry_chunk' in method_body
 
 
 if __name__ == "__main__":
