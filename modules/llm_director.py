@@ -435,9 +435,10 @@ class LLMScriptDirector:
             content = response.json().get('message', {}).get('content', '[]')
 
             # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
-            # Only strip real control characters; keep escaped sequences
-            # like \n and \t inside JSON strings intact.
-            content = content.replace('\t', ' ').replace('\r', '')
+            # Strip all ASCII control characters except \n (needed for
+            # JSON formatting).  This covers \x00-\x08, \x0b-\x0c,
+            # \x0e-\x1f, \t (\x09) and \r (\x0d).
+            content = re.sub(r'[\x00-\x09\x0b\x0c\x0e-\x1f]', ' ', content)
 
             # Strip Markdown code-block wrappers the LLM may hallucinate
             content = re.sub(r'^```(?:json)?\s*', '', content.strip(), flags=re.IGNORECASE)
