@@ -44,8 +44,7 @@ class _Completions:
         self._api_key = api_key
 
     def create(self, *, model, messages, temperature=1.0, top_p=1.0,
-               presence_penalty=0.0, max_tokens=4096, extra_body=None,
-               **kwargs):
+               presence_penalty=0.0, max_tokens=4096, extra_body=None):
         payload = {
             "model": model,
             "messages": messages,
@@ -59,9 +58,20 @@ class _Completions:
         headers = {"Content-Type": "application/json"}
         if self._api_key:
             headers["Authorization"] = f"Bearer {self._api_key}"
-        resp = requests.post(self._url, json=payload, headers=headers,
-                             timeout=300)
-        resp.raise_for_status()
+        try:
+            resp = requests.post(self._url, json=payload, headers=headers,
+                                 timeout=300)
+            resp.raise_for_status()
+        except requests.exceptions.ConnectionError:
+            raise RuntimeError(
+                f"无法连接到本地大模型服务 ({self._url})。"
+                " 请确认 Ollama 已启动并正在运行。"
+            )
+        except requests.exceptions.Timeout:
+            raise RuntimeError(
+                f"本地大模型服务响应超时 ({self._url})。"
+                " 请检查模型是否正常运行。"
+            )
         return _ChatCompletion(resp.json())
 
 
