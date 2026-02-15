@@ -1,0 +1,14 @@
+{
+  "llm": {
+    "api_url": "http://localhost:11434/api/chat",
+    "model": "qwen14b-pro",
+    "temperature": 0.0,
+    "num_ctx": 8192
+  },
+  "tts": {
+    "mode": "local",
+    "device": "auto",
+    "language": "Chinese",
+    "compile_codec": false
+  }
+}

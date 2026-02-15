@@ -1,0 +1,22 @@
+{
+    "llm": {
+        "provider": "ollama",
+        "model": "qwen14b-pro",
+        "host": "http://localhost:11434",
+        "api_url": "http://localhost:11434/api/chat",
+        "temperature": 0.0,
+        "num_ctx": 8192
+    },
+    "tts": {
+        "mode": "local",
+        "model_path": "../qwentts/models/Qwen3-TTS-MLX-0.6B",
+        "device": "metal",
+        "compile_codec": false,
+        "language": "Chinese"
+    },
+    "processing": {
+        "max_chars_per_chunk": 300,
+        "context_window": 3,
+        "smart_chunking": true
+    }
+}
