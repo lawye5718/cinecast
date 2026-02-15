@@ -148,11 +148,14 @@ class CineCastProducer:
                     chapters[os.path.splitext(file_name)[0]] = f.read()
         
         director = LLMScriptDirector()
+        prev_chapter_content = None  # 用于存储上一章内容
         
         for chapter_name, content in chapters.items():
             script_path = os.path.join(self.script_dir, f"{chapter_name}_micro.json")
             if os.path.exists(script_path):
                 logger.info(f"⏭️ 微切片剧本已存在，跳过: {chapter_name}")
+                # 保留已有章节的文本给下一章用
+                prev_chapter_content = content
                 continue
                 
             logger.info(f"✍️ 正在生成微切片剧本: {chapter_name} (字数: {len(content)})")
@@ -164,6 +167,35 @@ class CineCastProducer:
                 if not micro_script:
                     logger.error(f"❌ {chapter_name} 生成的微切片剧本为空！")
                     return False
+                
+                # 🌟 核心逻辑：如果不是第一章，且有上一章的内容，则生成并插入前情提要
+                if prev_chapter_content is not None:
+                    logger.info(f"🔄 正在为 {chapter_name} 生成前情摘要...")
+                    recap_text = director.generate_chapter_recap(prev_chapter_content)
+                    
+                    if recap_text:
+                        # 构建一个标准的前情提要引子单元
+                        intro_unit = {
+                            "chunk_id": f"{chapter_name}_recap_intro",
+                            "type": "recap",
+                            "speaker": "talkover",
+                            "content": "前情提要：",
+                            "pause_ms": 500
+                        }
+                        # 构建摘要主体单元
+                        recap_unit = {
+                            "chunk_id": f"{chapter_name}_recap_body",
+                            "type": "recap",
+                            "speaker": "talkover",
+                            "content": recap_text,
+                            "pause_ms": 1500
+                        }
+                        # 将提要插入到本章剧本的最开头（在标题之后，正文之前）
+                        micro_script.insert(1, intro_unit)
+                        micro_script.insert(2, recap_unit)
+                
+                # 保存当前章的原始文本，供下一章使用
+                prev_chapter_content = content
                 
                 # 验证每个片段都有必需的字段
                 for i, item in enumerate(micro_script):

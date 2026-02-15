@@ -142,8 +142,53 @@ class LLMScriptDirector:
             logger.info(f"   🧠 正在解析剧情片段 {i+1}/{len(text_chunks)}...")
             chunk_script = self._request_ollama(chunk)
             full_script.extend(chunk_script)
+        
+        # 最终兜底：如果折腾了一圈，script 依然为空
+        if not full_script or len(full_script) == 0:
+            logger.warning(f"⚠️ 剧本解析结果为空，生成占位剧本以防流水线断裂！")
+            full_script = [{
+                "type": "narration",
+                "speaker": "narrator",
+                "gender": "male",
+                "content": "本章内容为空或存在格式异常，请人工核查。",
+                "emotion": "平静"
+            }]
             
         return full_script
+    
+    def generate_chapter_recap(self, prev_chapter_text: str) -> str:
+        """
+        专门用于生成前情摘要和悬念钩子
+        """
+        system_prompt = """
+        你是一位顶级的有声书剧本编辑。请根据提供的上一章内容，写一段不超过100字的"前情摘要"。
+        要求：
+        1. 提炼最核心的剧情冲突或精华。
+        2. 语言风格要具有悬疑感和电影感（类似于美剧开头的 "Previously on..."）。
+        3. 最后一句必须是一个引出下一章的"悬念钩子"（例如："然而，她并没有意识到，真正的危险才刚刚降临……"）。
+        4. 只输出摘要文本，不要任何格式和前缀。
+        """
+        
+        # 为了防止输入过长，截取上一章的后半部分或限制总字数
+        input_text = prev_chapter_text[-2000:] if len(prev_chapter_text) > 2000 else prev_chapter_text
+        
+        payload = {
+            "model": self.model_name,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"上一章内容：\n{input_text}"}
+            ],
+            "stream": False,
+            "options": {"temperature": 0.5}
+        }
+        
+        try:
+            response = requests.post(self.api_url, json=payload, timeout=60)
+            response.raise_for_status()
+            return response.json().get('message', {}).get('content', '').strip()
+        except Exception as e:
+            logger.error(f"摘要生成失败: {e}")
+            return ""
     
     def _request_ollama(self, text_chunk: str) -> List[Dict]:
         """向Ollama发送单个文本块请求"""
@@ -173,6 +218,7 @@ class LLMScriptDirector:
         - "type": 仅限 "title"(章节名), "subtitle"(小标题), "narration"(旁白), "dialogue"(对白)。
         - "speaker": 对白填具体的角色名（需根据上下文推断并保持全书统一）；旁白和标题统一填 "narrator"。
         - "gender": 仅限 "male"、"female" 或 "unknown"。对白请推测性别；旁白固定为 "male"。
+        - "emotion": 情感标签（如"平静"、"激动"、"沧桑/叹息"、"愤怒"、"悲伤"等），用于未来语音合成的情感控制。
         - "content": 纯净的文本内容。如果 type 是 "dialogue"，必须去掉最外层的引号（如""或""）。
 
         【输出格式示例（One-Shot）】
@@ -181,18 +227,21 @@ class LLMScriptDirector:
             "type": "narration",
             "speaker": "narrator",
             "gender": "male",
+            "emotion": "平静",
             "content": "夜幕降临，港口的灯火开始闪烁。"
           },
           {
             "type": "dialogue",
             "speaker": "老渔夫",
             "gender": "male",
+            "emotion": "沧桑/叹息",
             "content": "你相信命运吗？"
           },
           {
             "type": "narration",
             "speaker": "narrator",
             "gender": "male",
+            "emotion": "平静",
             "content": "老渔夫说道。"
           }
         ]
@@ -271,6 +320,10 @@ class LLMScriptDirector:
             if 'gender' not in fixed_element:
                 fixed_element['gender'] = 'unknown'
                 logger.warning(f"⚠️ 补充缺失字段 'gender' 在元素 {i}: {element}")
+            
+            # 确保 emotion 字段存在
+            if 'emotion' not in fixed_element:
+                fixed_element['emotion'] = '平静'
             
             validated_script.append(fixed_element)
             

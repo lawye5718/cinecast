@@ -9,6 +9,15 @@
                 "duration_ms": 1000,
                 "sample_rate": 22050,
                 "channels": 1
+            },
+            "recap_transition": {
+                "filename": "recap_transition.wav",
+                "source": "recap_transition.wav",
+                "type": "前情摘要过渡音效",
+                "description": "前情摘要专用过渡音效，类似美剧常用的VHS磁带声或低音重击声",
+                "duration_ms": 2000,
+                "sample_rate": 22050,
+                "channels": 1
             }
         },
         "ambient": {
