@@ -65,6 +65,7 @@ class TTSEngine:
         self._url = tts_config.get("url", "http://127.0.0.1:7860")
         self._device = tts_config.get("device", "auto")
         self._compile_codec_enabled = tts_config.get("compile_codec", False)
+        self._mlx_model_path = tts_config.get("model_path", "../qwentts/models/Qwen3-TTS-MLX-0.6B")
 
         # Language setting (passed to Qwen3-TTS)
         self._language = tts_config.get("language", "Chinese")
@@ -963,7 +964,7 @@ class TTSEngine:
 
             # 初始化MLX TTS引擎（如果尚未初始化）
             if not hasattr(self, '_mlx_engine'):
-                tts_config = {"tts": {"model_path": "../qwentts/models/Qwen3-TTS-MLX-0.6B", "device": self._device, "language": self._language}}
+                tts_config = {"tts": {"model_path": self._mlx_model_path, "device": self._device, "language": self._language}}
                 self._mlx_engine = MLXTTSEngine(tts_config)
 
             # 使用MLX引擎生成语音

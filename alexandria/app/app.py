@@ -94,7 +94,7 @@ class LLMConfig(BaseModel):
     model_name: str
 
 class TTSConfig(BaseModel):
-    mode: str = "mlx"  # "local", "mlx" or "external"
+    mode: str = "mlx"  # "local" (torch Qwen3-TTS), "mlx" (Apple MLX Qwen3-TTS) or "external" (Gradio server)
     url: str = "http://127.0.0.1:7860"  # external mode only
     device: str = "auto"  # local mode: "auto", "cuda:0", "cpu", etc.
     language: str = "Chinese"  # TTS language
