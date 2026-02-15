@@ -16,11 +16,18 @@ import gc
 import os
 import numpy as np
 import soundfile as sf
-import mlx.core as mx
-from mlx_audio.tts.utils import load_model
 import logging
 from typing import List, Dict, Tuple
 from collections import defaultdict
+
+try:
+    import mlx.core as mx
+    from mlx_audio.tts.utils import load_model
+    _MLX_AVAILABLE = True
+except (ImportError, OSError):
+    mx = None
+    load_model = None
+    _MLX_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +62,11 @@ class MLXRenderEngine:
         Args:
             model_path: Qwen3-TTS-MLX模型路径
         """
+        if not _MLX_AVAILABLE:
+            raise ImportError(
+                "MLX is not available in this environment. "
+                "MLX requires Apple Silicon (macOS with M-series chips)."
+            )
         logger.info("🚀 启动 MLX 纯净干音渲染引擎...")
         try:
             self.model = load_model(model_path)
@@ -111,7 +123,8 @@ class MLXRenderEngine:
             if 'results' in locals(): del results
             if 'audio_array' in locals(): del audio_array
             if 'audio_data' in locals(): del audio_data
-            mx.metal.clear_cache()
+            if mx is not None and hasattr(mx, 'metal'):
+                mx.metal.clear_cache()
             
             # 🌟 优化：移除全局的 gc.collect()。
             # Python 的引用计数已经能自动清理大部分局部变量，
