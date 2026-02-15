@@ -464,7 +464,7 @@ class LLMScriptDirector:
                 f"❌ 大模型返回了非预期的 JSON 结构（既非数组也非包含数组的字典），请检查模型输出。原始内容: {content[:200]}"
             )
 
-        except (RuntimeError,):
+        except RuntimeError:
             raise
         except Exception as e:
             raise RuntimeError(f"❌ Ollama 解析失败: {e}") from e
