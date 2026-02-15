@@ -103,8 +103,7 @@ class MLXRenderEngine:
             return True
             
         except Exception as e:
-            logger.error(f"❌ 干音渲染失败 [{content[:10]}...]: {e}")
-            return False
+            raise RuntimeError(f"❌ MLX 干音渲染失败 [{content[:10]}...]: {e}") from e
             
         finally:
             # 清理内存 (保留局部变量删除和 mx 的缓存清理)
