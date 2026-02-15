@@ -291,7 +291,7 @@ def main():
     llm_config = config.get("llm", {})
     base_url = llm_config.get("base_url", "http://localhost:11434/v1")
     api_key = llm_config.get("api_key", "local")
-    model_name = llm_config.get("model_name", "local-model")
+    model_name = llm_config.get("model_name", "qwen14b-pro")
 
     generation_config = config.get("generation", {})
     batch_size = generation_config.get("review_batch_size", 25)
