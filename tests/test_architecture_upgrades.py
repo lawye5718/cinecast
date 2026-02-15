@@ -44,7 +44,8 @@ except ImportError:
         os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                      "modules", "mlx_tts_engine.py"),
     )
-    _source = open(_spec.origin, "r").read()
+    with open(_spec.origin, "r") as _fh:
+        _source = _fh.read()
     # Extract just the function we need without executing the full module
     _ns: dict = {"defaultdict": __import__("collections").defaultdict}
     exec(compile(

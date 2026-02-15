@@ -115,12 +115,15 @@ class CinematicPackager:
                     "frame_rate": new_frame_rate
                 }).set_frame_rate(self.sample_rate)
             
-            # 🌟 动态停顿：跨角色 500ms / 同角色 250ms
+            # 🌟 动态停顿：同角色连续对白用短停顿，跨角色切换用长停顿
             current_speaker = item.get("speaker", "narrator")
+            script_pause = item.get("pause_ms", 0)
             if prev_speaker is not None and current_speaker == prev_speaker:
-                pause_ms = min(item.get("pause_ms", SAME_SPEAKER_PAUSE_MS), SAME_SPEAKER_PAUSE_MS)
+                # Same speaker: use the shorter of script pause and cap
+                pause_ms = SAME_SPEAKER_PAUSE_MS
             else:
-                pause_ms = max(item.get("pause_ms", CROSS_SPEAKER_PAUSE_MS), CROSS_SPEAKER_PAUSE_MS)
+                # Different speaker: ensure at least CROSS_SPEAKER_PAUSE_MS
+                pause_ms = max(script_pause, CROSS_SPEAKER_PAUSE_MS)
             prev_speaker = current_speaker
             
             # Record label for multi-track export

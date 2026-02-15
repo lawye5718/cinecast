@@ -441,9 +441,10 @@ class LLMScriptDirector:
             response.raise_for_status()
             content = response.json().get('message', {}).get('content', '[]')
 
-            # 🌟 预处理：清洗控制字符（防止 LLM 输出的转义序列破坏 JSON）
+            # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
+            # Only strip real control characters; keep escaped sequences
+            # like \n and \t inside JSON strings intact.
             content = content.replace('\t', ' ').replace('\r', '')
-            content = re.sub(r'\\[tnr]', ' ', content)
 
             # Strip Markdown code-block wrappers the LLM may hallucinate
             content = re.sub(r'^```(?:json)?\s*', '', content.strip(), flags=re.IGNORECASE)
