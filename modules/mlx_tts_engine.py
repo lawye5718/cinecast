@@ -4,6 +4,12 @@ CineCast MLX底层渲染引擎
 阶段二：纯净干音渲染 (Dry Voice Rendering)
 只负责将文本变成 WAV 文件，绝不维护状态
 基于qwentts项目的成熟实现
+
+Supports an optional "group-by-voice" rendering strategy: instead of
+rendering chunks in script order (which forces frequent voice-embedding
+switches), callers can use ``group_indices_by_voice_type`` to cluster all
+chunks that share the same voice first, render each cluster in one pass,
+and then reassemble in the original order during Stage 3.
 """
 
 import gc
@@ -13,8 +19,33 @@ import soundfile as sf
 import mlx.core as mx
 from mlx_audio.tts.utils import load_model
 import logging
+from typing import List, Dict, Tuple
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
+
+
+def group_indices_by_voice_type(
+    micro_script: List[Dict],
+) -> Dict[str, List[int]]:
+    """Group script indices by their effective voice type.
+
+    Returns a dict mapping voice-type keys (e.g. ``"narrator"``,
+    ``"dialogue:老渔夫"``) to the list of indices in *micro_script* that
+    should be rendered with that voice.  This allows the caller to render
+    all chunks for a single voice consecutively, minimising MLX
+    embedding switches and potentially improving throughput by 2-3×.
+    """
+    groups: Dict[str, List[int]] = defaultdict(list)
+    for idx, item in enumerate(micro_script):
+        item_type = item.get("type", "narration")
+        speaker = item.get("speaker", "narrator")
+        if item_type in ("title", "subtitle", "narration", "recap"):
+            key = item_type
+        else:
+            key = f"dialogue:{speaker}"
+        groups[key].append(idx)
+    return dict(groups)
 
 class MLXRenderEngine:
     def __init__(self, model_path="./models/Qwen3-TTS-MLX-0.6B"):

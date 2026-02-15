@@ -7,11 +7,17 @@ CineCast 混音与发行打包器
 
 import os
 import logging
+import zipfile
 from pydub import AudioSegment
 from typing import Optional, List, Dict
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
+
+# Dynamic pause constants (milliseconds)
+CROSS_SPEAKER_PAUSE_MS = 500   # 不同角色之间的停顿
+SAME_SPEAKER_PAUSE_MS = 250    # 同一角色连续说话的停顿
+
 
 class CinematicPackager:
     FADE_IN_MS = 3000   # 淡入时长（毫秒）
@@ -33,6 +39,11 @@ class CinematicPackager:
         
         self.buffer = AudioSegment.empty()
         self.file_index = 1
+        
+        # Track per-speaker audio for multi-track export
+        self._speaker_tracks: dict = {}
+        self._labels: list = []  # [{"start_ms", "end_ms", "speaker", "text"}]
+        self._timeline_ms = 0  # current position on the global timeline
         
         logger.info(f"🎛️ 启动后期混音台 (Pydub)，输出目录: {output_dir}")
     
@@ -73,8 +84,13 @@ class CinematicPackager:
                           ambient_bgm=None, chime=None):
         """
         流水线第三阶段：从干音缓存组装成电影级有声书
+        
+        Uses dynamic pauses: CROSS_SPEAKER_PAUSE_MS between different speakers,
+        SAME_SPEAKER_PAUSE_MS for consecutive lines by the same speaker.
         """
         logger.info("🎛️ 启动后期混音台 (Pydub)...")
+        
+        prev_speaker = None
         
         for item in tqdm(micro_script, desc="混音组装中"):
             wav_path = os.path.join(cache_dir, f"{item['chunk_id']}.wav")
@@ -99,8 +115,42 @@ class CinematicPackager:
                     "frame_rate": new_frame_rate
                 }).set_frame_rate(self.sample_rate)
             
-            # 拼接入缓冲区，并加上在阶段一就计算好的停顿
-            self.buffer += segment + AudioSegment.silent(duration=item["pause_ms"])
+            # 🌟 动态停顿：跨角色 500ms / 同角色 250ms
+            current_speaker = item.get("speaker", "narrator")
+            if prev_speaker is not None and current_speaker == prev_speaker:
+                pause_ms = min(item.get("pause_ms", SAME_SPEAKER_PAUSE_MS), SAME_SPEAKER_PAUSE_MS)
+            else:
+                pause_ms = max(item.get("pause_ms", CROSS_SPEAKER_PAUSE_MS), CROSS_SPEAKER_PAUSE_MS)
+            prev_speaker = current_speaker
+            
+            # Record label for multi-track export
+            seg_start = self._timeline_ms
+            seg_end = seg_start + len(segment)
+            self._labels.append({
+                "start_ms": seg_start,
+                "end_ms": seg_end,
+                "speaker": current_speaker,
+                "text": item.get("content", "")[:80],
+            })
+            
+            # Accumulate per-speaker track data
+            if current_speaker not in self._speaker_tracks:
+                # Pad with silence up to this point
+                self._speaker_tracks[current_speaker] = AudioSegment.silent(
+                    duration=seg_start
+                )
+            else:
+                # Pad any gap since the last segment from this speaker
+                current_len = len(self._speaker_tracks[current_speaker])
+                if current_len < seg_start:
+                    self._speaker_tracks[current_speaker] += AudioSegment.silent(
+                        duration=seg_start - current_len
+                    )
+            self._speaker_tracks[current_speaker] += segment
+            
+            # 拼接入缓冲区
+            self.buffer += segment + AudioSegment.silent(duration=pause_ms)
+            self._timeline_ms += len(segment) + pause_ms
             
             # 满 30 分钟则导出
             if len(self.buffer) >= self.target_duration_ms:
@@ -263,6 +313,61 @@ class CinematicPackager:
             "target_duration_min": self.target_duration_ms / 1000 / 60,
             "remaining_until_target": (self.target_duration_ms - len(self.buffer)) / 1000 / 60
         }
+
+    def export_audacity(self, output_path: Optional[str] = None) -> Optional[str]:
+        """Export a multi-track Audacity project as a ZIP archive.
+
+        The archive contains:
+        - One WAV file per speaker (stem), named ``{speaker}.wav``
+        - A ``labels.txt`` with tab-separated Audacity label format:
+          ``start_seconds\tend_seconds\tspeaker: text``
+
+        This allows professional producers to import into a DAW (Audacity,
+        Logic Pro, etc.) for fine-grained per-line editing.
+
+        Args:
+            output_path: Path for the ZIP file.  Defaults to
+                ``<output_dir>/audacity_export.zip``.
+
+        Returns:
+            The path to the created ZIP file, or ``None`` on failure.
+        """
+        if not self._speaker_tracks and not self._labels:
+            logger.warning("No multi-track data collected; call process_from_cache first.")
+            return None
+
+        if output_path is None:
+            output_path = os.path.join(self.output_dir, "audacity_export.zip")
+
+        try:
+            with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
+                # Write per-speaker stem WAVs
+                for speaker, track in self._speaker_tracks.items():
+                    safe_name = speaker.replace("/", "_").replace("\\", "_")
+                    wav_name = f"{safe_name}.wav"
+                    tmp_wav = os.path.join(self.output_dir, f"_tmp_{wav_name}")
+                    try:
+                        track.export(tmp_wav, format="wav")
+                        zf.write(tmp_wav, wav_name)
+                    finally:
+                        if os.path.exists(tmp_wav):
+                            os.unlink(tmp_wav)
+
+                # Write Audacity labels
+                label_lines = []
+                for lbl in self._labels:
+                    start_s = lbl["start_ms"] / 1000.0
+                    end_s = lbl["end_ms"] / 1000.0
+                    text = f"{lbl['speaker']}: {lbl['text']}"
+                    label_lines.append(f"{start_s:.3f}\t{end_s:.3f}\t{text}")
+                zf.writestr("labels.txt", "\n".join(label_lines))
+
+            logger.info(f"✅ Audacity 多轨工程已导出: {output_path}")
+            return output_path
+
+        except Exception as e:
+            logger.error(f"❌ Audacity 导出失败: {e}")
+            return None
 
 if __name__ == "__main__":
     # 测试代码
