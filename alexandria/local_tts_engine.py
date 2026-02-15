@@ -105,40 +105,48 @@ class LocalTTSEngine:
         return text
     
     def _generate_audio(self, text: str, voice_config: Dict):
-        """生成音频数组"""
+        """生成音频数组 - 基于CineCast的正确实现"""
         try:
-            # 文本编码
-            text_tokens = self.tokenizer.encode(text)
+            logger.debug(f"🎵 开始生成音频: {text[:50]}...")
             
-            # 语音合成（简化实现）
-            # 实际实现需要根据Qwen-TTS的具体接口调整
-            results = self.model.generate(
-                text_tokens=text_tokens,
-                speech_tokenizer=self.speech_tokenizer,
-                # 添加语音配置参数
-                **voice_config
-            )
+            # 直接使用模型的generate方法（基于CineCast的实现）
+            # 注意：这里需要根据实际的voice_config结构调整参数
+            if 'audio' in voice_config and 'text' in voice_config:
+                # 如果提供了参考音频和文本
+                results = list(self.model.generate(
+                    text=text,
+                    ref_audio=voice_config['audio'],
+                    ref_text=voice_config['text']
+                ))
+            else:
+                # 默认生成方式
+                results = list(self.model.generate(text=text))
             
             # 提取音频数据
-            if hasattr(results, 'audio_array'):
-                return results.audio_array
-            elif isinstance(results, dict) and 'audio' in results:
-                return results['audio']
+            if results and hasattr(results[0], 'audio'):
+                audio_array = results[0].audio
+                mx.eval(audio_array)  # 强制执行计算
+                logger.debug(f"✅ 音频生成成功: {audio_array.shape}")
+                return audio_array
             else:
-                # 默认返回
+                logger.warning("⚠️ 生成结果为空，返回静音")
                 import numpy as np
-                return np.zeros(24000)  # 1秒静音
+                return np.zeros(24000, dtype=np.float32)  # 1秒静音
                 
         except Exception as e:
             logger.error(f"❌ 音频生成失败: {e}")
+            import traceback
+            logger.error(f"详细错误信息: {traceback.format_exc()}")
             import numpy as np
-            return np.zeros(24000)
+            return np.zeros(24000, dtype=np.float32)
     
     def _save_wav(self, audio_array, save_path: str) -> bool:
         """保存WAV文件"""
         try:
             import soundfile as sf
             import numpy as np
+            
+            logger.debug(f"💾 开始保存音频文件: {save_path}")
             
             # 确保目录存在
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -148,6 +156,12 @@ class LocalTTSEngine:
                 audio_data = np.array(audio_array.astype(mx.float32))
             else:
                 audio_data = np.array(audio_array, dtype=np.float32)
+            
+            logger.debug(f"📊 音频数据信息: shape={audio_data.shape}, dtype={audio_data.dtype}, min={audio_data.min():.6f}, max={audio_data.max():.6f}")
+            
+            # 检查是否为有效的音频数据
+            if audio_data.size == 0 or (audio_data.max() == 0.0 and audio_data.min() == 0.0):
+                logger.warning(f"⚠️ 检测到静音或空音频数据: {save_path}")
             
             # 保存为WAV文件
             sf.write(save_path, audio_data, 24000, subtype='FLOAT')
