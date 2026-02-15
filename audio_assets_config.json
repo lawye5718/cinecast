@@ -45,11 +45,56 @@
         "target_sample_rate": 22050,
         "target_channels": 1,
         "normalization_enabled": true,
-        "supported_formats": [".wav", ".mp3", ".m4a", ".flac"]
+        "supported_formats": [
+            ".wav",
+            ".mp3",
+            ".m4a",
+            ".flac"
+        ],
+        "dynamic_pauses": {
+            "cross_speaker_ms": 500,
+            "same_speaker_ms": 250,
+            "paragraph_end_ms": 1000,
+            "sentence_end_ms": 600,
+            "clause_end_ms": 250
+        }
     },
     "usage_notes": {
         "transitions": "过渡音效在章节切换时播放，建议使用短小精悍的音效",
         "ambient": "环境音在背景持续播放，建议使用较长的循环音效",
         "configuration": "可通过修改config.json中的ambient_theme参数切换环境音主题"
+    },
+    "voice_reference": {
+        "narrator": {
+            "acoustic_description": "male baritone, warm resonant tone, measured pacing, authoritative yet gentle",
+            "emotion_guidelines": "Use emotion field for mood only: 平静沉稳, 紧张急促, 温柔舒缓"
+        },
+        "male_default": {
+            "acoustic_description": "male tenor, clear articulation, moderate resonance, natural conversational tone",
+            "emotion_guidelines": "Use emotion field for mood only: avoid mixing physical voice traits"
+        },
+        "female_default": {
+            "acoustic_description": "female mezzo-soprano, silky even tone, soft rounded edges, natural warmth",
+            "emotion_guidelines": "Use emotion field for mood only: avoid mixing physical voice traits"
+        },
+        "young_male": {
+            "acoustic_description": "male tenor, bright energetic timbre, slightly faster natural pace",
+            "emotion_guidelines": "Use emotion field for mood only"
+        },
+        "elder_male": {
+            "acoustic_description": "male bass-baritone, gravelly texture, deliberate pacing, weathered quality",
+            "emotion_guidelines": "Use emotion field for mood only"
+        }
+    },
+    "export_options": {
+        "mp3": {
+            "bitrate": "128k",
+            "vbr_quality": 2,
+            "description": "Standard audiobook MP3 export"
+        },
+        "audacity_stems": {
+            "format": "wav",
+            "description": "Per-speaker WAV stems + labels.txt in ZIP archive for DAW import"
+        }
     }
 }

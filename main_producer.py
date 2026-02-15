@@ -20,8 +20,8 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from modules.asset_manager import AssetManager
-from modules.llm_director import LLMScriptDirector
-from modules.mlx_tts_engine import MLXRenderEngine
+from modules.llm_director import LLMScriptDirector, atomic_json_write
+from modules.mlx_tts_engine import MLXRenderEngine, group_indices_by_voice_type
 from modules.cinematic_packager import CinematicPackager
 
 # 配置日志
@@ -206,9 +206,9 @@ class CineCastProducer:
                         logger.error(f"   片段内容: {item}")
                         return False
                 
-                with open(script_path, 'w', encoding='utf-8') as f:
-                    json.dump(micro_script, f, ensure_ascii=False, indent=2)
-                    logger.info(f"✅ 生成微切片剧本: {script_path} ({len(micro_script)}个片段)")
+                # 🌟 原子化写入：防止中断导致 JSON 损坏
+                atomic_json_write(script_path, micro_script)
+                logger.info(f"✅ 生成微切片剧本: {script_path} ({len(micro_script)}个片段)")
             except Exception as e:
                 logger.error(f"❌ 处理章节 {chapter_name} 时发生错误: {e}")
                 import traceback
@@ -224,7 +224,11 @@ class CineCastProducer:
     # 🎙️ 阶段二：纯净干音渲染 (Dry Voice Rendering)
     # ==========================================
     def phase_2_render_dry_audio(self):
-        """阶段二：录音期 (MLX TTS) - 纯净干音渲染，只产生WAV文件"""
+        """阶段二：录音期 (MLX TTS) - 纯净干音渲染，只产生WAV文件
+        
+        Uses a "group-by-voice" strategy: chunks sharing the same voice type
+        are rendered consecutively to minimise MLX embedding switches.
+        """
         logger.info("\n" + "="*50 + "\n🎙️ [阶段二] 录音期 (MLX TTS)\n" + "="*50)
         engine = MLXRenderEngine(self.config["model_path"])
         
@@ -238,20 +242,24 @@ class CineCastProducer:
             total_chunks += len(micro_script)
             
             logger.info(f"🎙️ 正在渲染干音: {file} ({len(micro_script)}个片段)")
-            for item in micro_script:
-                voice_cfg = self.assets.get_voice_for_role(
-                    item["type"], 
-                    item.get("speaker"), 
-                    item.get("gender")
-                )
-                save_path = os.path.join(self.cache_dir, f"{item['chunk_id']}.wav")
-                # 🌟 这里只会产生单纯的文件写盘，内存毫无波动
-                if engine.render_dry_chunk(item["content"], voice_cfg, save_path):
-                    rendered_chunks += 1
-                
-                # 显示进度
-                if rendered_chunks > 0 and rendered_chunks % 50 == 0:
-                    logger.info(f"   🎵 进度: {rendered_chunks}/{total_chunks} 片段已渲染")
+            
+            # 🌟 Group-by-voice 优化：按角色分组批量渲染，减少 MLX 音色切换开销
+            voice_groups = group_indices_by_voice_type(micro_script)
+            for voice_key, indices in voice_groups.items():
+                logger.info(f"   🎤 渲染音色组: {voice_key} ({len(indices)}个片段)")
+                for idx in indices:
+                    item = micro_script[idx]
+                    voice_cfg = self.assets.get_voice_for_role(
+                        item["type"], 
+                        item.get("speaker"), 
+                        item.get("gender")
+                    )
+                    save_path = os.path.join(self.cache_dir, f"{item['chunk_id']}.wav")
+                    if engine.render_dry_chunk(item["content"], voice_cfg, save_path):
+                        rendered_chunks += 1
+                    
+                    if rendered_chunks > 0 and rendered_chunks % 50 == 0:
+                        logger.info(f"   🎵 进度: {rendered_chunks}/{total_chunks} 片段已渲染")
         
         # 释放 MLX 模型显存
         del engine

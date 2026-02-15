@@ -10,9 +10,129 @@ import re
 import logging
 import requests
 import os
-from typing import List, Dict
+import tempfile
+from typing import List, Dict, Optional
 
 logger = logging.getLogger(__name__)
+
+
+def atomic_json_write(path: str, data, **kwargs) -> None:
+    """Atomic JSON write: write to a temporary file first, then replace.
+
+    This prevents JSON corruption if the process crashes mid-write.
+    """
+    dir_name = os.path.dirname(path) or "."
+    kwargs.setdefault("ensure_ascii", False)
+    kwargs.setdefault("indent", 2)
+    fd, tmp_path = tempfile.mkstemp(suffix=".tmp", dir=dir_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, **kwargs)
+        os.replace(tmp_path, path)
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
+def repair_json_array(raw: str) -> Optional[List[Dict]]:
+    """Attempt to repair a truncated or malformed JSON array.
+
+    Tries progressively more aggressive strategies:
+    1. Strip trailing garbage after the last ``}`` and close the array.
+    2. Use regex to salvage individual JSON objects.
+
+    Returns ``None`` if nothing can be recovered.
+    """
+    # Strategy 1: find last complete object and close the array
+    raw = raw.strip()
+    if raw.startswith("["):
+        last_brace = raw.rfind("}")
+        if last_brace > 0:
+            candidate = raw[: last_brace + 1].rstrip().rstrip(",") + "\n]"
+            try:
+                result = json.loads(candidate)
+                if isinstance(result, list) and result:
+                    return result
+            except json.JSONDecodeError:
+                pass
+
+    # Strategy 2: regex salvage individual entries
+    return salvage_json_entries(raw)
+
+
+def salvage_json_entries(raw: str) -> Optional[List[Dict]]:
+    """Use regex to extract valid script entries from broken JSON text.
+
+    Each entry is expected to have at least ``speaker`` and ``content`` fields.
+    """
+    pattern = re.compile(
+        r'\{\s*'
+        r'"(?:type)"\s*:\s*"([^"]*)"\s*,\s*'
+        r'"(?:speaker)"\s*:\s*"([^"]*)"\s*,\s*'
+        r'"(?:gender)"\s*:\s*"([^"]*)"\s*,\s*'
+        r'"(?:emotion|instruct)"\s*:\s*"([^"]*)"\s*,\s*'
+        r'"(?:content)"\s*:\s*"([^"]*)"',
+        re.DOTALL,
+    )
+    entries = []
+    for m in pattern.finditer(raw):
+        entries.append({
+            "type": m.group(1) or "narration",
+            "speaker": m.group(2) or "narrator",
+            "gender": m.group(3) or "unknown",
+            "emotion": m.group(4) or "平静",
+            "content": m.group(5) or "",
+        })
+
+    if not entries:
+        # Looser pattern: just find speaker + content
+        loose = re.compile(
+            r'"speaker"\s*:\s*"([^"]*)"\s*[,}].*?"content"\s*:\s*"([^"]*)"',
+            re.DOTALL,
+        )
+        for m in loose.finditer(raw):
+            entries.append({
+                "type": "narration",
+                "speaker": m.group(1) or "narrator",
+                "gender": "unknown",
+                "emotion": "平静",
+                "content": m.group(2) or "",
+            })
+
+    return entries if entries else None
+
+
+def merge_consecutive_narrators(script: List[Dict], max_chars: int = 800) -> List[Dict]:
+    """Merge consecutive narrator entries that share the same emotion.
+
+    This reduces TTS startup overhead and avoids fragmented short sentences
+    that cause jarring tonal shifts.
+    """
+    if not script:
+        return script
+
+    merged: List[Dict] = []
+    for entry in script:
+        if (
+            merged
+            and entry.get("speaker") == "narrator"
+            and merged[-1].get("speaker") == "narrator"
+            and entry.get("emotion", "平静") == merged[-1].get("emotion", "平静")
+            and entry.get("type") == merged[-1].get("type")
+            and len(merged[-1].get("content", "")) + len(entry.get("content", "")) <= max_chars
+        ):
+            merged[-1]["content"] = merged[-1]["content"] + entry["content"]
+            # Keep the longer pause
+            merged[-1]["pause_ms"] = max(
+                merged[-1].get("pause_ms", 0), entry.get("pause_ms", 0)
+            )
+        else:
+            merged.append(entry.copy())
+
+    return merged
 
 class LLMScriptDirector:
     def __init__(self, ollama_url="http://127.0.0.1:11434", use_local_mlx_lm=False):
@@ -20,6 +140,10 @@ class LLMScriptDirector:
         self.model_name = "qwen14b-pro"
         self.max_chars_per_chunk = 60 # 微切片红线
         self.use_local_mlx_lm = use_local_mlx_lm
+        
+        # Context sliding window state
+        self._prev_characters: List[str] = []
+        self._prev_tail_entries: List[Dict] = []
         
         # 测试Ollama连接
         self._test_ollama_connection()
@@ -133,15 +257,53 @@ class LLMScriptDirector:
         else: return 100
 
     def parse_text_to_script(self, text: str) -> List[Dict]:
-        """阶段一：宏观剧本解析（保持原有逻辑）"""
+        """阶段一：宏观剧本解析（保持原有逻辑）
+        
+        Implements a context sliding window: each chunk receives the previous
+        chunk's cast list and last three entries as context so that character
+        names and speaking styles stay consistent across slices.
+        """
         # 🌟 修复截断漏洞：按段落切分长章节
         text_chunks = self._chunk_text_for_llm(text)
         full_script = []
         
         for i, chunk in enumerate(text_chunks):
             logger.info(f"   🧠 正在解析剧情片段 {i+1}/{len(text_chunks)}...")
-            chunk_script = self._request_ollama(chunk)
+            
+            # Build context from previous chunk
+            context_parts: List[str] = []
+            if self._prev_characters:
+                context_parts.append(
+                    "前一段出场角色: " + ", ".join(self._prev_characters)
+                )
+            if self._prev_tail_entries:
+                try:
+                    tail_json = json.dumps(
+                        self._prev_tail_entries, ensure_ascii=False
+                    )
+                    context_parts.append(
+                        "\nPrevious section ended with:\n" + tail_json
+                    )
+                except Exception:
+                    pass
+            
+            chunk_script = self._request_ollama(chunk, context="\n".join(context_parts) if context_parts else None)
+            
+            # Update sliding window state
+            if chunk_script:
+                speakers = {
+                    e.get("speaker")
+                    for e in chunk_script
+                    if e.get("speaker") and e.get("speaker") != "narrator"
+                }
+                if speakers:
+                    self._prev_characters = list(speakers)
+                self._prev_tail_entries = chunk_script[-3:]
+            
             full_script.extend(chunk_script)
+        
+        # Merge consecutive narrators to reduce TTS overhead
+        full_script = merge_consecutive_narrators(full_script)
         
         # 最终兜底：如果折腾了一圈，script 依然为空
         if not full_script or len(full_script) == 0:
@@ -190,9 +352,14 @@ class LLMScriptDirector:
             logger.error(f"摘要生成失败: {e}")
             return ""
     
-    def _request_ollama(self, text_chunk: str) -> List[Dict]:
-        """向Ollama发送单个文本块请求"""
-        # 🌟 全新升级的工程级 System Prompt
+    def _request_ollama(self, text_chunk: str, *, context: Optional[str] = None) -> List[Dict]:
+        """向Ollama发送单个文本块请求
+
+        Args:
+            text_chunk: The raw text to convert into a script.
+            context: Optional sliding-window context from the previous chunk
+                     (character list + tail entries) to maintain consistency.
+        """
         system_prompt = """
         你是一位顶级的有声书导演兼数据清洗专家，负责将原始小说文本转换为标准化的录音剧本。
         你必须严格遵守以下四大纪律，任何违反都将导致系统崩溃：
@@ -201,10 +368,11 @@ class LLMScriptDirector:
         - 必须 100% 逐字保留原文内容！
         - 严禁任何形式的概括、改写、缩写、续写或润色！
         - 严禁自行添加原文中不存在的台词或动作描写！
+        - 严禁在 content 中保留归属标签（如"他说"、"她叫道"），归属信息只能出现在 speaker 字段！
 
         【二、 字符净化原则】
         - 剔除所有不可发音的特殊符号（如 Emoji表情、Markdown标记 * _ ~ #、制表符 \t、不可见控制字符）。
-        - 仅保留基础标点符号（，。！？：；、“”‘’（））。
+        - 仅保留基础标点符号（，。！？：；、""''（））。
         - 数字、英文字母允许保留，但禁止出现复杂的数学公式符号。
 
         【三、 粒度拆分原则】
@@ -246,20 +414,24 @@ class LLMScriptDirector:
           }
         ]
         """
-        
+
+        user_content = "请严格按照规范，将以下文本拆解为纯净的 JSON 剧本（绝不改写原意）：\n\n"
+        if context:
+            user_content += f"【上文参考（仅供角色一致性参考，不要翻译此段）】\n{context}\n\n"
+        user_content += text_chunk
+
         payload = {
             "model": self.model_name,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                # 🌟 User 提示词也可以加一层强化
-                {"role": "user", "content": f"请严格按照规范，将以下文本拆解为纯净的 JSON 剧本（绝不改写原意）：\n\n{text_chunk}"}
+                {"role": "user", "content": user_content}
             ],
-            "format": "json", # Ollama 原生支持强制输出 JSON 格式
+            "format": "json",
             "stream": False,
             "keep_alive": "10m",
             "options": {
                 "num_ctx": 8192,
-                "temperature": 0.0, # 🌟 建议将温度降为 0.0，彻底消除大模型的创造力，只做苦力提取
+                "temperature": 0.0,
                 "top_p": 0.1
             }
         }
@@ -268,25 +440,33 @@ class LLMScriptDirector:
             response = requests.post(self.api_url, json=payload, timeout=180)
             response.raise_for_status()
             content = response.json().get('message', {}).get('content', '[]')
-            
-            # 🌟 强力剥离 Markdown 代码块（防止 LLM 幻觉）
+
+            # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
+            # Only strip real control characters; keep escaped sequences
+            # like \n and \t inside JSON strings intact.
+            content = content.replace('\t', ' ').replace('\r', '')
+
+            # Strip Markdown code-block wrappers the LLM may hallucinate
             content = re.sub(r'^```(?:json)?\s*', '', content.strip(), flags=re.IGNORECASE)
             content = re.sub(r'\s*```$', '', content.strip())
-            
-            script = json.loads(content)
+
+            try:
+                script = json.loads(content)
+            except json.JSONDecodeError:
+                logger.warning("⚠️ JSON 解析失败，尝试修复截断的 JSON ...")
+                script = repair_json_array(content)
+                if script is None:
+                    return self._fallback_regex_parse(text_chunk)
+                return self._validate_script_elements(script)
+
             if isinstance(script, list):
-                # 验证每个元素都有必需的字段
-                validated_script = self._validate_script_elements(script)
-                return validated_script
-            # Handle case where model returns {"result": [...]} or similar wrapper.
-            # The first list value found is used since the prompt requests a single array.
+                return self._validate_script_elements(script)
             if isinstance(script, dict):
                 for value in script.values():
                     if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
-                        validated_script = self._validate_script_elements(value)
-                        return validated_script
+                        return self._validate_script_elements(value)
             return self._fallback_regex_parse(text_chunk)
-            
+
         except Exception as e:
             logger.error(f"❌ Ollama 解析失败，触发正则降级: {e}")
             return self._fallback_regex_parse(text_chunk)
