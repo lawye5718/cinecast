@@ -8,7 +8,7 @@
         "num_ctx": 8192
     },
     "tts": {
-        "mode": "local",
+        "mode": "mlx",
         "model_path": "../qwentts/models/Qwen3-TTS-MLX-0.6B",
         "device": "metal",
         "compile_codec": false,

@@ -2,6 +2,7 @@ import os
 import re
 import json
 import threading
+from typing import Dict
 import numpy as np
 import soundfile as sf
 from pydub import AudioSegment
@@ -544,7 +545,9 @@ class TTSEngine:
 
     def generate_clone_voice(self, text, speaker, voice_config, output_path):
         """Generate audio using voice cloning. Returns True on success."""
-        if self._mode == "local":
+        if self._mode == "mlx":
+            return self._mlx_generate_custom(text, "", speaker, voice_config, output_path)
+        elif self._mode == "local":
             return self._local_generate_clone(text, speaker, voice_config, output_path)
         else:
             return self._external_generate_clone(text, speaker, voice_config, output_path)
@@ -1604,14 +1607,7 @@ class TTSEngine:
 
 
 # MLX TTS 支持 - 基于CineCast成功实现
-try:
-    import mlx.core as mx
-    from mlx_audio.tts.utils import load_model
-    MLX_AVAILABLE = True
-    print("✅ MLX模块可用")
-except ImportError as e:
-    print(f"⚠️ MLX模块不可用: {e}")
-    MLX_AVAILABLE = False
+# MLX_AVAILABLE already set at module top level; no duplicate import needed.
 
 
 class MLXTTSEngine:
@@ -1676,11 +1672,15 @@ class MLXTTSEngine:
             # MLX推理生成音频
             print(f"🎵 MLX TTS生成音频: {cleaned_text[:50]}... -> {output_path}")
 
-            # 使用MLX模型生成音频
-            results = list(self.model.generate(
-                text=cleaned_text,
-                language=self.language
-            ))
+            # 使用MLX模型生成音频 - 基于master分支的调用方法
+            generate_kwargs = {"text": cleaned_text}
+            if ref_audio_path and os.path.exists(ref_audio_path):
+                generate_kwargs["ref_audio"] = ref_audio_path
+                generate_kwargs["ref_text"] = ref_text
+            else:
+                generate_kwargs["language"] = self.language
+
+            results = list(self.model.generate(**generate_kwargs))
 
             if not results or len(results) == 0:
                 print("❌ MLX未生成音频结果")
@@ -1707,7 +1707,8 @@ class MLXTTSEngine:
             if 'results' in locals(): del results
             if 'audio_array' in locals(): del audio_array
             if 'audio_data' in locals(): del audio_data
-            mx.metal.clear_cache()
+            if MLX_AVAILABLE:
+                mx.metal.clear_cache()
 
     def _clean_text(self, text: str) -> str:
         """文本清洗 - 基于CineCast的规则"""
