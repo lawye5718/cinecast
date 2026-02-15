@@ -3,7 +3,7 @@ import sys
 import json
 import re
 import argparse
-from openai import OpenAI
+from local_openai_compat import OpenAI
 from review_prompts import REVIEW_SYSTEM_PROMPT, REVIEW_USER_PROMPT
 from generate_script import clean_json_string, repair_json_array, salvage_json_entries
 

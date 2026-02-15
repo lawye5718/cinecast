@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import re
-from openai import OpenAI
+from local_openai_compat import OpenAI
 from default_prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_USER_PROMPT
 
 def clean_json_string(text):
