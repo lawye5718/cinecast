@@ -123,7 +123,7 @@ class MLXRenderEngine:
             if 'results' in locals(): del results
             if 'audio_array' in locals(): del audio_array
             if 'audio_data' in locals(): del audio_data
-            if mx is not None and hasattr(mx, 'metal'):
+            if _MLX_AVAILABLE:
                 mx.metal.clear_cache()
             
             # 🌟 优化：移除全局的 gc.collect()。
