@@ -305,16 +305,9 @@ class LLMScriptDirector:
         # Merge consecutive narrators to reduce TTS overhead
         full_script = merge_consecutive_narrators(full_script)
         
-        # 最终兜底：如果折腾了一圈，script 依然为空
+        # 如果解析结果为空，直接报错退出
         if not full_script or len(full_script) == 0:
-            logger.warning(f"⚠️ 剧本解析结果为空，生成占位剧本以防流水线断裂！")
-            full_script = [{
-                "type": "narration",
-                "speaker": "narrator",
-                "gender": "male",
-                "content": "本章内容为空或存在格式异常，请人工核查。",
-                "emotion": "平静"
-            }]
+            raise RuntimeError("❌ 剧本解析结果为空，请检查输入文本和大模型服务是否正常。")
             
         return full_script
     
@@ -456,7 +449,9 @@ class LLMScriptDirector:
                 logger.warning("⚠️ JSON 解析失败，尝试修复截断的 JSON ...")
                 script = repair_json_array(content)
                 if script is None:
-                    return self._fallback_regex_parse(text_chunk)
+                    raise RuntimeError(
+                        f"❌ 大模型返回的 JSON 无法解析且修复失败，请检查模型输出。原始内容: {content[:200]}"
+                    )
                 return self._validate_script_elements(script)
 
             if isinstance(script, list):
@@ -465,11 +460,14 @@ class LLMScriptDirector:
                 for value in script.values():
                     if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
                         return self._validate_script_elements(value)
-            return self._fallback_regex_parse(text_chunk)
+            raise RuntimeError(
+                f"❌ 大模型返回了非预期的 JSON 结构（既非数组也非包含数组的字典），请检查模型输出。原始内容: {content[:200]}"
+            )
 
+        except (RuntimeError,):
+            raise
         except Exception as e:
-            logger.error(f"❌ Ollama 解析失败，触发正则降级: {e}")
-            return self._fallback_regex_parse(text_chunk)
+            raise RuntimeError(f"❌ Ollama 解析失败: {e}") from e
     
     def _validate_script_elements(self, script: List[Dict]) -> List[Dict]:
         """验证并修复脚本元素，确保包含所有必需字段"""
@@ -509,117 +507,6 @@ class LLMScriptDirector:
             
         return validated_script
     
-    def _fallback_regex_parse(self, text: str) -> List[Dict]:
-        """🌟 降级正则方案：当大模型解析失败时的保底方案"""
-        units = []
-        lines = text.split('\n')
-        
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-            
-            # 检测标题（章节标题通常较短且有特定格式）
-            if self._is_title(line):
-                units.append({
-                    "type": "title", 
-                    "speaker": "narrator", 
-                    "gender": "unknown",
-                    "content": line
-                })
-            # 检测对话
-            elif self._is_dialogue(line):
-                speaker, content = self._extract_dialogue_components(line)
-                gender = self._predict_gender(speaker)
-                units.append({
-                    "type": "dialogue", 
-                    "speaker": speaker, 
-                    "gender": gender, 
-                    "content": content
-                })
-            # 默认为旁白
-            else:
-                units.append({
-                    "type": "narration", 
-                    "speaker": "narrator", 
-                    "gender": "unknown",
-                    "content": line
-                })
-        
-        # 验证并修复返回的数据
-        return self._validate_script_elements(units)
-    
-    def _is_title(self, text: str) -> bool:
-        """判断是否为标题"""
-        # 标题特征：较短、可能包含"第"、"章"等字样
-        if len(text) < 30 and re.search(r'[第章节卷部集]', text):
-            return True
-        # 或者全是大写字母（英文标题）
-        if text.isupper() and len(text) < 50:
-            return True
-        return False
-        
-    def _is_dialogue(self, text: str) -> bool:
-        """判断是否为对话"""
-        # 包含引号的文本
-        if ('"' in text or '"' in text or 
-            '“' in text or '”' in text or
-            '『' in text or '』' in text):
-            return True
-        return False
-        
-    def _extract_dialogue_components(self, text: str) -> tuple:
-        """提取对话的说话人和内容"""
-        # 处理常见的对话格式
-        patterns = [
-            r'^(.*?)\s*[:："“「『]\s*(.*?)\s*[:："“」』]$',
-            r'^(.*?)\s*[:："“]\s*(.*?)(?=\s*[:："“]|$)',
-            r'^["“](.*?)["”]\s*[—\-]\s*(.*)$',
-        ]
-            
-        for pattern in patterns:
-            match = re.match(pattern, text.strip())
-            if match:
-                groups = match.groups()
-                if len(groups) >= 2:
-                    speaker = groups[0].strip()
-                    content = groups[1].strip()
-                    # 清理内容中的引号
-                    content = re.sub(r'^["“”『』「」]|["“”『』「」]$', '', content)
-                    return speaker, content
-            
-        # 如果无法解析，返回默认值
-        return "未知角色", text
-        
-    def _predict_gender(self, speaker_name: str) -> str:
-        """
-        简单的性别预测（可根据需要扩展）
-        """
-        # 常见的女性名字特征
-        female_indicators = ['女士', '小姐', '夫人', '妈妈', '姐姐', '妹妹', '女儿']
-        male_indicators = ['先生', '少爷', '老爷', '爸爸', '哥哥', '弟弟', '儿子']
-            
-        # 基于称谓判断
-        for indicator in female_indicators:
-            if indicator in speaker_name:
-                return "female"
-        for indicator in male_indicators:
-            if indicator in speaker_name:
-                return "male"
-            
-        # 基于常见姓名库判断（简化版）
-        female_names = ['玛丽', '琳达', '芭芭拉', '伊丽莎白', '珍妮弗', '李娜', '王芳', '张丽']
-        male_names = ['约翰', '迈克尔', '大卫', '罗伯特', '詹姆斯', '李明', '王强', '张伟']
-            
-        for name in female_names:
-            if name in speaker_name:
-                return "female"
-        for name in male_names:
-            if name in speaker_name:
-                return "male"
-            
-        # 默认返回男性（可根据统计数据调整）
-        return "male"
 
 if __name__ == "__main__":
     # 测试代码

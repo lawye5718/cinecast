@@ -368,29 +368,28 @@ class TestValidateScriptElements:
 
 
 # ---------------------------------------------------------------------------
-# Fallback Regex Parse
+# Error Raising on LLM Failure (no regex fallback)
 # ---------------------------------------------------------------------------
 
-class TestFallbackRegexParse:
-    def test_detects_title(self):
+class TestNoRegexFallback:
+    def test_fallback_regex_parse_removed(self):
+        """Ensure _fallback_regex_parse method no longer exists."""
         director = LLMScriptDirector()
-        result = director._fallback_regex_parse("第一章 风雪来袭")
-        assert len(result) >= 1
-        assert result[0]["type"] == "title"
+        assert not hasattr(director, '_fallback_regex_parse')
 
-    def test_detects_dialogue(self):
-        director = LLMScriptDirector()
-        result = director._fallback_regex_parse('"你好吗？"他说。')
-        assert len(result) >= 1
-        # Should detect dialogue due to quotes
-        has_dialogue = any(e["type"] == "dialogue" for e in result)
-        assert has_dialogue
+    def test_request_ollama_raises_on_connection_error(self):
+        """When Ollama is unreachable, _request_ollama should raise RuntimeError."""
+        director = LLMScriptDirector(ollama_url="http://127.0.0.1:19999")
+        with pytest.raises(RuntimeError, match="Ollama 解析失败"):
+            director._request_ollama("测试文本")
 
-    def test_defaults_to_narration(self):
+    def test_parse_text_to_script_raises_on_empty(self):
+        """parse_text_to_script should raise RuntimeError when result is empty."""
         director = LLMScriptDirector()
-        result = director._fallback_regex_parse("远处的灯塔开始旋转。")
-        assert len(result) >= 1
-        assert result[0]["type"] == "narration"
+        # Monkey-patch _request_ollama to return an empty list
+        director._request_ollama = lambda text_chunk, context=None: []
+        with pytest.raises(RuntimeError, match="剧本解析结果为空"):
+            director.parse_text_to_script("测试文本")
 
 
 if __name__ == "__main__":
