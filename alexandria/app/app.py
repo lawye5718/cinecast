@@ -94,10 +94,10 @@ class LLMConfig(BaseModel):
     model_name: str
 
 class TTSConfig(BaseModel):
-    mode: str = "external"  # "local" or "external"
+    mode: str = "mlx"  # "local" (torch Qwen3-TTS), "mlx" (Apple MLX Qwen3-TTS) or "external" (Gradio server)
     url: str = "http://127.0.0.1:7860"  # external mode only
     device: str = "auto"  # local mode: "auto", "cuda:0", "cpu", etc.
-    language: str = "English"  # TTS language
+    language: str = "Chinese"  # TTS language
     parallel_workers: int = 2  # concurrent TTS workers
     batch_seed: Optional[int] = None  # Single seed for batch mode, None/-1 = random
     compile_codec: bool = False  # torch.compile the codec for ~3-4x batch throughput (slow first run)
@@ -294,10 +294,10 @@ async def get_config():
         "llm": {
             "base_url": "http://localhost:11434/v1",
             "api_key": "local",
-            "model_name": "richardyoung/qwen3-14b-abliterated:Q8_0"
+            "model_name": "qwen14b-pro"
         },
         "tts": {
-            "mode": "external",
+            "mode": "mlx",
             "url": "http://127.0.0.1:7860",
             "device": "auto"
         },
