@@ -29,6 +29,7 @@ from modules.llm_director import (
     salvage_json_entries,
     LLMScriptDirector,
 )
+from modules.asset_manager import AssetManager
 
 # mlx_tts_engine imports mlx which is macOS-only; import only the pure-Python
 # helper we need for testing.
@@ -366,6 +367,40 @@ class TestValidateScriptElements:
         assert len(result) == 1
         assert result[0]["emotion"] == "激动"
 
+    def test_fixes_none_speaker(self):
+        """When speaker is explicitly None, it should be fixed to 'narrator'."""
+        director = LLMScriptDirector()
+        elements = [
+            {"type": "narration", "speaker": None, "content": "测试",
+             "gender": "male", "emotion": "平静"},
+        ]
+        result = director._validate_script_elements(elements)
+        assert len(result) == 1
+        assert result[0]["speaker"] == "narrator"
+
+    def test_fixes_none_gender(self):
+        """When gender is explicitly None, it should be fixed to 'unknown'."""
+        director = LLMScriptDirector()
+        elements = [
+            {"type": "narration", "speaker": "narrator", "content": "测试",
+             "gender": None, "emotion": "平静"},
+        ]
+        result = director._validate_script_elements(elements)
+        assert len(result) == 1
+        assert result[0]["gender"] == "unknown"
+
+    def test_fixes_both_none_speaker_and_gender(self):
+        """When both speaker and gender are None, both should be fixed."""
+        director = LLMScriptDirector()
+        elements = [
+            {"type": "narration", "speaker": None, "content": "测试",
+             "gender": None, "emotion": "平静"},
+        ]
+        result = director._validate_script_elements(elements)
+        assert len(result) == 1
+        assert result[0]["speaker"] == "narrator"
+        assert result[0]["gender"] == "unknown"
+
 
 # ---------------------------------------------------------------------------
 # Error Raising on LLM Failure (no regex fallback)
@@ -390,6 +425,166 @@ class TestNoRegexFallback:
         director._request_ollama = lambda text_chunk, context=None: []
         with pytest.raises(RuntimeError, match="剧本解析结果为空"):
             director.parse_text_to_script("测试文本")
+
+
+# ---------------------------------------------------------------------------
+# Micro-chunking Fallback Logic
+# ---------------------------------------------------------------------------
+
+class TestMicroChunkFallback:
+    def test_hard_cut_fallback_for_no_punctuation(self):
+        """Content without any punctuation should still produce chunks."""
+        director = LLMScriptDirector()
+        # Monkey-patch parse_text_to_script to return a single element with no
+        # Chinese punctuation (pure English / no separable marks).
+        long_content = "A" * 180  # 180 chars, no Chinese punctuation
+        director.parse_text_to_script = lambda text: [
+            {"type": "narration", "speaker": "narrator", "gender": "male",
+             "emotion": "平静", "content": long_content}
+        ]
+        result = director.parse_and_micro_chunk("test", chapter_prefix="ch01")
+        # Should produce at least one chunk (not lose content)
+        assert len(result) > 0
+        # Total content should be preserved
+        total_content = "".join(item["content"] for item in result)
+        assert total_content == long_content
+
+    def test_empty_content_units_skipped(self):
+        """Script units with empty content should be skipped without errors."""
+        director = LLMScriptDirector()
+        director.parse_text_to_script = lambda text: [
+            {"type": "narration", "speaker": "narrator", "gender": "male",
+             "emotion": "平静", "content": ""},
+            {"type": "narration", "speaker": "narrator", "gender": "male",
+             "emotion": "平静", "content": "有内容的句子。"},
+        ]
+        result = director.parse_and_micro_chunk("test", chapter_prefix="ch01")
+        # Only the non-empty unit should produce chunks
+        assert len(result) >= 1
+        assert all(item["content"].strip() for item in result)
+
+    def test_special_symbols_only_hard_cut(self):
+        """Content with only special symbols that regex can't split should be hard-cut."""
+        director = LLMScriptDirector()
+        # Content of special symbols without Chinese punctuation
+        special_content = "★☆◆◇■□▲△○●" * 10  # 100 special chars
+        director.parse_text_to_script = lambda text: [
+            {"type": "narration", "speaker": "narrator", "gender": "male",
+             "emotion": "平静", "content": special_content}
+        ]
+        result = director.parse_and_micro_chunk("test", chapter_prefix="ch01")
+        assert len(result) > 0
+
+
+# ---------------------------------------------------------------------------
+# AssetManager Config Loading
+# ---------------------------------------------------------------------------
+
+class TestAssetManagerConfigLoading:
+    def test_loads_voice_reference_from_config(self):
+        """AssetManager should load voice_reference from audio_assets_config.json."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = {
+                "voice_reference": {
+                    "narrator": {
+                        "acoustic_description": "test narrator voice"
+                    },
+                    "male_default": {
+                        "acoustic_description": "test male voice"
+                    },
+                    "female_default": {
+                        "acoustic_description": "test female voice"
+                    }
+                },
+                "audio_processing": {
+                    "target_sample_rate": 44100
+                }
+            }
+            config_path = os.path.join(tmpdir, "audio_assets_config.json")
+            with open(config_path, 'w') as f:
+                json.dump(config, f)
+
+            # Create AssetManager with asset_dir as a subdirectory so
+            # the config is found at ../audio_assets_config.json
+            asset_dir = os.path.join(tmpdir, "assets")
+            os.makedirs(asset_dir, exist_ok=True)
+            manager = AssetManager(asset_dir)
+
+            assert manager.voices["narrator"]["text"] == "test narrator voice"
+            assert manager.voices["male_pool"][0]["text"] == "test male voice"
+            assert manager.voices["female_pool"][0]["text"] == "test female voice"
+            assert manager.target_sr == 44100
+
+    def test_works_without_config_file(self):
+        """AssetManager should work with defaults when config file is missing."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manager = AssetManager(tmpdir)
+            # Should have default voices
+            assert "narrator" in manager.voices
+            assert len(manager.voices["male_pool"]) > 0
+
+
+# ---------------------------------------------------------------------------
+# Phase 1 Chapter-Skip Logic
+# ---------------------------------------------------------------------------
+
+class TestPhase1ChapterSkip:
+    def test_continues_on_chapter_failure(self):
+        """phase_1_generate_scripts should skip failed chapters, not abort."""
+        try:
+            from main_producer import CineCastProducer
+        except ImportError:
+            pytest.skip("main_producer requires mlx (macOS-only), skipping")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create input directory with two chapter files
+            input_dir = os.path.join(tmpdir, "chapters")
+            os.makedirs(input_dir, exist_ok=True)
+            with open(os.path.join(input_dir, "chapter_01.txt"), 'w') as f:
+                f.write("好的内容。正常文本。")
+            with open(os.path.join(input_dir, "chapter_02.txt"), 'w') as f:
+                f.write("更多好的内容。正常文本。")
+
+            producer = CineCastProducer(config={
+                "assets_dir": os.path.join(tmpdir, "assets"),
+                "output_dir": os.path.join(tmpdir, "output"),
+                "model_path": "dummy",
+                "ambient_theme": "default",
+                "target_duration_min": 30,
+                "min_tail_min": 10,
+                "use_local_llm": False,
+            })
+
+            # Monkey-patch check_ollama_alive to return True
+            producer.check_ollama_alive = lambda: True
+            # Monkey-patch _eject_ollama_memory to be a no-op
+            producer._eject_ollama_memory = lambda: None
+
+            # Create a director that fails on first chapter, succeeds on second
+            call_count = [0]
+
+            def mock_parse_and_micro_chunk(self_dir, content, chapter_prefix="chunk"):
+                call_count[0] += 1
+                if call_count[0] == 1:
+                    raise RuntimeError("Simulated LLM failure")
+                return [
+                    {"chunk_id": f"{chapter_prefix}_00001",
+                     "type": "narration", "speaker": "narrator",
+                     "gender": "male", "content": "成功内容。", "pause_ms": 600}
+                ]
+
+            # Patch LLMScriptDirector
+            original_parse = LLMScriptDirector.parse_and_micro_chunk
+            LLMScriptDirector.parse_and_micro_chunk = mock_parse_and_micro_chunk
+            try:
+                result = producer.phase_1_generate_scripts(input_dir)
+                # Should return True (continued processing) rather than False
+                assert result is True
+                # Second chapter should have been written
+                script_files = os.listdir(producer.script_dir)
+                assert len(script_files) >= 1
+            finally:
+                LLMScriptDirector.parse_and_micro_chunk = original_parse
 
 
 if __name__ == "__main__":

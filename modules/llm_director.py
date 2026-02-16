@@ -214,8 +214,12 @@ class LLMScriptDirector:
         chunk_id = 1
         
         for unit in macro_script:
+            content = unit.get("content", "")
+            if not content or not content.strip():
+                continue
+
             # 实施微切片
-            raw_sentences = re.split(r'([。！？；，、：])', unit["content"])
+            raw_sentences = re.split(r'([。！？；，、：])', content)
             chunks, temp = [], ""
             for part in raw_sentences:
                 if not part.strip(): continue
@@ -231,6 +235,20 @@ class LLMScriptDirector:
             
             # 清理空块并计算停顿
             valid_chunks = [c.strip() for c in chunks if c.strip()]
+
+            # 🌟 兜底逻辑：如果正则切分后无有效块，按每60字硬切
+            if not valid_chunks and content.strip():
+                hard_cut_chunk_size = self.max_chars_per_chunk
+                stripped = content.strip()
+                valid_chunks = [
+                    stripped[i:i + hard_cut_chunk_size]
+                    for i in range(0, len(stripped), hard_cut_chunk_size)
+                ]
+                logger.warning(
+                    f"⚠️ 正则切分无结果，已按每{hard_cut_chunk_size}字硬切: "
+                    f"'{content[:30]}...'"
+                )
+
             for idx, chunk in enumerate(valid_chunks):
                 is_para_end = (idx == len(valid_chunks) - 1)
                 pause_ms = self._calculate_pause(chunk, is_para_end)
@@ -494,7 +512,15 @@ class LLMScriptDirector:
                         fixed_element['content'] = ''  # 空内容
                     logger.warning(f"⚠️ 补充缺失字段 '{field}' 在元素 {i}: {element}")
             
-            # 确保 gender 字段存在
+            # 强化修复逻辑：处理 None 值
+            if fixed_element.get('speaker') is None:
+                fixed_element['speaker'] = 'narrator'
+                logger.warning(f"⚠️ 修复 None 值字段 'speaker' 在元素 {i}")
+            if fixed_element.get('gender') is None:
+                fixed_element['gender'] = 'unknown'
+                logger.warning(f"⚠️ 修复 None/缺失字段 'gender' 在元素 {i}")
+            
+            # 确保 gender 字段存在（兼容原有逻辑）
             if 'gender' not in fixed_element:
                 fixed_element['gender'] = 'unknown'
                 logger.warning(f"⚠️ 补充缺失字段 'gender' 在元素 {i}: {element}")

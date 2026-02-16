@@ -123,6 +123,22 @@ class CineCastProducer:
         except Exception as e:
             logger.warning(f"⚠️ 弹射 Ollama 失败，可能已自动释放: {e}")
     
+    def check_ollama_alive(self):
+        """前置检查：验证 Ollama 服务是否可用"""
+        try:
+            response = requests.get(
+                "http://127.0.0.1:11434/api/tags", timeout=10
+            )
+            if response.status_code == 200:
+                logger.info("✅ Ollama 服务前置检查通过")
+                return True
+            else:
+                logger.error(f"❌ Ollama 服务响应异常 (HTTP {response.status_code})")
+                return False
+        except Exception as e:
+            logger.error(f"❌ Ollama 服务不可达: {e}")
+            return False
+
     # ==========================================
     # 🎬 阶段一：剧本化与微切片 (Script & Micro-chunking)
     # ==========================================
@@ -130,6 +146,11 @@ class CineCastProducer:
         """阶段一：编剧期 (Ollama) - 生成包含chunk_id和停顿时间的微切片剧本"""
         logger.info("\n" + "="*50 + "\n🎬 [阶段一] 编剧期 (Ollama)\n" + "="*50)
         
+        # 🌟 前置检查：确认 Ollama 服务存活
+        if not self.check_ollama_alive():
+            logger.error("❌ Ollama 服务不可用，阶段一中止。请检查 Ollama 是否已启动。")
+            return False
+
         # 支持EPUB和TXT两种输入格式
         if input_source.endswith('.epub'):
             chapters = self._extract_epub_chapters(input_source)
@@ -149,6 +170,7 @@ class CineCastProducer:
         
         director = LLMScriptDirector()
         prev_chapter_content = None  # 用于存储上一章内容
+        failed_chapters = []
         
         for chapter_name, content in chapters.items():
             script_path = os.path.join(self.script_dir, f"{chapter_name}_micro.json")
@@ -165,8 +187,9 @@ class CineCastProducer:
                 
                 # 验证生成的剧本数据结构
                 if not micro_script:
-                    logger.error(f"❌ {chapter_name} 生成的微切片剧本为空！")
-                    return False
+                    logger.error(f"❌ {chapter_name} 生成的微切片剧本为空，跳过该章节")
+                    failed_chapters.append(chapter_name)
+                    continue
                 
                 # 🌟 核心逻辑：如果不是第一章，且有上一章的内容，则生成并插入前情提要
                 if prev_chapter_content is not None:
@@ -198,25 +221,37 @@ class CineCastProducer:
                 prev_chapter_content = content
                 
                 # 验证每个片段都有必需的字段
+                valid = True
                 for i, item in enumerate(micro_script):
                     required_fields = ['chunk_id', 'type', 'speaker', 'content']
                     missing_fields = [field for field in required_fields if field not in item]
                     if missing_fields:
                         logger.error(f"❌ {chapter_name} 第{i+1}个片段缺少字段: {missing_fields}")
                         logger.error(f"   片段内容: {item}")
-                        return False
+                        valid = False
+                        break
+
+                if not valid:
+                    logger.error(f"❌ 章节 {chapter_name} 数据校验失败，跳过该章")
+                    failed_chapters.append(chapter_name)
+                    continue
                 
                 # 🌟 原子化写入：防止中断导致 JSON 损坏
                 atomic_json_write(script_path, micro_script)
                 logger.info(f"✅ 生成微切片剧本: {script_path} ({len(micro_script)}个片段)")
             except Exception as e:
-                logger.error(f"❌ 处理章节 {chapter_name} 时发生错误: {e}")
+                logger.error(f"❌ 章节 {chapter_name} 解析严重失败，跳过该章: {e}")
                 import traceback
                 logger.error(f"详细错误信息:\n{traceback.format_exc()}")
-                return False
+                failed_chapters.append(chapter_name)
+                continue
                 
         # 强制弹射Ollama内存
         self._eject_ollama_memory()
+
+        if failed_chapters:
+            logger.warning(f"⚠️ 以下章节处理失败: {', '.join(failed_chapters)}")
+
         logger.info("✅ 阶段一完成，Ollama已从内存中安全撤离！")
         return True
     

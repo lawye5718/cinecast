@@ -5,6 +5,7 @@ CineCast 资产与选角管理器
 """
 
 import os
+import json
 import random
 from pydub import AudioSegment
 import logging
@@ -16,6 +17,7 @@ class AssetManager:
         self.asset_dir = asset_dir
         self.target_sr = 22050  # Qwen-TTS 标准采样率
         self._initialize_default_voices()
+        self._load_voice_config()
         self.role_voice_map = {}  # 记忆已分配角色的音色
         
     def _normalize_audio(self, audio: AudioSegment) -> AudioSegment:
@@ -68,6 +70,60 @@ class AssetManager:
                 "speed": 1.1
             },
         }
+
+    def _load_voice_config(self):
+        """从 audio_assets_config.json 加载音色配置，覆盖硬编码的默认值"""
+        config_path = os.path.join(os.path.dirname(self.asset_dir), "audio_assets_config.json")
+        if not os.path.exists(config_path):
+            # 也尝试项目根目录
+            config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "audio_assets_config.json")
+        if not os.path.exists(config_path):
+            logger.info("未找到 audio_assets_config.json，使用默认音色配置")
+            return
+
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+
+            voice_ref = config.get("voice_reference", {})
+            if not voice_ref:
+                return
+
+            # 用配置文件中的 acoustic_description 覆盖默认 text 字段
+            if "narrator" in voice_ref:
+                self.voices["narrator"]["text"] = voice_ref["narrator"].get(
+                    "acoustic_description", self.voices["narrator"]["text"]
+                )
+                self.voices["title"]["text"] = voice_ref["narrator"].get(
+                    "acoustic_description", self.voices["title"]["text"]
+                )
+                self.voices["subtitle"]["text"] = voice_ref["narrator"].get(
+                    "acoustic_description", self.voices["subtitle"]["text"]
+                )
+
+            if "male_default" in voice_ref and self.voices["male_pool"]:
+                self.voices["male_pool"][0]["text"] = voice_ref["male_default"].get(
+                    "acoustic_description", self.voices["male_pool"][0]["text"]
+                )
+
+            if "young_male" in voice_ref and len(self.voices["male_pool"]) > 1:
+                self.voices["male_pool"][1]["text"] = voice_ref["young_male"].get(
+                    "acoustic_description", self.voices["male_pool"][1]["text"]
+                )
+
+            if "female_default" in voice_ref and self.voices["female_pool"]:
+                self.voices["female_pool"][0]["text"] = voice_ref["female_default"].get(
+                    "acoustic_description", self.voices["female_pool"][0]["text"]
+                )
+
+            # 加载采样率配置
+            audio_proc = config.get("audio_processing", {})
+            if "target_sample_rate" in audio_proc:
+                self.target_sr = audio_proc["target_sample_rate"]
+
+            logger.info("✅ 已从 audio_assets_config.json 加载音色配置")
+        except Exception as e:
+            logger.warning(f"⚠️ 加载 audio_assets_config.json 失败，使用默认配置: {e}")
     
     def get_voice_for_role(self, role_type, speaker_name=None, gender="male"):
         """
