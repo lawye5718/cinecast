@@ -238,14 +238,14 @@ class LLMScriptDirector:
 
             # 🌟 兜底逻辑：如果正则切分后无有效块，按每60字硬切
             if not valid_chunks and content.strip():
-                hard_cut_size = self.max_chars_per_chunk
+                hard_cut_chunk_size = self.max_chars_per_chunk
                 stripped = content.strip()
                 valid_chunks = [
-                    stripped[i:i + hard_cut_size]
-                    for i in range(0, len(stripped), hard_cut_size)
+                    stripped[i:i + hard_cut_chunk_size]
+                    for i in range(0, len(stripped), hard_cut_chunk_size)
                 ]
                 logger.warning(
-                    f"⚠️ 正则切分无结果，已按每{hard_cut_size}字硬切: "
+                    f"⚠️ 正则切分无结果，已按每{hard_cut_chunk_size}字硬切: "
                     f"'{content[:30]}...'"
                 )
 

@@ -73,7 +73,7 @@ class AssetManager:
 
     def _load_voice_config(self):
         """从 audio_assets_config.json 加载音色配置，覆盖硬编码的默认值"""
-        config_path = os.path.join(self.asset_dir, "..", "audio_assets_config.json")
+        config_path = os.path.join(os.path.dirname(self.asset_dir), "audio_assets_config.json")
         if not os.path.exists(config_path):
             # 也尝试项目根目录
             config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "audio_assets_config.json")
