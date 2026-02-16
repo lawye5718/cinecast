@@ -480,7 +480,7 @@ class LLMScriptDirector:
 
             if isinstance(script, list):
                 return self._validate_script_elements(script)
-                
+
             if isinstance(script, dict):
                 # 容错 1: 空字典 {}
                 if not script:
@@ -488,7 +488,7 @@ class LLMScriptDirector:
                     return self._validate_script_elements([
                         {"type": "narration", "speaker": "narrator", "content": text_chunk}
                     ])
-                    
+
                 # 容错 2a: LLM 返回了 {"name": "...", "content": "..."} 结构
                 if "content" in script and "name" in script:
                     logger.warning("⚠️ 检测到非数组结构（含 name/content），正在将其转换为单条旁白")
@@ -533,7 +533,7 @@ class LLMScriptDirector:
                 
             # 检查并补充缺失的字段
             fixed_element = element.copy()
-            
+
             # 【核心修复】：如果大模型把 content 写成了数组，强制拼成字符串
             if 'content' in fixed_element:
                 if isinstance(fixed_element['content'], list):
