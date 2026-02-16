@@ -476,11 +476,15 @@ class LLMScriptDirector:
             if isinstance(script, list):
                 return self._validate_script_elements(script)
             if isinstance(script, dict):
-                # 容错 1: LLM 返回了 {"name": "...", "content": "..."} 结构
+                # 容错 1a: LLM 返回了 {"name": "...", "content": "..."} 结构
                 if "content" in script and "name" in script:
                     logger.warning("⚠️ 检测到非数组结构（含 name/content），正在将其转换为单条旁白")
                     script = [{"type": "narration", "speaker": "narrator", "content": script["content"]}]
                     return self._validate_script_elements(script)
+                # 容错 1b: LLM 返回了单个 JSON 对象（如 {"type": "narration", "speaker": "narrator", "content": "..."}）
+                if "content" in script or "type" in script:
+                    logger.warning("⚠️ 模型返回了单个 JSON 对象而非数组，自动使用列表包裹以恢复流水线。")
+                    return self._validate_script_elements([script])
                 # 容错 2: LLM 返回了包含列表的字典 (如 {"script": [...]})
                 for value in script.values():
                     if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
