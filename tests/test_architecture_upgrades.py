@@ -743,5 +743,309 @@ class TestPhase1ChapterSkip:
                 LLMScriptDirector.parse_and_micro_chunk = original_parse
 
 
+# ---------------------------------------------------------------------------
+# Asset Manager: Recap voice fallback
+# ---------------------------------------------------------------------------
+
+class TestRecapVoiceFallback:
+    def test_fallback_to_narrator_when_talkover_missing(self):
+        """When talkover.wav does not exist, recap should fall back to narrator.wav."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            voices_dir = os.path.join(tmpdir, "voices")
+            os.makedirs(voices_dir)
+            # Only create narrator.wav (no talkover.wav)
+            with open(os.path.join(voices_dir, "narrator.wav"), "wb") as f:
+                f.write(b"\x00")
+            manager = AssetManager(asset_dir=tmpdir)
+            recap = manager.voices["recap"]
+            assert recap["audio"] == os.path.join(tmpdir, "voices", "narrator.wav")
+            assert recap["speed"] == 1.15
+
+    def test_uses_talkover_when_present(self):
+        """When talkover.wav exists, recap should use it."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            voices_dir = os.path.join(tmpdir, "voices")
+            os.makedirs(voices_dir)
+            with open(os.path.join(voices_dir, "narrator.wav"), "wb") as f:
+                f.write(b"\x00")
+            with open(os.path.join(voices_dir, "talkover.wav"), "wb") as f:
+                f.write(b"\x00")
+            manager = AssetManager(asset_dir=tmpdir)
+            recap = manager.voices["recap"]
+            assert recap["audio"] == os.path.join(tmpdir, "voices", "talkover.wav")
+            assert recap["text"] == "前情提要专用声音"
+
+    def test_get_voice_for_role_recap_returns_fallback(self):
+        """get_voice_for_role('recap') should use the fallback voice config."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            voices_dir = os.path.join(tmpdir, "voices")
+            os.makedirs(voices_dir)
+            with open(os.path.join(voices_dir, "narrator.wav"), "wb") as f:
+                f.write(b"\x00")
+            manager = AssetManager(asset_dir=tmpdir)
+            voice = manager.get_voice_for_role("recap")
+            # Should return recap config, not crash
+            assert voice["audio"].endswith("narrator.wav")
+
+
+# ---------------------------------------------------------------------------
+# LLM Director: Map-Reduce recap engine
+# ---------------------------------------------------------------------------
+
+class TestMapReduceRecapEngine:
+    def test_empty_text_returns_empty(self):
+        """Empty input should return empty string without LLM call."""
+        director = LLMScriptDirector()
+        assert director.generate_chapter_recap("") == ""
+        assert director.generate_chapter_recap("   ") == ""
+
+    def test_short_text_skips_map_phase(self):
+        """Text under 5000 chars should go directly to reduce phase."""
+        import unittest.mock as mock
+
+        director = LLMScriptDirector()
+        short_text = "A" * 3000
+
+        fake_resp = mock.MagicMock()
+        fake_resp.status_code = 200
+        fake_resp.raise_for_status = mock.MagicMock()
+        fake_resp.json.return_value = {
+            "message": {"content": "短文本摘要结果"}
+        }
+
+        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp) as mock_post:
+            result = director.generate_chapter_recap(short_text)
+        # Should be called exactly once (reduce only, no map)
+        assert mock_post.call_count == 1
+        assert result == "短文本摘要结果"
+
+    def test_long_text_triggers_map_reduce(self):
+        """Text over 5000 chars should trigger map then reduce calls."""
+        import unittest.mock as mock
+
+        director = LLMScriptDirector()
+        long_text = "A" * 12000  # Will produce 3 chunks (5000+5000+2000)
+
+        call_count = [0]
+        def mock_post_side_effect(*args, **kwargs):
+            call_count[0] += 1
+            fake_resp = mock.MagicMock()
+            fake_resp.status_code = 200
+            fake_resp.raise_for_status = mock.MagicMock()
+            if call_count[0] <= 3:  # Map phase
+                fake_resp.json.return_value = {"message": {"content": f"子摘要{call_count[0]}"}}
+            else:  # Reduce phase
+                fake_resp.json.return_value = {"message": {"content": "终极摘要"}}
+            return fake_resp
+
+        with mock.patch("modules.llm_director.requests.post", side_effect=mock_post_side_effect):
+            result = director.generate_chapter_recap(long_text)
+        # 3 map calls + 1 reduce call = 4 total
+        assert call_count[0] == 4
+        assert result == "终极摘要"
+
+    def test_recap_prefix_cleaned(self):
+        """Recap result should have common prefixes stripped."""
+        import unittest.mock as mock
+
+        director = LLMScriptDirector()
+        fake_resp = mock.MagicMock()
+        fake_resp.status_code = 200
+        fake_resp.raise_for_status = mock.MagicMock()
+        fake_resp.json.return_value = {
+            "message": {"content": "前情提要：这是摘要正文"}
+        }
+
+        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp):
+            result = director.generate_chapter_recap("测试文本")
+        assert result == "这是摘要正文"
+
+    def test_llm_failure_returns_empty(self):
+        """LLM failures should return empty string, not crash."""
+        import unittest.mock as mock
+
+        director = LLMScriptDirector()
+        with mock.patch("modules.llm_director.requests.post", side_effect=Exception("LLM down")):
+            result = director.generate_chapter_recap("测试文本")
+        assert result == ""
+
+
+# ---------------------------------------------------------------------------
+# Main Producer: enable_recap config switch
+# ---------------------------------------------------------------------------
+
+class TestEnableRecapConfig:
+    def test_default_config_has_enable_recap(self):
+        """Default config should include enable_recap set to True."""
+        try:
+            from main_producer import CineCastProducer
+        except ImportError:
+            pytest.skip("main_producer requires mlx (macOS-only), skipping")
+        producer = CineCastProducer()
+        assert "enable_recap" in producer.config
+        assert producer.config["enable_recap"] is True
+
+    def test_recap_disabled_skips_generation(self):
+        """When enable_recap is False, recap should not be generated."""
+        try:
+            from main_producer import CineCastProducer
+        except ImportError:
+            pytest.skip("main_producer requires mlx (macOS-only), skipping")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_dir = os.path.join(tmpdir, "input")
+            os.makedirs(input_dir)
+            # Create two chapters with enough content
+            with open(os.path.join(input_dir, "chapter_01.txt"), 'w') as f:
+                f.write("A" * 2000)
+            with open(os.path.join(input_dir, "chapter_02.txt"), 'w') as f:
+                f.write("B" * 2000)
+
+            producer = CineCastProducer(config={
+                "assets_dir": os.path.join(tmpdir, "assets"),
+                "output_dir": os.path.join(tmpdir, "output"),
+                "model_path": "dummy",
+                "ambient_theme": "default",
+                "target_duration_min": 30,
+                "min_tail_min": 10,
+                "use_local_llm": False,
+                "enable_recap": False,
+            })
+            producer.check_ollama_alive = lambda: True
+            producer._eject_ollama_memory = lambda: None
+
+            recap_called = [False]
+            original_generate = LLMScriptDirector.generate_chapter_recap
+
+            def mock_generate(self_dir, text):
+                recap_called[0] = True
+                return "fake recap"
+
+            def mock_parse(self_dir, content, chapter_prefix="chunk"):
+                return [
+                    {"chunk_id": f"{chapter_prefix}_00001",
+                     "type": "narration", "speaker": "narrator",
+                     "gender": "male", "content": "内容。", "pause_ms": 600}
+                ]
+
+            LLMScriptDirector.parse_and_micro_chunk = mock_parse
+            LLMScriptDirector.generate_chapter_recap = mock_generate
+            try:
+                producer.phase_1_generate_scripts(input_dir)
+                assert recap_called[0] is False
+            finally:
+                LLMScriptDirector.generate_chapter_recap = original_generate
+
+
+# ---------------------------------------------------------------------------
+# Main Producer: Non-content chapter filtering
+# ---------------------------------------------------------------------------
+
+class TestNonContentChapterFiltering:
+    def test_short_chapter_skips_recap(self):
+        """Chapters under 500 chars should not trigger recap generation."""
+        try:
+            from main_producer import CineCastProducer
+        except ImportError:
+            pytest.skip("main_producer requires mlx (macOS-only), skipping")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_dir = os.path.join(tmpdir, "input")
+            os.makedirs(input_dir)
+            # First chapter: long enough to be "previous content"
+            with open(os.path.join(input_dir, "chapter_01.txt"), 'w') as f:
+                f.write("A" * 2000)
+            # Second chapter: too short (under 500 chars)
+            with open(os.path.join(input_dir, "chapter_02.txt"), 'w') as f:
+                f.write("Short.")
+
+            producer = CineCastProducer(config={
+                "assets_dir": os.path.join(tmpdir, "assets"),
+                "output_dir": os.path.join(tmpdir, "output"),
+                "model_path": "dummy",
+                "ambient_theme": "default",
+                "target_duration_min": 30,
+                "min_tail_min": 10,
+                "use_local_llm": False,
+                "enable_recap": True,
+            })
+            producer.check_ollama_alive = lambda: True
+            producer._eject_ollama_memory = lambda: None
+
+            recap_called = [False]
+
+            def mock_generate(self_dir, text):
+                recap_called[0] = True
+                return "fake recap"
+
+            def mock_parse(self_dir, content, chapter_prefix="chunk"):
+                return [
+                    {"chunk_id": f"{chapter_prefix}_00001",
+                     "type": "narration", "speaker": "narrator",
+                     "gender": "male", "content": "内容。", "pause_ms": 600}
+                ]
+
+            LLMScriptDirector.parse_and_micro_chunk = mock_parse
+            original_generate = LLMScriptDirector.generate_chapter_recap
+            LLMScriptDirector.generate_chapter_recap = mock_generate
+            try:
+                producer.phase_1_generate_scripts(input_dir)
+                # Short second chapter should not trigger recap
+                assert recap_called[0] is False
+            finally:
+                LLMScriptDirector.generate_chapter_recap = original_generate
+
+    def test_copyright_page_skips_recap(self):
+        """Chapters containing copyright keywords should skip recap."""
+        try:
+            from main_producer import CineCastProducer
+        except ImportError:
+            pytest.skip("main_producer requires mlx (macOS-only), skipping")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_dir = os.path.join(tmpdir, "input")
+            os.makedirs(input_dir)
+            with open(os.path.join(input_dir, "chapter_01.txt"), 'w') as f:
+                f.write("A" * 2000)
+            # Second chapter: contains copyright keywords in first 200 chars
+            with open(os.path.join(input_dir, "chapter_02.txt"), 'w') as f:
+                f.write("版权所有 ISBN 978-7-000-00000-0 " + "B" * 1000)
+
+            producer = CineCastProducer(config={
+                "assets_dir": os.path.join(tmpdir, "assets"),
+                "output_dir": os.path.join(tmpdir, "output"),
+                "model_path": "dummy",
+                "ambient_theme": "default",
+                "target_duration_min": 30,
+                "min_tail_min": 10,
+                "use_local_llm": False,
+                "enable_recap": True,
+            })
+            producer.check_ollama_alive = lambda: True
+            producer._eject_ollama_memory = lambda: None
+
+            recap_called = [False]
+
+            def mock_generate(self_dir, text):
+                recap_called[0] = True
+                return "fake recap"
+
+            def mock_parse(self_dir, content, chapter_prefix="chunk"):
+                return [
+                    {"chunk_id": f"{chapter_prefix}_00001",
+                     "type": "narration", "speaker": "narrator",
+                     "gender": "male", "content": "内容。", "pause_ms": 600}
+                ]
+
+            LLMScriptDirector.parse_and_micro_chunk = mock_parse
+            original_generate = LLMScriptDirector.generate_chapter_recap
+            LLMScriptDirector.generate_chapter_recap = mock_generate
+            try:
+                producer.phase_1_generate_scripts(input_dir)
+                assert recap_called[0] is False
+            finally:
+                LLMScriptDirector.generate_chapter_recap = original_generate
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -64,11 +64,25 @@ class AssetManager:
                 }
             ],
             # 新增：前情摘要专属音色 (可稍微加速，带出回顾的紧凑感)
-            "recap": {
-                "audio": f"{self.asset_dir}/voices/talkover.wav", 
-                "text": "前情提要专用声音", 
-                "speed": 1.1
-            },
+            # 🌟 修复: 检查 talkover.wav 是否存在，不存在则自动降级为 narrator
+            "recap": self._build_recap_voice(),
+        }
+
+    def _build_recap_voice(self):
+        """构建 recap 音色配置，若 talkover.wav 不存在则降级为 narrator"""
+        talkover_path = f"{self.asset_dir}/voices/talkover.wav"
+        narrator_path = f"{self.asset_dir}/voices/narrator.wav"
+        if os.path.exists(talkover_path):
+            return {
+                "audio": talkover_path,
+                "text": "前情提要专用声音",
+                "speed": 1.15
+            }
+        logger.warning(f"⚠️ 未找到 {talkover_path}，recap 音色自动降级为 narrator")
+        return {
+            "audio": narrator_path,
+            "text": "沉稳旁白",
+            "speed": 1.15
         }
 
     def _load_voice_config(self):

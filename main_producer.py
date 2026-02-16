@@ -59,7 +59,8 @@ class CineCastProducer:
             "ambient_theme": "iceland_wind",  # 环境音主题
             "target_duration_min": 30,  # 目标时长（分钟）
             "min_tail_min": 10,  # 最小尾部时长（分钟）
-            "use_local_llm": True  # 是否使用本地LLM
+            "use_local_llm": True,  # 是否使用本地LLM
+            "enable_recap": True  # 🌟 前情提要总开关
         }
     
     def _initialize_components(self):
@@ -191,31 +192,40 @@ class CineCastProducer:
                     failed_chapters.append(chapter_name)
                     continue
                 
-                # 🌟 核心逻辑：如果不是第一章，且有上一章的内容，则生成并插入前情提要
-                if prev_chapter_content is not None and len(prev_chapter_content) >= 1000:
-                    logger.info(f"🔄 正在为 {chapter_name} 生成前情摘要...")
-                    recap_text = director.generate_chapter_recap(prev_chapter_content)
+                # 🌟 核心逻辑：智能前情提要判断
+                # 判定条件：开关打开 + 不是第一章 + 上一章有足够内容 + 当前章看起来像正文
+                is_main_text = True
+                # 过滤版权页、目录、致谢等非正文章节 (通过长度和特征词识别)
+                if len(content) < 500 or any(keyword in content[:200] for keyword in ["版权", "目录", "出版", "ISBN", "序言", "致谢"]):
+                    is_main_text = False
+                    logger.info(f"⏭️ 判定 {chapter_name} 为非正文/短章节，跳过生成前情摘要。")
+
+                if self.config.get("enable_recap", True) and prev_chapter_content is not None and is_main_text:
+                    # 只有上一章也是正文，才值得回顾
+                    if len(prev_chapter_content) >= 800:
+                        logger.info(f"🔄 正在为 {chapter_name} 生成前情摘要 (Map-Reduce 引擎)...")
+                        recap_text = director.generate_chapter_recap(prev_chapter_content)
                     
-                    if recap_text:
-                        # 构建一个标准的前情提要引子单元
-                        intro_unit = {
-                            "chunk_id": f"{chapter_name}_recap_intro",
-                            "type": "recap",
-                            "speaker": "talkover",
-                            "content": "前情提要：",
-                            "pause_ms": 500
-                        }
-                        # 构建摘要主体单元
-                        recap_unit = {
-                            "chunk_id": f"{chapter_name}_recap_body",
-                            "type": "recap",
-                            "speaker": "talkover",
-                            "content": recap_text,
-                            "pause_ms": 1500
-                        }
-                        # 将提要插入到本章剧本的最开头（在标题之后，正文之前）
-                        micro_script.insert(1, intro_unit)
-                        micro_script.insert(2, recap_unit)
+                        if recap_text:
+                            # 构建一个标准的前情提要引子单元
+                            intro_unit = {
+                                "chunk_id": f"{chapter_name}_recap_intro",
+                                "type": "recap",
+                                "speaker": "talkover",
+                                "content": "前情提要：",
+                                "pause_ms": 500
+                            }
+                            # 构建摘要主体单元
+                            recap_unit = {
+                                "chunk_id": f"{chapter_name}_recap_body",
+                                "type": "recap",
+                                "speaker": "talkover",
+                                "content": recap_text,
+                                "pause_ms": 1500
+                            }
+                            # 将提要插入到本章剧本的最开头（在标题之后，正文之前）
+                            micro_script.insert(1, intro_unit)
+                            micro_script.insert(2, recap_unit)
                 
                 # 保存当前章的原始文本，供下一章使用
                 prev_chapter_content = content
