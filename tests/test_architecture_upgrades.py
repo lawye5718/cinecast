@@ -403,6 +403,66 @@ class TestValidateScriptElements:
 
 
 # ---------------------------------------------------------------------------
+# LLM Dict-Format Tolerance
+# ---------------------------------------------------------------------------
+
+class TestLLMDictFormatTolerance:
+    """Tests for _request_ollama handling of dict responses from LLM."""
+
+    def _make_director_with_mock_response(self, json_content):
+        """Create a director where _request_ollama returns a mocked HTTP response."""
+        import unittest.mock as mock
+
+        director = LLMScriptDirector()
+        fake_resp = mock.MagicMock()
+        fake_resp.status_code = 200
+        fake_resp.raise_for_status = mock.MagicMock()
+        fake_resp.json.return_value = {
+            "message": {"content": json.dumps(json_content, ensure_ascii=False)}
+        }
+
+        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp):
+            return director._request_ollama("任意文本")
+
+    def test_name_content_dict_converted_to_narration(self):
+        """LLM returns {"name": "第一章 风雪", "content": "原文..."} — should become a single narration."""
+        result = self._make_director_with_mock_response(
+            {"name": "第一章 风雪", "content": "夜幕降临，港口的灯火开始闪烁。"}
+        )
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]["type"] == "narration"
+        assert result[0]["speaker"] == "narrator"
+        assert result[0]["content"] == "夜幕降临，港口的灯火开始闪烁。"
+
+    def test_dict_containing_list_extracted(self):
+        """LLM returns {"script": [...]} — should extract the inner list."""
+        inner = [
+            {"type": "narration", "speaker": "narrator", "content": "测试内容。",
+             "gender": "male", "emotion": "平静"},
+        ]
+        result = self._make_director_with_mock_response({"script": inner})
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]["content"] == "测试内容。"
+
+    def test_valid_array_passthrough(self):
+        """LLM returns a proper JSON array — should pass through normally."""
+        arr = [
+            {"type": "narration", "speaker": "narrator", "content": "正常。",
+             "gender": "male", "emotion": "平静"},
+        ]
+        result = self._make_director_with_mock_response(arr)
+        assert isinstance(result, list)
+        assert len(result) == 1
+
+    def test_dict_without_list_or_name_raises(self):
+        """LLM returns a dict without any recognisable structure — should raise."""
+        with pytest.raises(RuntimeError, match="非预期的 JSON 结构"):
+            self._make_director_with_mock_response({"random_key": "random_value"})
+
+
+# ---------------------------------------------------------------------------
 # Error Raising on LLM Failure (no regex fallback)
 # ---------------------------------------------------------------------------
 
