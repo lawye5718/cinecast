@@ -313,7 +313,10 @@ class CineCastProducer:
         logger.info("\n" + "="*50 + "\n🎛️ [阶段三] 混音发版期 (Pydub)\n" + "="*50)
 
         # 🌟 前置检查：确认缓存目录存在有效音频片段
-        wav_files = [f for f in os.listdir(self.cache_dir) if f.endswith('.wav')] if os.path.isdir(self.cache_dir) else []
+        if os.path.isdir(self.cache_dir):
+            wav_files = [f for f in os.listdir(self.cache_dir) if f.endswith('.wav')]
+        else:
+            wav_files = []
         if not wav_files:
             logger.warning("⚠️ 未发现有效音频片段，请检查剧本解析阶段（阶段一）和干音渲染阶段（阶段二）是否成功。跳过混音。")
             return
