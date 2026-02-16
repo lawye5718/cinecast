@@ -5,6 +5,7 @@ CineCast 主控程序
 实现100%防内存溢出和断点续传
 """
 
+import argparse
 import os
 import sys
 import json
@@ -60,7 +61,8 @@ class CineCastProducer:
             "target_duration_min": 30,  # 目标时长（分钟）
             "min_tail_min": 10,  # 最小尾部时长（分钟）
             "use_local_llm": True,  # 是否使用本地LLM
-            "enable_recap": True  # 🌟 前情提要总开关
+            "enable_recap": True,  # 🌟 前情提要总开关
+            "pure_narrator_mode": False  # 🌟 纯净旁白模式开关
         }
     
     def _initialize_components(self):
@@ -147,8 +149,10 @@ class CineCastProducer:
         """阶段一：编剧期 (Ollama) - 生成包含chunk_id和停顿时间的微切片剧本"""
         logger.info("\n" + "="*50 + "\n🎬 [阶段一] 编剧期 (Ollama)\n" + "="*50)
         
-        # 🌟 前置检查：确认 Ollama 服务存活
-        if not self.check_ollama_alive():
+        pure_mode = self.config.get("pure_narrator_mode", False)
+
+        # 🌟 前置检查：纯净模式下不需要 Ollama 服务
+        if not pure_mode and not self.check_ollama_alive():
             logger.error("❌ Ollama 服务不可用，阶段一中止。请检查 Ollama 是否已启动。")
             return False
 
@@ -183,8 +187,13 @@ class CineCastProducer:
                 
             logger.info(f"✍️ 正在生成微切片剧本: {chapter_name} (字数: {len(content)})")
             try:
-                # 🌟 修复：传入 chapter_name 作为 ID 前缀，避免文件名冲突
-                micro_script = director.parse_and_micro_chunk(content, chapter_prefix=chapter_name)
+                # 🌟 核心拦截分支：纯净模式下，使用基于规则的生成器
+                if pure_mode:
+                    logger.info(f"⚡ 启用纯净旁白模式解析: {chapter_name}")
+                    micro_script = director.generate_pure_narrator_script(content, chapter_prefix=chapter_name)
+                else:
+                    # 🌟 修复：传入 chapter_name 作为 ID 前缀，避免文件名冲突
+                    micro_script = director.parse_and_micro_chunk(content, chapter_prefix=chapter_name)
                 
                 # 验证生成的剧本数据结构
                 if not micro_script:
@@ -192,40 +201,41 @@ class CineCastProducer:
                     failed_chapters.append(chapter_name)
                     continue
                 
-                # 🌟 核心逻辑：智能前情提要判断
-                # 判定条件：开关打开 + 不是第一章 + 上一章有足够内容 + 当前章看起来像正文
-                is_main_text = True
-                # 过滤版权页、目录、致谢等非正文章节 (通过长度和特征词识别)
-                if len(content) < 500 or any(keyword in content[:200] for keyword in ["版权", "目录", "出版", "ISBN", "序言", "致谢"]):
-                    is_main_text = False
-                    logger.info(f"⏭️ 判定 {chapter_name} 为非正文/短章节，跳过生成前情摘要。")
+                # 🌟 核心逻辑：智能前情提要判断（纯净模式下跳过）
+                # 判定条件：非纯净模式 + 开关打开 + 不是第一章 + 上一章有足够内容 + 当前章看起来像正文
+                if not pure_mode:
+                    is_main_text = True
+                    # 过滤版权页、目录、致谢等非正文章节 (通过长度和特征词识别)
+                    if len(content) < 500 or any(keyword in content[:200] for keyword in ["版权", "目录", "出版", "ISBN", "序言", "致谢"]):
+                        is_main_text = False
+                        logger.info(f"⏭️ 判定 {chapter_name} 为非正文/短章节，跳过生成前情摘要。")
 
-                if self.config.get("enable_recap", True) and prev_chapter_content is not None and is_main_text:
-                    # 只有上一章也是正文，才值得回顾
-                    if len(prev_chapter_content) >= 800:
-                        logger.info(f"🔄 正在为 {chapter_name} 生成前情摘要 (Map-Reduce 引擎)...")
-                        recap_text = director.generate_chapter_recap(prev_chapter_content)
-                    
-                        if recap_text:
-                            # 构建一个标准的前情提要引子单元
-                            intro_unit = {
-                                "chunk_id": f"{chapter_name}_recap_intro",
-                                "type": "recap",
-                                "speaker": "talkover",
-                                "content": "前情提要：",
-                                "pause_ms": 500
-                            }
-                            # 构建摘要主体单元
-                            recap_unit = {
-                                "chunk_id": f"{chapter_name}_recap_body",
-                                "type": "recap",
-                                "speaker": "talkover",
-                                "content": recap_text,
-                                "pause_ms": 1500
-                            }
-                            # 将提要插入到本章剧本的最开头（在标题之后，正文之前）
-                            micro_script.insert(1, intro_unit)
-                            micro_script.insert(2, recap_unit)
+                    if self.config.get("enable_recap", True) and prev_chapter_content is not None and is_main_text:
+                        # 只有上一章也是正文，才值得回顾
+                        if len(prev_chapter_content) >= 800:
+                            logger.info(f"🔄 正在为 {chapter_name} 生成前情摘要 (Map-Reduce 引擎)...")
+                            recap_text = director.generate_chapter_recap(prev_chapter_content)
+                        
+                            if recap_text:
+                                # 构建一个标准的前情提要引子单元
+                                intro_unit = {
+                                    "chunk_id": f"{chapter_name}_recap_intro",
+                                    "type": "recap",
+                                    "speaker": "talkover",
+                                    "content": "前情提要：",
+                                    "pause_ms": 500
+                                }
+                                # 构建摘要主体单元
+                                recap_unit = {
+                                    "chunk_id": f"{chapter_name}_recap_body",
+                                    "type": "recap",
+                                    "speaker": "talkover",
+                                    "content": recap_text,
+                                    "pause_ms": 1500
+                                }
+                                # 将提要插入到本章剧本的最开头（在标题之后，正文之前）
+                                micro_script.insert(1, intro_unit)
+                                micro_script.insert(2, recap_unit)
                 
                 # 保存当前章的原始文本，供下一章使用
                 prev_chapter_content = content
@@ -256,8 +266,9 @@ class CineCastProducer:
                 failed_chapters.append(chapter_name)
                 continue
                 
-        # 强制弹射Ollama内存
-        self._eject_ollama_memory()
+        # 强制弹射Ollama内存（纯净模式下无需弹射）
+        if not pure_mode:
+            self._eject_ollama_memory()
 
         if failed_chapters:
             logger.warning(f"⚠️ 以下章节处理失败: {', '.join(failed_chapters)}")
@@ -332,8 +343,15 @@ class CineCastProducer:
             return
 
         packager = CinematicPackager(self.config["output_dir"])
-        ambient_bgm = self.assets.get_ambient_sound(self.config["ambient_theme"])
-        chime_sound = self.assets.get_transition_chime()
+
+        # 🌟 核心拦截：纯净模式下，强行将音效设为 None
+        if self.config.get("pure_narrator_mode", False):
+            logger.info("🔇 纯净模式已开启：关闭环境背景音与章节过渡音效")
+            ambient_bgm = None
+            chime_sound = None
+        else:
+            ambient_bgm = self.assets.get_ambient_sound(self.config["ambient_theme"])
+            chime_sound = self.assets.get_transition_chime()
         
         script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])
         for file in script_files:
@@ -345,25 +363,44 @@ class CineCastProducer:
         logger.info("🎉 三段式架构全流程完成！全书压制完毕，请前往 output 目录查收。")
     
 def main():
-    """主函数 - 严格的三段式串行处理，彻底切断内存重叠"""
-    producer = CineCastProducer()
+    """主函数 - 引入命令行参数"""
+    parser = argparse.ArgumentParser(description="CineCast 电影级有声书生产线")
+    parser.add_argument("input", nargs="?", default="./input_chapters", help="输入文件(EPUB)或目录(TXT)")
+    parser.add_argument("--pure-narrator", action="store_true", help="启用纯净旁白模式(单音色/无背景音/无摘要/免LLM)")
+    args = parser.parse_args()
+
+    config = {
+        "assets_dir": "./assets",
+        "output_dir": "./output/Audiobooks",
+        "model_path": "../qwentts/models/Qwen3-TTS-MLX-0.6B",
+        "ambient_theme": "iceland_wind",
+        "target_duration_min": 30,
+        "min_tail_min": 10,
+        "use_local_llm": True,
+        "enable_recap": True,
+        "pure_narrator_mode": args.pure_narrator  # 🌟 将命令行参数写入全局配置
+    }
+
+    producer = CineCastProducer(config=config)
+    input_source = args.input
     
-    # 支持EPUB文件输入（通过命令行参数或配置）
-    epub_path = sys.argv[1] if len(sys.argv) > 1 else None
-    
-    if epub_path and os.path.exists(epub_path):
-        input_source = epub_path
-        logger.info(f"📚 检测到EPUB文件: {epub_path}")
-    else:
-        # 回退到TXT目录模式
-        input_dir = "./input_chapters"
-        os.makedirs(input_dir, exist_ok=True)
-        if not os.listdir(input_dir):
-            logger.warning(f"⚠️ 请先在 {input_dir} 文件夹中放入测试用的 .txt 章节！")
-            with open(os.path.join(input_dir, "第一章_测试.txt"), 'w', encoding='utf-8') as f:
+    if input_source.endswith('.epub') and os.path.exists(input_source):
+        logger.info(f"📚 检测到EPUB文件: {input_source}")
+    elif os.path.isdir(input_source):
+        if not os.listdir(input_source):
+            logger.warning(f"⚠️ 请先在 {input_source} 文件夹中放入测试用的 .txt 章节！")
+            with open(os.path.join(input_source, "第一章_测试.txt"), 'w', encoding='utf-8') as f:
                 f.write("第一章 风雪\n1976年\n夜幕降临港口。\"你相信命运吗？\"老渔夫问。\n\"我不信。\"年轻人回答。")
-        input_source = input_dir
-        logger.info(f"📝 使用TXT目录模式: {input_dir}")
+        logger.info(f"📝 使用TXT目录模式: {input_source}")
+    else:
+        # 回退到默认TXT目录模式
+        input_source = "./input_chapters"
+        os.makedirs(input_source, exist_ok=True)
+        if not os.listdir(input_source):
+            logger.warning(f"⚠️ 请先在 {input_source} 文件夹中放入测试用的 .txt 章节！")
+            with open(os.path.join(input_source, "第一章_测试.txt"), 'w', encoding='utf-8') as f:
+                f.write("第一章 风雪\n1976年\n夜幕降临港口。\"你相信命运吗？\"老渔夫问。\n\"我不信。\"年轻人回答。")
+        logger.info(f"📝 使用TXT目录模式: {input_source}")
     
     try:
         # 严格的三段式串行处理，彻底切断内存重叠
