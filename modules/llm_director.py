@@ -380,6 +380,7 @@ class LLMScriptDirector:
         - 严禁任何形式的概括、改写、缩写、续写或润色！
         - 严禁自行添加原文中不存在的台词或动作描写！
         - 严禁在 content 中保留归属标签（如"他说"、"她叫道"），归属信息只能出现在 speaker 字段！
+        - 严禁总结全文，必须从第一句话开始逐句拆解。严禁输出章节名称作为唯一内容！
 
         【二、 字符净化原则】
         - 剔除所有不可发音的特殊符号（如 Emoji表情、Markdown标记 * _ ~ #、制表符 \t、不可见控制字符）。
@@ -475,6 +476,12 @@ class LLMScriptDirector:
             if isinstance(script, list):
                 return self._validate_script_elements(script)
             if isinstance(script, dict):
+                # 容错 1: LLM 返回了 {"name": "...", "content": "..."} 结构
+                if "content" in script and "name" in script:
+                    logger.warning("⚠️ 检测到非数组结构（含 name/content），正在将其转换为单条旁白")
+                    script = [{"type": "narration", "speaker": "narrator", "content": script["content"]}]
+                    return self._validate_script_elements(script)
+                # 容错 2: LLM 返回了包含列表的字典 (如 {"script": [...]})
                 for value in script.values():
                     if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
                         return self._validate_script_elements(value)

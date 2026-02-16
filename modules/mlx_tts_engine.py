@@ -110,7 +110,7 @@ class MLXRenderEngine:
             if 'results' in locals(): del results
             if 'audio_array' in locals(): del audio_array
             if 'audio_data' in locals(): del audio_data
-            mx.metal.clear_cache()
+            mx.clear_cache()
             
             # 🌟 优化：移除全局的 gc.collect()。
             # Python 的引用计数已经能自动清理大部分局部变量，

@@ -300,7 +300,7 @@ class CineCastProducer:
         del engine
         try:
             import mlx.core as mx
-            mx.metal.clear_cache()
+            mx.clear_cache()
         except ImportError:
             pass
         logger.info(f"✅ 阶段二完成 ({rendered_chunks}/{total_chunks} 片段)，MLX 已从内存中安全撤离！")
@@ -311,6 +311,16 @@ class CineCastProducer:
     def phase_3_cinematic_mix(self):
         """阶段三：混音发版期 (Pydub) - 从干音缓存组装成电影级有声书"""
         logger.info("\n" + "="*50 + "\n🎛️ [阶段三] 混音发版期 (Pydub)\n" + "="*50)
+
+        # 🌟 前置检查：确认缓存目录存在有效音频片段
+        if os.path.isdir(self.cache_dir):
+            wav_files = [f for f in os.listdir(self.cache_dir) if f.endswith('.wav')]
+        else:
+            wav_files = []
+        if not wav_files:
+            logger.warning("⚠️ 未发现有效音频片段，请检查剧本解析阶段（阶段一）和干音渲染阶段（阶段二）是否成功。跳过混音。")
+            return
+
         packager = CinematicPackager(self.config["output_dir"])
         ambient_bgm = self.assets.get_ambient_sound(self.config["ambient_theme"])
         chime_sound = self.assets.get_transition_chime()
