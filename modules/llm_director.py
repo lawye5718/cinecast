@@ -201,6 +201,94 @@ class LLMScriptDirector:
             chunks.append(current_chunk)
         return chunks
     
+    def generate_pure_narrator_script(self, text: str, chapter_prefix: str = "chunk") -> List[Dict]:
+        """
+        纯净旁白模式专用的剧本生成器（绕过LLM，秒级生成，100%忠实原著）
+        """
+        micro_script = []
+        chunk_id = 1
+
+        # 1. 按段落切分
+        paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+
+        for p_idx, para in enumerate(paragraphs):
+            # 2. 按长句标点切分（保留标点）
+            sentences = re.split(r'([。！？；.!?;])', para)
+
+            temp_sentence = ""
+            for part in sentences:
+                if not part.strip() and not re.match(r'[。！？；.!?;]', part):
+                    continue
+
+                if re.match(r'^[。！？；.!?;]$', part.strip()):
+                    temp_sentence += part
+
+                    # 3. 如果单句仍然超长，启动逗号/顿号的次级切分
+                    if len(temp_sentence) > self.max_chars_per_chunk:
+                        sub_parts = re.split(r'([，、：,:])', temp_sentence)
+                        sub_temp = ""
+                        for sub in sub_parts:
+                            if re.match(r'^[，、：,:]$', sub):
+                                sub_temp += sub
+                                pause = self._calculate_pause(sub_temp, False)
+                                micro_script.append({
+                                    "chunk_id": f"{chapter_prefix}_{chunk_id:05d}",
+                                    "type": "narration",
+                                    "speaker": "narrator",
+                                    "gender": "male",
+                                    "emotion": "平静",
+                                    "content": sub_temp.strip(),
+                                    "pause_ms": pause
+                                })
+                                chunk_id += 1
+                                sub_temp = ""
+                            else:
+                                sub_temp += sub
+                        if sub_temp.strip():
+                            pause = self._calculate_pause(sub_temp, p_idx == len(paragraphs)-1)
+                            micro_script.append({
+                                "chunk_id": f"{chapter_prefix}_{chunk_id:05d}",
+                                "type": "narration",
+                                "speaker": "narrator",
+                                "gender": "male",
+                                "emotion": "平静",
+                                "content": sub_temp.strip(),
+                                "pause_ms": pause
+                            })
+                            chunk_id += 1
+                    else:
+                        # 正常长度的句子直接推入
+                        pause = self._calculate_pause(temp_sentence, p_idx == len(paragraphs)-1)
+                        micro_script.append({
+                            "chunk_id": f"{chapter_prefix}_{chunk_id:05d}",
+                            "type": "narration",
+                            "speaker": "narrator",
+                            "gender": "male",
+                            "emotion": "平静",
+                            "content": temp_sentence.strip(),
+                            "pause_ms": pause
+                        })
+                        chunk_id += 1
+                    temp_sentence = ""
+                else:
+                    temp_sentence += part
+
+            # 处理段落末尾没有标点的残留部分
+            if temp_sentence.strip():
+                pause = self._calculate_pause(temp_sentence, p_idx == len(paragraphs)-1)
+                micro_script.append({
+                    "chunk_id": f"{chapter_prefix}_{chunk_id:05d}",
+                    "type": "narration",
+                    "speaker": "narrator",
+                    "gender": "male",
+                    "emotion": "平静",
+                    "content": temp_sentence.strip(),
+                    "pause_ms": pause
+                })
+                chunk_id += 1
+
+        return micro_script
+
     def parse_and_micro_chunk(self, text: str, chapter_prefix: str = "chunk") -> List[Dict]:
         """宏观剧本解析 -> 自动展开为微切片剧本
         
