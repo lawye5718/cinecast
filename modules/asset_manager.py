@@ -4,6 +4,7 @@ CineCast 资产与选角管理器
 负责处理音色、声场、音效的加载与智能分配
 """
 
+import hashlib
 import os
 import json
 import random
@@ -164,9 +165,13 @@ class AssetManager:
         # 对话角色音色记忆
         if speaker_name and speaker_name not in self.role_voice_map:
             pool = self.voices["male_pool"] if gender == "male" else self.voices["female_pool"]
-            # 使用哈希分配确保同名角色在重启后仍获得同一音色
-            idx = hash(speaker_name) % len(pool)
-            self.role_voice_map[speaker_name] = pool[idx]
+            if not pool:
+                self.role_voice_map[speaker_name] = self.voices["narrator"]
+            else:
+                # 使用确定性哈希分配，确保同名角色跨进程仍获得同一音色
+                digest = int(hashlib.md5(speaker_name.encode()).hexdigest(), 16)
+                idx = digest % len(pool)
+                self.role_voice_map[speaker_name] = pool[idx]
             
         if speaker_name:
             return self.role_voice_map.get(speaker_name, self.voices["narrator"])
