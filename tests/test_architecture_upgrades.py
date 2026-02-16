@@ -456,6 +456,29 @@ class TestLLMDictFormatTolerance:
         assert isinstance(result, list)
         assert len(result) == 1
 
+    def test_single_object_with_type_and_content_wrapped(self):
+        """LLM returns {"type": "narration", "speaker": "narrator", "content": "..."} — should wrap in list."""
+        result = self._make_director_with_mock_response(
+            {"type": "narration", "speaker": "narrator", "content": "第二章 1976年的故事。",
+             "gender": "male", "emotion": "平静"}
+        )
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]["type"] == "narration"
+        assert result[0]["speaker"] == "narrator"
+        assert result[0]["content"] == "第二章 1976年的故事。"
+
+    def test_single_object_with_only_type_wrapped(self):
+        """LLM returns a dict with 'type' but no 'name' — should wrap in list."""
+        result = self._make_director_with_mock_response(
+            {"type": "dialogue", "speaker": "老渔夫", "content": "你相信命运吗？",
+             "gender": "male", "emotion": "沧桑"}
+        )
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]["type"] == "dialogue"
+        assert result[0]["content"] == "你相信命运吗？"
+
     def test_dict_without_list_or_name_raises(self):
         """LLM returns a dict without any recognisable structure — should raise."""
         with pytest.raises(RuntimeError, match="非预期的 JSON 结构"):
