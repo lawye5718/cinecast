@@ -255,8 +255,7 @@ class CineCastProducer:
                         item.get("gender")
                     )
                     save_path = os.path.join(self.cache_dir, f"{item['chunk_id']}.wav")
-                    emotion = item.get("emotion", "平静")
-                    if engine.render_dry_chunk(item["content"], voice_cfg, save_path, emotion=emotion):
+                    if engine.render_dry_chunk(item["content"], voice_cfg, save_path):
                         rendered_chunks += 1
                     
                     if rendered_chunks > 0 and rendered_chunks % 50 == 0:
@@ -287,9 +286,6 @@ class CineCastProducer:
                 micro_script = json.load(f)
             # 🌟 Pydub 开始组装，此时已经没有大模型在抢占内存了
             packager.process_from_cache(micro_script, self.cache_dir, self.assets, ambient_bgm, chime_sound)
-        
-        # 🌟 导出 Audacity 多轨工程（专业级 DAW 导入支持）
-        packager.export_audacity()
         
         logger.info("🎉 三段式架构全流程完成！全书压制完毕，请前往 output 目录查收。")
     
