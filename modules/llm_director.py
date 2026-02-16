@@ -225,10 +225,10 @@ class LLMScriptDirector:
 
                     # 3. 如果单句仍然超长，启动逗号/顿号的次级切分
                     if len(temp_sentence) > self.max_chars_per_chunk:
-                        sub_parts = re.split(r'([，、：,:] )', temp_sentence)
+                        sub_parts = re.split(r'([，、：,:])', temp_sentence)
                         sub_temp = ""
                         for sub in sub_parts:
-                            if re.match(r'^[，、：,:] $', sub.strip()):
+                            if re.match(r'^[，、：,:]$', sub):
                                 sub_temp += sub
                                 pause = self._calculate_pause(sub_temp, False)
                                 micro_script.append({

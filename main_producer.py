@@ -369,19 +369,8 @@ def main():
     parser.add_argument("--pure-narrator", action="store_true", help="启用纯净旁白模式(单音色/无背景音/无摘要/免LLM)")
     args = parser.parse_args()
 
-    config = {
-        "assets_dir": "./assets",
-        "output_dir": "./output/Audiobooks",
-        "model_path": "../qwentts/models/Qwen3-TTS-MLX-0.6B",
-        "ambient_theme": "iceland_wind",
-        "target_duration_min": 30,
-        "min_tail_min": 10,
-        "use_local_llm": True,
-        "enable_recap": True,
-        "pure_narrator_mode": args.pure_narrator  # 🌟 将命令行参数写入全局配置
-    }
-
-    producer = CineCastProducer(config=config)
+    producer = CineCastProducer()
+    producer.config["pure_narrator_mode"] = args.pure_narrator  # 🌟 将命令行参数写入全局配置
     input_source = args.input
     
     if input_source.endswith('.epub') and os.path.exists(input_source):

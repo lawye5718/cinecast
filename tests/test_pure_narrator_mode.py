@@ -165,8 +165,8 @@ class TestPauseCalculation:
         text = "这是一个非常长的句子，后面还有更多的内容。"
         result = director.generate_pure_narrator_script(text)
         comma_chunks = [c for c in result if c["content"].endswith("，")]
-        if comma_chunks:
-            assert comma_chunks[0]["pause_ms"] == 250
+        assert len(comma_chunks) > 0, "Expected at least one comma-ending chunk"
+        assert comma_chunks[0]["pause_ms"] == 250
 
 
 # ---------------------------------------------------------------------------
