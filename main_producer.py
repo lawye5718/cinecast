@@ -303,15 +303,18 @@ class CineCastProducer:
             voice_groups = group_indices_by_voice_type(micro_script)
             for voice_key, indices in voice_groups.items():
                 logger.info(f"   🎤 渲染音色组: {voice_key} ({len(indices)}个片段)")
+                # 🌟 修复：每个音色组只解析一次 voice_cfg，确保组内所有微切片
+                # 使用完全相同的音色配置，杜绝音色在微切片之间切换
+                first_item = micro_script[indices[0]]
+                group_voice_cfg = self.assets.get_voice_for_role(
+                    first_item["type"],
+                    first_item.get("speaker"),
+                    first_item.get("gender")
+                )
                 for idx in indices:
                     item = micro_script[idx]
-                    voice_cfg = self.assets.get_voice_for_role(
-                        item["type"], 
-                        item.get("speaker"), 
-                        item.get("gender")
-                    )
                     save_path = os.path.join(self.cache_dir, f"{item['chunk_id']}.wav")
-                    if engine.render_dry_chunk(item["content"], voice_cfg, save_path):
+                    if engine.render_dry_chunk(item["content"], group_voice_cfg, save_path):
                         rendered_chunks += 1
                     
                     if rendered_chunks > 0 and rendered_chunks % 50 == 0:

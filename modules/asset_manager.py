@@ -4,6 +4,7 @@ CineCast 资产与选角管理器
 负责处理音色、声场、音效的加载与智能分配
 """
 
+import hashlib
 import os
 import json
 import random
@@ -63,6 +64,12 @@ class AssetManager:
                     "speed": 1.0
                 }
             ],
+            # "narration" 显式映射到 narrator 音色，避免 dict.get() 隐式回退
+            "narration": {
+                "audio": f"{self.asset_dir}/voices/narrator.wav",
+                "text": "沉稳旁白",
+                "speed": 1.0
+            },
             # 新增：前情摘要专属音色 (可稍微加速，带出回顾的紧凑感)
             # 🌟 修复: 检查 talkover.wav 是否存在，不存在则自动降级为 narrator
             "recap": self._build_recap_voice(),
@@ -105,15 +112,13 @@ class AssetManager:
 
             # 用配置文件中的 acoustic_description 覆盖默认 text 字段
             if "narrator" in voice_ref:
-                self.voices["narrator"]["text"] = voice_ref["narrator"].get(
+                narrator_desc = voice_ref["narrator"].get(
                     "acoustic_description", self.voices["narrator"]["text"]
                 )
-                self.voices["title"]["text"] = voice_ref["narrator"].get(
-                    "acoustic_description", self.voices["title"]["text"]
-                )
-                self.voices["subtitle"]["text"] = voice_ref["narrator"].get(
-                    "acoustic_description", self.voices["subtitle"]["text"]
-                )
+                self.voices["narrator"]["text"] = narrator_desc
+                self.voices["narration"]["text"] = narrator_desc
+                self.voices["title"]["text"] = narrator_desc
+                self.voices["subtitle"]["text"] = narrator_desc
 
             if "male_default" in voice_ref and self.voices["male_pool"]:
                 self.voices["male_pool"][0]["text"] = voice_ref["male_default"].get(
@@ -148,6 +153,11 @@ class AssetManager:
             speaker_name: 说话人姓名 (用于对话角色记忆)
             gender: 性别 (male, female)
         """
+        # 🌟 修复：gender 为 None 时使用默认值 "male"，防止 item.get("gender")
+        # 返回 None 覆盖函数签名中的默认值导致错误的音色池选择
+        if gender is None:
+            gender = "male"
+
         # 处理非对话角色
         if role_type in ["title", "subtitle", "narration", "recap"]:
             return self.voices.get(role_type, self.voices["narrator"])
@@ -155,15 +165,20 @@ class AssetManager:
         # 对话角色音色记忆
         if speaker_name and speaker_name not in self.role_voice_map:
             pool = self.voices["male_pool"] if gender == "male" else self.voices["female_pool"]
-            # 随机或哈希分配一个音色给新角色
-            self.role_voice_map[speaker_name] = random.choice(pool)
+            if not pool:
+                self.role_voice_map[speaker_name] = self.voices["narrator"]
+            else:
+                # 使用确定性哈希分配，确保同名角色跨进程仍获得同一音色
+                digest = int(hashlib.md5(speaker_name.encode()).hexdigest(), 16)
+                idx = digest % len(pool)
+                self.role_voice_map[speaker_name] = pool[idx]
             
         if speaker_name:
             return self.role_voice_map.get(speaker_name, self.voices["narrator"])
         else:
-            # 如果没有说话人信息，根据性别选择
-            pool = self.voices["male_pool"] if gender == "male" else self.voices["female_pool"]
-            return random.choice(pool)
+            # 如果没有说话人信息，使用 narrator 音色而非随机选择，防止每个微切片
+            # 都随机到不同音色导致音色在微切片之间切换
+            return self.voices["narrator"]
     
     def get_ambient_sound(self, theme="default") -> AudioSegment:
         """🌟 防采样率爆炸：支持用户动态上传环境音并强制归一化"""
