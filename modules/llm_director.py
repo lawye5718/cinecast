@@ -356,7 +356,7 @@ class LLMScriptDirector:
         }
         
         try:
-            response = requests.post(self.api_url, json=payload, timeout=60)
+            response = requests.post(self.api_url, json=payload, timeout=180)
             response.raise_for_status()
             return response.json().get('message', {}).get('content', '').strip()
         except Exception as e:
@@ -392,8 +392,11 @@ class LLMScriptDirector:
         - 例如原文："你好，"老渔夫笑着说。
           必须拆分为两个对象：1. 角色对白("你好，") 2. 旁白描述("老渔夫笑着说。")
 
-        【四、 JSON 格式规范】
-        必须且只能输出合法的 JSON 数组，禁止任何解释性前言或后缀（如"好的，以下是..."），禁止输出 Markdown 代码块标记（```json）。
+        【四、 JSON 格式规范（生死攸关）】
+        必须且只能输出合法的 JSON 数组（Array）！
+        最外层必须是中括号 [ ]，绝对不能是大括号 { }！
+        严禁将整个章节合并为一个单一的 JSON 对象！你必须将文本逐句拆解为多个数组元素！
+        禁止任何解释性前言或后缀，禁止输出 Markdown 代码块标记（```json）。
         数组元素字段要求：
         - "type": 仅限 "title"(章节名), "subtitle"(小标题), "narration"(旁白), "dialogue"(对白)。
         - "speaker": 对白填具体的角色名（需根据上下文推断并保持全书统一）；旁白和标题统一填 "narrator"。
