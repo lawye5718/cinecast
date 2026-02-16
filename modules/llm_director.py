@@ -331,36 +331,82 @@ class LLMScriptDirector:
     
     def generate_chapter_recap(self, prev_chapter_text: str) -> str:
         """
-        专门用于生成前情摘要和悬念钩子
+        🌟 Map-Reduce 前情摘要引擎
+        解决长章节导致大模型 OOM 或注意力丢失的问题
+        - 短文本 (<=5000字): 直接生成终极摘要
+        - 长文本 (>5000字): 分块提炼 -> 合并 -> 终极摘要
         """
-        system_prompt = """
-        你是一位顶级的有声书剧本编辑。请根据提供的上一章内容，写一段不超过100字的"前情摘要"。
-        要求：
-        1. 提炼最核心的剧情冲突或精华。
-        2. 语言风格要具有悬疑感和电影感（类似于美剧开头的 "Previously on..."）。
-        3. 最后一句必须是一个引出下一章的"悬念钩子"（例如："然而，她并没有意识到，真正的危险才刚刚降临……"）。
-        4. 只输出摘要文本，不要任何格式和前缀。
-        """
-        
-        # 为了防止输入过长，截取上一章的后半部分或限制总字数
-        input_text = prev_chapter_text[-2000:] if len(prev_chapter_text) > 2000 else prev_chapter_text
-        
+        chunk_size = 5000
+
+        # 1. 基础清理
+        text = prev_chapter_text.strip()
+        if not text:
+            return ""
+
+        # 2. 如果文本极长，执行 Map 阶段 (分块总结)
+        if len(text) > chunk_size:
+            logger.info(f"🔄 上一章超长 ({len(text)}字)，启动 Map-Reduce 摘要分块处理...")
+            chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
+            sub_summaries = []
+
+            for idx, chunk in enumerate(chunks):
+                map_prompt = ("你是一个剧情提炼专家。请将以下小说片段压缩成不超过200字的纯剧情摘要。"
+                              "要求：只保留核心冲突、关键人物动作和重要线索。不加任何前缀和废话。")
+
+                payload = {
+                    "model": self.model_name,
+                    "messages": [
+                        {"role": "system", "content": map_prompt},
+                        {"role": "user", "content": f"小说片段：\n{chunk}"}
+                    ],
+                    "stream": False,
+                    "options": {"temperature": 0.3}
+                }
+                try:
+                    resp = requests.post(self.api_url, json=payload, timeout=120)
+                    resp.raise_for_status()
+                    sub_sum = resp.json().get('message', {}).get('content', '').strip()
+                    sub_summaries.append(sub_sum)
+                    logger.debug(f"   ✓ 完成第 {idx+1}/{len(chunks)} 块提炼")
+                except Exception as e:
+                    logger.warning(f"区块 {idx+1} 总结失败，已跳过: {e}")
+
+            # 组合所有子摘要作为 Reduce 阶段的输入
+            final_input = "\n".join(sub_summaries)
+        else:
+            final_input = text
+
+        # 3. Reduce 阶段 (终极摘要 + 悬念钩子)
+        reduce_prompt = (
+            '你是一位顶级的有声书剧本编辑和悬疑大师。'
+            '请根据提供的上一章内容（或内容摘要），写一段不超过100字的\u201c前情摘要\u201d。'
+            '绝对纪律：'
+            '1. 语言必须高度凝练，具有美剧片头的电影感（\u201cPreviously on...\u201d的风格）。'
+            '2. 只保留最具张力的剧情矛盾。'
+            '3. 最后一句必须是一个引出下一章的\u201c悬念钩子\u201d。'
+            '4. 绝对不要输出\u201c前情提要：\u201d这样的标题，直接输出正文。'
+        )
+
         payload = {
             "model": self.model_name,
             "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"上一章内容：\n{input_text}"}
+                {"role": "system", "content": reduce_prompt},
+                {"role": "user", "content": f"上一章内容：\n{final_input}"}
             ],
             "stream": False,
-            "options": {"temperature": 0.5}
+            "options": {"temperature": 0.5, "top_p": 0.8}
         }
-        
+
         try:
             response = requests.post(self.api_url, json=payload, timeout=180)
             response.raise_for_status()
-            return response.json().get('message', {}).get('content', '').strip()
+            recap_result = response.json().get('message', {}).get('content', '').strip()
+
+            # 清理大模型可能违规加上的前缀
+            recap_result = re.sub(r'^(前情提要|前情摘要|回顾|摘要)[:：]\s*', '', recap_result)
+            return recap_result
         except Exception as e:
-            logger.error(f"摘要生成失败: {e}")
+            logger.error(f"终极摘要生成失败: {e}")
             return ""
     
     def _request_ollama(self, text_chunk: str, *, context: Optional[str] = None) -> List[Dict]:
