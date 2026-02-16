@@ -471,30 +471,49 @@ class LLMScriptDirector:
                 logger.warning("⚠️ JSON 解析失败，尝试修复截断的 JSON ...")
                 script = repair_json_array(content)
                 if script is None:
-                    raise RuntimeError(
-                        f"❌ 大模型返回的 JSON 无法解析且修复失败，请检查模型输出。原始内容: {content[:200]}"
-                    )
+                    # 【终极降级 1】：JSON彻底损坏，直接拿原文本做旁白
+                    logger.warning("⚠️ JSON彻底损坏，启用终极降级方案：原文本作为旁白。")
+                    return self._validate_script_elements([
+                        {"type": "narration", "speaker": "narrator", "content": text_chunk}
+                    ])
                 return self._validate_script_elements(script)
 
             if isinstance(script, list):
                 return self._validate_script_elements(script)
+
             if isinstance(script, dict):
-                # 容错 1a: LLM 返回了 {"name": "...", "content": "..."} 结构
+                # 容错 1: 空字典 {}
+                if not script:
+                    logger.warning("⚠️ 模型返回了空字典，启用终极降级方案。")
+                    return self._validate_script_elements([
+                        {"type": "narration", "speaker": "narrator", "content": text_chunk}
+                    ])
+
+                # 容错 2a: LLM 返回了 {"name": "...", "content": "..."} 结构
                 if "content" in script and "name" in script:
                     logger.warning("⚠️ 检测到非数组结构（含 name/content），正在将其转换为单条旁白")
                     script = [{"type": "narration", "speaker": "narrator", "content": script["content"]}]
                     return self._validate_script_elements(script)
-                # 容错 1b: LLM 返回了单个 JSON 对象（如 {"type": "narration", "speaker": "narrator", "content": "..."}）
+                # 容错 2b: LLM 返回了单个 JSON 对象（如 {"type": "narration", "speaker": "narrator", "content": "..."}）
                 if "content" in script or "type" in script:
                     logger.warning("⚠️ 模型返回了单个 JSON 对象而非数组，自动使用列表包裹以恢复流水线。")
                     return self._validate_script_elements([script])
-                # 容错 2: LLM 返回了包含列表的字典 (如 {"script": [...]})
+                # 容错 3: LLM 返回了包含列表的字典 (如 {"script": [...]})
                 for value in script.values():
                     if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
                         return self._validate_script_elements(value)
-            raise RuntimeError(
-                f"❌ 大模型返回了非预期的 JSON 结构（既非数组也非包含数组的字典），请检查模型输出。原始内容: {content[:200]}"
-            )
+                
+                # 【终极降级 2】：模型返回了版权页、书籍元数据等无法识别的字典
+                logger.warning(f"⚠️ 模型返回了无法识别的字典结构（如版权信息），启用终极降级方案。")
+                return self._validate_script_elements([
+                    {"type": "narration", "speaker": "narrator", "content": text_chunk}
+                ])
+                
+            # 【终极降级 3】：大模型返回了字符串或数字等完全不是对象的格式
+            logger.warning("⚠️ 模型返回了非预期结构，启用终极降级方案。")
+            return self._validate_script_elements([
+                {"type": "narration", "speaker": "narrator", "content": text_chunk}
+            ])
 
         except RuntimeError:
             raise
@@ -514,6 +533,13 @@ class LLMScriptDirector:
                 
             # 检查并补充缺失的字段
             fixed_element = element.copy()
+
+            # 【核心修复】：如果大模型把 content 写成了数组，强制拼成字符串
+            if 'content' in fixed_element:
+                if isinstance(fixed_element['content'], list):
+                    fixed_element['content'] = "\n".join(str(x) for x in fixed_element['content'])
+                elif not isinstance(fixed_element['content'], str):
+                    fixed_element['content'] = str(fixed_element['content'])
             
             # 确保必需字段存在
             for field in required_fields:

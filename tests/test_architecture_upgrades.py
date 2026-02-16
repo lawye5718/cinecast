@@ -479,15 +479,88 @@ class TestLLMDictFormatTolerance:
         assert result[0]["type"] == "dialogue"
         assert result[0]["content"] == "你相信命运吗？"
 
-    def test_dict_without_list_or_name_raises(self):
-        """LLM returns a dict without any recognisable structure — should raise."""
-        with pytest.raises(RuntimeError, match="非预期的 JSON 结构"):
-            self._make_director_with_mock_response({"random_key": "random_value"})
+    def test_dict_without_list_or_name_falls_back_to_narration(self):
+        """LLM returns a dict without any recognisable structure — should fallback to narration."""
+        result = self._make_director_with_mock_response({"random_key": "random_value"})
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]["type"] == "narration"
+        assert result[0]["speaker"] == "narrator"
+
+    def test_empty_dict_falls_back_to_narration(self):
+        """LLM returns an empty dict {} — should fallback to narration."""
+        result = self._make_director_with_mock_response({})
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]["type"] == "narration"
+        assert result[0]["speaker"] == "narrator"
+
+    def test_copyright_metadata_dict_falls_back(self):
+        """LLM returns a copyright metadata dict — should fallback to narration."""
+        result = self._make_director_with_mock_response(
+            {"publisher": "出版社", "isbn": "978-7-000-00000-0"}
+        )
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]["type"] == "narration"
+        assert result[0]["speaker"] == "narrator"
+
+    def test_broken_json_falls_back_to_narration(self):
+        """When JSON is completely broken and repair fails, should fallback to narration."""
+        import unittest.mock as mock
+
+        director = LLMScriptDirector()
+        fake_resp = mock.MagicMock()
+        fake_resp.status_code = 200
+        fake_resp.raise_for_status = mock.MagicMock()
+        fake_resp.json.return_value = {
+            "message": {"content": "This is not JSON at all, just random text."}
+        }
+
+        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp):
+            result = director._request_ollama("原始文本内容")
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]["type"] == "narration"
+        assert result[0]["content"] == "原始文本内容"
 
 
 # ---------------------------------------------------------------------------
-# Error Raising on LLM Failure (no regex fallback)
+# Validate Script Elements - Content Type Coercion
 # ---------------------------------------------------------------------------
+
+class TestValidateScriptContentCoercion:
+    def test_list_content_joined_to_string(self):
+        """When content is a list, it should be joined into a string."""
+        director = LLMScriptDirector()
+        elements = [
+            {"type": "narration", "speaker": "narrator", "content": ["句子1", "句子2"]},
+        ]
+        result = director._validate_script_elements(elements)
+        assert len(result) == 1
+        assert result[0]["content"] == "句子1\n句子2"
+        assert isinstance(result[0]["content"], str)
+
+    def test_numeric_content_converted_to_string(self):
+        """When content is a number, it should be converted to a string."""
+        director = LLMScriptDirector()
+        elements = [
+            {"type": "narration", "speaker": "narrator", "content": 12345},
+        ]
+        result = director._validate_script_elements(elements)
+        assert len(result) == 1
+        assert result[0]["content"] == "12345"
+        assert isinstance(result[0]["content"], str)
+
+    def test_string_content_unchanged(self):
+        """When content is already a string, it should remain unchanged."""
+        director = LLMScriptDirector()
+        elements = [
+            {"type": "narration", "speaker": "narrator", "content": "正常文本"},
+        ]
+        result = director._validate_script_elements(elements)
+        assert len(result) == 1
+        assert result[0]["content"] == "正常文本"
 
 class TestNoRegexFallback:
     def test_fallback_regex_parse_removed(self):

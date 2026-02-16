@@ -192,7 +192,7 @@ class CineCastProducer:
                     continue
                 
                 # 🌟 核心逻辑：如果不是第一章，且有上一章的内容，则生成并插入前情提要
-                if prev_chapter_content is not None:
+                if prev_chapter_content is not None and len(prev_chapter_content) >= 1000:
                     logger.info(f"🔄 正在为 {chapter_name} 生成前情摘要...")
                     recap_text = director.generate_chapter_recap(prev_chapter_content)
                     
