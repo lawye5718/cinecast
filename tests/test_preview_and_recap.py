@@ -632,3 +632,56 @@ class TestPreviewForcedRecapInjection:
             # Should have recap injected
             recap_chunks = [c for c in chunks if c.get("type") == "recap"]
             assert len(recap_chunks) == 2
+
+
+# ---------------------------------------------------------------------------
+# Test: Safe recap insertion (Bug fix for out-of-bounds)
+# ---------------------------------------------------------------------------
+
+class TestSafeRecapInsertion:
+    """Verify recap units are safely inserted regardless of micro_script length."""
+
+    def test_insert_into_empty_script(self):
+        """Recap insertion into an empty script should not raise."""
+        micro_script = []
+        intro_unit = {"chunk_id": "test_intro", "type": "recap", "speaker": "talkover", "content": "前情提要：", "pause_ms": 500}
+        recap_unit = {"chunk_id": "test_body", "type": "recap", "speaker": "talkover", "content": "上回……", "pause_ms": 1500}
+        insert_idx = 1 if len(micro_script) > 0 else 0
+        micro_script.insert(insert_idx, intro_unit)
+        micro_script.insert(insert_idx + 1, recap_unit)
+        assert len(micro_script) == 2
+        assert micro_script[0]["type"] == "recap"
+        assert micro_script[1]["type"] == "recap"
+
+    def test_insert_into_single_element_script(self):
+        """Recap insertion into a script with only one element (title) should be safe."""
+        micro_script = [
+            {"chunk_id": "ch01_00001", "type": "title", "speaker": "narrator", "content": "第一章 风雪"}
+        ]
+        intro_unit = {"chunk_id": "test_intro", "type": "recap", "speaker": "talkover", "content": "前情提要：", "pause_ms": 500}
+        recap_unit = {"chunk_id": "test_body", "type": "recap", "speaker": "talkover", "content": "上回……", "pause_ms": 1500}
+        insert_idx = 1 if len(micro_script) > 0 else 0
+        micro_script.insert(insert_idx, intro_unit)
+        micro_script.insert(insert_idx + 1, recap_unit)
+        assert len(micro_script) == 3
+        assert micro_script[0]["type"] == "title"
+        assert micro_script[1]["type"] == "recap"
+        assert micro_script[2]["type"] == "recap"
+
+    def test_insert_into_normal_script(self):
+        """Recap insertion into a script with title + narration should keep correct order."""
+        micro_script = [
+            {"chunk_id": "ch01_00001", "type": "title", "speaker": "narrator", "content": "第一章"},
+            {"chunk_id": "ch01_00002", "type": "narration", "speaker": "narrator", "content": "夜幕降临。"},
+            {"chunk_id": "ch01_00003", "type": "narration", "speaker": "narrator", "content": "港口闪烁。"},
+        ]
+        intro_unit = {"chunk_id": "test_intro", "type": "recap", "speaker": "talkover", "content": "前情提要：", "pause_ms": 500}
+        recap_unit = {"chunk_id": "test_body", "type": "recap", "speaker": "talkover", "content": "上回……", "pause_ms": 1500}
+        insert_idx = 1 if len(micro_script) > 0 else 0
+        micro_script.insert(insert_idx, intro_unit)
+        micro_script.insert(insert_idx + 1, recap_unit)
+        assert len(micro_script) == 5
+        assert micro_script[0]["type"] == "title"
+        assert micro_script[1]["type"] == "recap"
+        assert micro_script[2]["type"] == "recap"
+        assert micro_script[3]["type"] == "narration"

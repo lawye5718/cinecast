@@ -320,8 +320,10 @@ class CineCastProducer:
                                 "content": recap_text,
                                 "pause_ms": 1500
                             }
-                            micro_script.insert(1, intro_unit)
-                            micro_script.insert(2, recap_unit)
+                            # 🌟 安全插入法：标题通常在首位，插在标题之后
+                            insert_idx = 1 if len(micro_script) > 0 else 0
+                            micro_script.insert(insert_idx, intro_unit)
+                            micro_script.insert(insert_idx + 1, recap_unit)
                             recap_injected = True
 
                 # 🌟 试听强制注入逻辑（核心）
@@ -343,8 +345,10 @@ class CineCastProducer:
                         "content": borrowed_recap,
                         "pause_ms": 1500
                     }
-                    micro_script.insert(1, intro_unit)
-                    micro_script.insert(2, recap_unit)
+                    # 🌟 安全插入法：标题通常在首位，插在标题之后
+                    insert_idx = 1 if len(micro_script) > 0 else 0
+                    micro_script.insert(insert_idx, intro_unit)
+                    micro_script.insert(insert_idx + 1, recap_unit)
                 
                 # 保存当前章的原始文本，供下一章使用
                 prev_chapter_content = content

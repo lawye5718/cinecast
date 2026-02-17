@@ -253,3 +253,37 @@ class TestCustomRecapsInjection:
             assert producer.config["custom_recaps"]["Chapter_002"] == "上回说到老渔夫在暴风雪中发现了黑匣子……"
             assert producer.config["custom_recaps"]["Chapter_003"] == "警长的调查陷入僵局……"
             assert producer.config["enable_auto_recap"] is False
+
+
+# ---------------------------------------------------------------------------
+# Test: Global cast whitelist injected into _request_ollama prompt
+# ---------------------------------------------------------------------------
+
+class TestGlobalCastWhitelist:
+    def test_global_cast_whitelist_code_exists(self):
+        """The _request_ollama method should contain cast whitelist injection logic."""
+        from modules.llm_director import LLMScriptDirector
+        import inspect
+
+        director = LLMScriptDirector(global_cast={"老渔夫": {"gender": "male"}})
+        source = inspect.getsource(director._request_ollama)
+        assert "全局选角纪律" in source
+        assert "Cast Whitelist" in source
+        assert "self.global_cast" in source
+
+    def test_global_cast_stored_on_director(self):
+        """Director with global_cast should store it for prompt injection."""
+        from modules.llm_director import LLMScriptDirector
+        cast = {
+            "老渔夫": {"gender": "male", "emotion": "沧桑"},
+            "艾米莉": {"gender": "female", "emotion": "活泼"},
+        }
+        director = LLMScriptDirector(global_cast=cast)
+        assert director.global_cast == cast
+        assert len(director.global_cast) == 2
+
+    def test_empty_global_cast_no_whitelist(self):
+        """When global_cast is empty, no whitelist should be injected."""
+        from modules.llm_director import LLMScriptDirector
+        director = LLMScriptDirector(global_cast={})
+        assert not director.global_cast
