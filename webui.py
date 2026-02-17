@@ -110,7 +110,7 @@ with gr.Blocks(theme=theme, title="CineCast 电影级有声书") as ui:
 
             with gr.Group():
                 gr.Markdown("### 🗣️ 第二步：选角与音色 (可选)")
-                gr.Markdown("*如果不上传，将自动使用系统内置的高优预设音色。当角色数量超过已上传的音色数量时，系统会自动随机分配一个音色，并在全书中保持该分配不变。*")
+                gr.Markdown("*如果不上传，将自动使用系统内置的高优预设音色。当角色数量超过已上传的音色数量时，系统会自动分配一个音色，并在全书中保持该分配不变。*")
                 narrator_audio = gr.Audio(label="旁白音色样本 (Narrator)", type="filepath")
 
                 # 动态隐藏/显示的配音角色面板

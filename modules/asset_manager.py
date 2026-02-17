@@ -295,15 +295,11 @@ class AssetManager:
                 logger.info(f"✅ 已设置旁白音色: {file_path}")
             else:
                 pool = self.voices[target_key]
-                # 确保池子有足够的槽位
-                while len(pool) <= pool_idx:
-                    pool.append({
-                        "audio": "",
-                        "text": f"{'男' if 'male' in target_key else '女'}声{len(pool) + 1}",
-                        "speed": 1.0,
-                    })
-                pool[pool_idx]["audio"] = file_path
-                logger.info(f"✅ 已设置角色 {role_name} 音色: {file_path}")
+                if pool_idx < len(pool):
+                    pool[pool_idx]["audio"] = file_path
+                    logger.info(f"✅ 已设置角色 {role_name} 音色: {file_path}")
+                else:
+                    logger.warning(f"⚠️ 音色池 {target_key} 槽位不足 (需要索引 {pool_idx})，跳过 {role_name}")
 
 if __name__ == "__main__":
     # 测试代码
