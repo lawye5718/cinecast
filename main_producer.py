@@ -327,7 +327,7 @@ class CineCastProducer:
                 # 🌟 试听强制注入逻辑（核心）
                 # 如果是试听模式，且原本这章没摘要（比如第一章），但用户传了外脑字典，我们就强行借用一条来试听！
                 if is_preview and not recap_injected and custom_recaps:
-                    borrowed_recap = list(custom_recaps.values())[0]
+                    borrowed_recap = next(iter(custom_recaps.values()))
                     logger.info(f"🎧 试听连通性测试：强制借用一条前情提要进行 Talkover 音色验证！")
                     intro_unit = {
                         "chunk_id": f"{chapter_name}_recap_intro",
