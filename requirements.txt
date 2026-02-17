@@ -21,6 +21,9 @@ black>=23.0.0
 flake8>=6.0.0
 mypy>=1.0.0
 
+# Web UI
+gradio>=4.0.0
+
 # 日志和监控
 tqdm>=4.65.0
 psutil>=5.9.0

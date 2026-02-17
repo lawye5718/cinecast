@@ -14,6 +14,7 @@ and then reassemble in the original order during Stage 3.
 
 import gc
 import os
+import re
 import numpy as np
 import soundfile as sf
 import mlx.core as mx
@@ -84,11 +85,17 @@ class MLXRenderEngine:
             return True # 🌟 断点续传核心：已存在则直接跳过！
             
         try:
-            logger.debug(f"🎵 渲染干音: {content[:50]}... -> {save_path}")
+            # 🌟 核心修复：防止自回归TTS短文本复读幻觉
+            # 如果结尾没有标准的中文或英文闭合标点，强制补全句号
+            render_text = content.strip()
+            if not re.search(r'[。！？；.!?;]$', render_text):
+                render_text += "。"
+
+            logger.debug(f"🎵 渲染干音: {render_text[:50]}... -> {save_path}")
             
-            # MLX 极速推理
+            # MLX 极速推理 (传入处理后的 render_text)
             results = list(self.model.generate(
-                text=content,
+                text=render_text,
                 ref_audio=voice_cfg["audio"],
                 ref_text=voice_cfg["text"]
             ))

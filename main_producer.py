@@ -277,6 +277,51 @@ class CineCastProducer:
         return True
     
     # ==========================================
+    # 🎧 试听模式：极速通道，只处理前 10 句话
+    # ==========================================
+    def run_preview_mode(self, input_source: str) -> str:
+        """🌟 专属的试听模式：极速通道，只处理前 10 句话"""
+        logger.info("🎧 启动试听通道...")
+
+        # 临时强制设为极短时长，迫使 CinematicPackager 提前触发导出
+        original_duration = self.config["target_duration_min"]
+        self.config["target_duration_min"] = 0.5  # 30秒就发版
+
+        try:
+            # 执行第一阶段（如果开启了纯净模式，这步是秒级的）
+            self.phase_1_generate_scripts(input_source)
+
+            # 找到第一个生成的剧本
+            script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])
+            if not script_files:
+                raise Exception("未找到剧本")
+
+            first_script_path = os.path.join(self.script_dir, script_files[0])
+            with open(first_script_path, 'r', encoding='utf-8') as f:
+                micro_script = json.load(f)
+
+            # 🌟 核心截断：只取前 10 句！
+            preview_script = micro_script[:10]
+
+            # 将截断后的剧本暂存覆盖，供阶段二读取
+            with open(first_script_path, 'w', encoding='utf-8') as f:
+                json.dump(preview_script, f, ensure_ascii=False)
+
+            # 执行第二和第三阶段
+            self.phase_2_render_dry_audio()
+            self.phase_3_cinematic_mix()
+
+            # 找到压制出的第一个文件返回给网页
+            preview_files = [f for f in os.listdir(self.config["output_dir"]) if f.endswith('.mp3')]
+            if preview_files:
+                return os.path.join(self.config["output_dir"], sorted(preview_files)[0])
+            return None
+
+        finally:
+            # 恢复配置以免污染正式的全本压制
+            self.config["target_duration_min"] = original_duration
+
+    # ==========================================
     # 🎙️ 阶段二：纯净干音渲染 (Dry Voice Rendering)
     # ==========================================
     def phase_2_render_dry_audio(self):
