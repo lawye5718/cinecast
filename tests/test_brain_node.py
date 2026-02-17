@@ -215,7 +215,7 @@ class TestCustomRecapsInjection:
         with tempfile.TemporaryDirectory() as tmpdir:
             input_dir = os.path.join(tmpdir, "chapters")
             os.makedirs(input_dir)
-            # Create 3 chapters with enough content to pass the 500-char filter
+            # Repeat text 100x to exceed the 500-char non-content filter threshold
             for i in range(1, 4):
                 fname = f"Chapter_{i:03d}.txt"
                 with open(os.path.join(input_dir, fname), "w", encoding="utf-8") as f:
@@ -235,7 +235,7 @@ class TestCustomRecapsInjection:
                 "min_tail_min": 10,
                 "use_local_llm": True,
                 "enable_recap": True,
-                "pure_narrator_mode": False,  # Smart mode to test recap injection
+                "pure_narrator_mode": False,
                 "user_recaps": None,
                 "global_cast": {},
                 "custom_recaps": custom_recaps,
@@ -249,15 +249,7 @@ class TestCustomRecapsInjection:
             os.makedirs(producer.cache_dir, exist_ok=True)
             producer.assets = None
 
-            # Use pure narrator mode for actual script gen (avoids Ollama), but
-            # override the branch to test custom_recaps: we set pure_narrator_mode=False
-            # so recap logic runs, but use generate_pure_narrator_script by monkey-patching
-            # the director. Actually, the simplest approach: set pure_narrator_mode to True
-            # for script generation but enable recap processing. However, the code skips
-            # recap in pure mode. So let's just test that custom_recaps dict is correctly
-            # read from config. We'll verify via a simpler approach.
-
-            # Since we can't run the full pipeline without Ollama, we verify config routing:
+            # Verify config routing without full pipeline (Ollama unavailable in CI)
             assert producer.config["custom_recaps"]["Chapter_002"] == "上回说到老渔夫在暴风雪中发现了黑匣子……"
             assert producer.config["custom_recaps"]["Chapter_003"] == "警长的调查陷入僵局……"
             assert producer.config["enable_auto_recap"] is False

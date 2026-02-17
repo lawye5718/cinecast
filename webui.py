@@ -264,4 +264,4 @@ with gr.Blocks(theme=theme, title="CineCast Pro 3.0") as ui:
     )
 
 if __name__ == "__main__":
-    ui.launch(inbrowser=True, server_name="0.0.0.0", server_port=7860)
+    ui.launch(inbrowser=True, server_name="127.0.0.1", server_port=7860)
