@@ -1047,5 +1047,62 @@ class TestNonContentChapterFiltering:
                 LLMScriptDirector.generate_chapter_recap = original_generate
 
 
+# ---------------------------------------------------------------------------
+# Optimization: merge_consecutive_narrators removed from parse_text_to_script
+# ---------------------------------------------------------------------------
+
+class TestMergeRemovedFromPipeline:
+    """Verify that parse_text_to_script no longer calls merge_consecutive_narrators,
+    since micro-chunking immediately re-splits the merged text anyway."""
+
+    def test_parse_text_to_script_does_not_call_merge(self):
+        """The parse_text_to_script source should not call merge_consecutive_narrators."""
+        import inspect
+        source = inspect.getsource(LLMScriptDirector.parse_text_to_script)
+        # Check that no active (non-commented) line calls the function
+        import re
+        active_calls = re.findall(
+            r'^[^#\n]*merge_consecutive_narrators\s*\(',
+            source,
+            re.MULTILINE,
+        )
+        assert len(active_calls) == 0, (
+            "parse_text_to_script should no longer call merge_consecutive_narrators; "
+            "micro-chunking makes the merge redundant"
+        )
+
+    def test_merge_function_still_importable(self):
+        """The merge_consecutive_narrators function should still exist for other uses."""
+        from modules.llm_director import merge_consecutive_narrators
+        assert callable(merge_consecutive_narrators)
+
+
+# ---------------------------------------------------------------------------
+# Optimization: Dynamic recap insertion index uses > 1 guard
+# ---------------------------------------------------------------------------
+
+class TestDynamicRecapInsertionIndex:
+    """Verify that main_producer.py uses 'len(micro_script) > 1' for safe recap insertion."""
+
+    def test_source_uses_gt_1_guard(self):
+        """main_producer.py should use '> 1' not '> 0' for recap insert_idx."""
+        source_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "main_producer.py",
+        )
+        with open(source_path, "r", encoding="utf-8") as f:
+            source = f.read()
+        assert "len(micro_script) > 1" in source, (
+            "main_producer.py should use 'len(micro_script) > 1' for safe recap insertion"
+        )
+        # Ensure the old pattern is no longer present
+        # Count occurrences of > 0 vs > 1 in insert_idx lines
+        import re
+        old_pattern_count = len(re.findall(r'insert_idx\s*=\s*1\s+if\s+len\(micro_script\)\s*>\s*0', source))
+        assert old_pattern_count == 0, (
+            "main_producer.py should not use 'len(micro_script) > 0' for insert_idx anymore"
+        )
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

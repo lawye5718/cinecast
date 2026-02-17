@@ -414,8 +414,9 @@ class LLMScriptDirector:
             
             full_script.extend(chunk_script)
         
-        # Merge consecutive narrators to reduce TTS overhead
-        full_script = merge_consecutive_narrators(full_script)
+        # 🌟 优化：移除 merge_consecutive_narrators 调用。
+        # 因为 parse_and_micro_chunk 会对结果进行严格的 60 字微切片，
+        # 合并后的 800 字长文本会被立即碾碎，属于无谓的算力浪费。
         
         # 如果解析结果为空，直接报错退出
         if not full_script or len(full_script) == 0:
