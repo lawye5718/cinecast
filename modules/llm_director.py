@@ -138,7 +138,8 @@ class LLMScriptDirector:
     def __init__(self, ollama_url="http://127.0.0.1:11434", use_local_mlx_lm=False):
         self.api_url = f"{ollama_url}/api/chat"
         self.model_name = "qwen14b-pro"
-        self.max_chars_per_chunk = 60 # 微切片红线
+        self.max_chars_per_chunk = 60 # 微切片红线（智能配音模式）
+        self.pure_narrator_chunk_limit = 100  # 纯净旁白模式切片上限（更长更流畅）
         self.use_local_mlx_lm = use_local_mlx_lm
         
         # Context sliding window state
@@ -204,9 +205,13 @@ class LLMScriptDirector:
     def generate_pure_narrator_script(self, text: str, chapter_prefix: str = "chunk") -> List[Dict]:
         """
         纯净旁白模式专用的剧本生成器（绕过LLM，秒级生成，100%忠实原著）
+        纯净旁白模式下，切片长度放宽到 100 字左右，减少切片数量，提升朗读流畅度。
         """
         micro_script = []
         chunk_id = 1
+
+        # 🌟 纯净旁白模式下，切片上限放宽到 ~100 字
+        pure_chunk_limit = self.pure_narrator_chunk_limit
 
         # 1. 按段落切分
         paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
@@ -224,7 +229,7 @@ class LLMScriptDirector:
                     temp_sentence += part
 
                     # 3. 如果单句仍然超长，启动逗号/顿号的次级切分
-                    if len(temp_sentence) > self.max_chars_per_chunk:
+                    if len(temp_sentence) > pure_chunk_limit:
                         sub_parts = re.split(r'([，、：,:])', temp_sentence)
                         sub_temp = ""
                         for sub in sub_parts:

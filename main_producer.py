@@ -280,15 +280,20 @@ class CineCastProducer:
     # 🎧 试听模式：极速通道，只处理前 10 句话
     # ==========================================
     def run_preview_mode(self, input_source: str) -> str:
-        """🌟 专属的试听模式：极速通道，只处理前 10 句话"""
+        """🌟 专属的试听模式：极速通道，只处理前 10 句话
+
+        流程：先完成第一阶段微切片，再从第一章剧本中截取前 10 句，
+        写入独立的临时剧本文件（不覆盖原始剧本），直接渲染并压制。
+        """
         logger.info("🎧 启动试听通道...")
 
         # 临时强制设为极短时长，迫使 CinematicPackager 提前触发导出
         original_duration = self.config["target_duration_min"]
         self.config["target_duration_min"] = 0.5  # 30秒就发版
+        preview_script_path = os.path.join(self.script_dir, "_preview_temp_micro.json")
 
         try:
-            # 执行第一阶段（如果开启了纯净模式，这步是秒级的）
+            # ── 第一阶段：微切片（必须先完成！）──
             self.phase_1_generate_scripts(input_source)
 
             # 找到第一个生成的剧本
@@ -303,13 +308,15 @@ class CineCastProducer:
             # 🌟 核心截断：只取前 10 句！
             preview_script = micro_script[:10]
 
-            # 将截断后的剧本暂存覆盖，供阶段二读取
-            with open(first_script_path, 'w', encoding='utf-8') as f:
+            # 🌟 写入独立的临时预览剧本，不覆盖原始剧本（保护全本压制的断点续传）
+            with open(preview_script_path, 'w', encoding='utf-8') as f:
                 json.dump(preview_script, f, ensure_ascii=False)
 
-            # 执行第二和第三阶段
-            self.phase_2_render_dry_audio()
-            self.phase_3_cinematic_mix()
+            # ── 第二阶段：仅渲染预览片段的干音 ──
+            self._render_script_chunks(preview_script)
+
+            # ── 第三阶段：仅混音预览片段 ──
+            self._mix_script_chunks(preview_script)
 
             # 找到压制出的第一个文件返回给网页
             preview_files = [f for f in os.listdir(self.config["output_dir"]) if f.endswith('.mp3')]
@@ -320,6 +327,47 @@ class CineCastProducer:
         finally:
             # 恢复配置以免污染正式的全本压制
             self.config["target_duration_min"] = original_duration
+            # 清理临时预览剧本（无论成功/失败都要清理）
+            if os.path.exists(preview_script_path):
+                os.remove(preview_script_path)
+
+    def _render_script_chunks(self, micro_script: list):
+        """渲染指定的微切片列表为干音 WAV 文件（供试听模式直接调用）"""
+        from modules.mlx_tts_engine import MLXRenderEngine, group_indices_by_voice_type
+        engine = MLXRenderEngine(self.config["model_path"])
+
+        voice_groups = group_indices_by_voice_type(micro_script)
+        for voice_key, indices in voice_groups.items():
+            first_item = micro_script[indices[0]]
+            group_voice_cfg = self.assets.get_voice_for_role(
+                first_item["type"],
+                first_item.get("speaker"),
+                first_item.get("gender")
+            )
+            for idx in indices:
+                item = micro_script[idx]
+                save_path = os.path.join(self.cache_dir, f"{item['chunk_id']}.wav")
+                engine.render_dry_chunk(item["content"], group_voice_cfg, save_path)
+
+        del engine
+        try:
+            import mlx.core as mx
+            mx.clear_cache()
+        except ImportError:
+            pass
+
+    def _mix_script_chunks(self, micro_script: list):
+        """将指定的微切片列表混音压制为 MP3（供试听模式直接调用）"""
+        packager = CinematicPackager(self.config["output_dir"])
+
+        if self.config.get("pure_narrator_mode", False):
+            ambient_bgm = None
+            chime_sound = None
+        else:
+            ambient_bgm = self.assets.get_ambient_sound(self.config["ambient_theme"])
+            chime_sound = self.assets.get_transition_chime()
+
+        packager.process_from_cache(micro_script, self.cache_dir, self.assets, ambient_bgm, chime_sound)
 
     # ==========================================
     # 🎙️ 阶段二：纯净干音渲染 (Dry Voice Rendering)
@@ -333,7 +381,8 @@ class CineCastProducer:
         logger.info("\n" + "="*50 + "\n🎙️ [阶段二] 录音期 (MLX TTS)\n" + "="*50)
         engine = MLXRenderEngine(self.config["model_path"])
         
-        script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])
+        script_files = sorted([f for f in os.listdir(self.script_dir)
+                               if f.endswith('_micro.json') and not f.startswith('_preview_')])
         total_chunks = 0
         rendered_chunks = 0
         
@@ -401,7 +450,8 @@ class CineCastProducer:
             ambient_bgm = self.assets.get_ambient_sound(self.config["ambient_theme"])
             chime_sound = self.assets.get_transition_chime()
         
-        script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])
+        script_files = sorted([f for f in os.listdir(self.script_dir)
+                               if f.endswith('_micro.json') and not f.startswith('_preview_')])
         for file in script_files:
             with open(os.path.join(self.script_dir, file), 'r', encoding='utf-8') as f:
                 micro_script = json.load(f)
