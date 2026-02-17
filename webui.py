@@ -2,198 +2,224 @@
 """
 CineCast Web UI
 基于 Gradio Blocks API 的现代化图形界面
-支持纯净旁白/智能配音双模式、自定义音色上传、极速试听与全本压制
+支持纯净旁白/智能配音双模式、云端外脑 Master JSON 统一输入、极速试听与全本压制
 """
 
 import os
+import json
 import shutil
 import gradio as gr
 from main_producer import CineCastProducer
 
-# 前情提要提示词模板（供用户复制到外部大模型使用）
-RECAP_PROMPT_TEMPLATE = """\
-请为以下小说的每一章生成"前情提要"。
+# 🌟 终极"云端外脑" Prompt 规范（供用户复制给 Kimi、豆包或 Claude 等长文本大模型）
+BRAIN_PROMPT_TEMPLATE = """\
+你是一位顶级的有声书"总导演兼剧本编审"。我已经上传了一本小说的全本文件。
+请你通读全书，完成【角色选角】与【前情提要】两项核心任务，并严格按要求的 JSON 格式输出。
 
-要求：
-1. 为每一章（从第2章开始）写一段不超过100字的前情摘要。
-2. 语言必须高度凝练，具有美剧片头的电影感（"Previously on..."的风格）。
-3. 只保留最具张力的剧情矛盾。
-4. 最后一句必须是一个引出下一章的"悬念钩子"。
-5. 不要输出"前情提要："这样的标题前缀。
+【任务一：建立全局角色设定集 (Character Bible)】
+1. 提取所有有台词的角色，将他们同一个人的不同称呼统一为一个【标准名】（如"老李"统一为"李局长"）。
+2. 推断角色的性别（male/female）和声音特质情感（如：沉稳、沧桑、活泼、阴冷等）。
+3. 必须包含一个名为 "路人" 的特殊角色，用于兜底那些只有一两句台词的群演。
 
-输出格式（严格按以下格式，每章一条）：
-第2章：[第1章的摘要，作为第2章的前情提要]
-第3章：[第2章的摘要，作为第3章的前情提要]
-第4章：[第3章的摘要，作为第4章的前情提要]
-...以此类推
+【任务二：撰写各章前情提要 (Recaps)】
+1. 为**除第一章以外**的每一章，生成一段用于片头播报的前情提要（80-120字）。
+2. 语言必须高度凝练，具有美剧片头的电影感。
+3. 最后一句必须是一个引出本章内容的"悬念钩子"。
 
-请将整本小说的文本粘贴到下方，然后发送给大模型（推荐使用通义千问、豆包等支持长文本的模型）。
-"""
+【⚠️ 格式生死攸关 ⚠️】
+你必须且只能输出一个合法的纯 JSON 字典格式！包含 "characters" 和 "recaps" 两个根节点。
+绝对不要输出任何 markdown 标记（如 ```json），不要包含任何解释性废话，直接输出大括号包裹的 JSON！
+
+【输出格式示例】
+{
+  "characters": {
+    "旁白": {"gender": "male", "emotion": "平静"},
+    "老渔夫": {"gender": "male", "emotion": "沧桑"},
+    "艾米莉": {"gender": "female", "emotion": "活泼"},
+    "路人": {"gender": "unknown", "emotion": "平淡"}
+  },
+  "recaps": {
+    "Chapter_002": "上一章中，老渔夫在暴风雪中带回了一个神秘的黑匣子……然而他没意识到，危险才刚刚降临。",
+    "Chapter_003": "警长的调查陷入僵局，唯一的目击者却在昨夜离奇失踪……一通电话突然打进了警局。"
+  }
+}"""
 
 
 # --- 辅助函数：保存用户上传的资产 ---
-def save_uploaded_asset(file_path, target_filename, folder):
-    """将用户上传的音频文件复制到 assets 目录的指定子文件夹"""
-    if file_path is None:
-        return
+def save_uploaded_asset(file_obj, target_filename, folder):
+    """将用户上传的音频文件复制到 assets 目录的指定子文件夹
+
+    Args:
+        file_obj: 文件路径字符串，或带有 .name 属性的 Gradio 文件对象，
+                  或 None（跳过）。
+        target_filename: 目标文件名。如果为 None，则使用原始文件名。
+        folder: assets 下的子文件夹名称。
+
+    Returns:
+        保存后的目标路径，或 None。
+    """
+    if file_obj is None:
+        return None
     target_dir = os.path.join("./assets", folder)
     os.makedirs(target_dir, exist_ok=True)
-    target_path = os.path.join(target_dir, target_filename)
-    shutil.copy(file_path, target_path)
+    # 兼容路径字符串和 Gradio 文件对象
+    src_path = file_obj.name if hasattr(file_obj, "name") else file_obj
+    final_name = target_filename if target_filename else os.path.basename(src_path)
+    target_path = os.path.join(target_dir, final_name)
+    shutil.copy(src_path, target_path)
+    return target_path
+
+
+def process_master_json(master_json_str):
+    """🌟 核心解析：将统一的 Master JSON 拆包为 角色库 和 摘要库
+
+    Args:
+        master_json_str: 外脑返回的 JSON 字符串，包含 "characters" 和 "recaps" 两个根节点。
+
+    Returns:
+        (global_cast, custom_recaps, success, message) 四元组
+    """
+    global_cast = {}
+    custom_recaps = {}
+
+    if not master_json_str or not master_json_str.strip():
+        return global_cast, custom_recaps, True, ""
+
+    try:
+        master_data = json.loads(master_json_str)
+        # 提取两个核心字典
+        global_cast = master_data.get("characters", {})
+        custom_recaps = master_data.get("recaps", {})
+        return global_cast, custom_recaps, True, "✅ 外脑数据解析成功"
+    except json.JSONDecodeError:
+        return {}, {}, False, "❌ 外脑 JSON 格式错误，请检查是否有遗漏的逗号或引号。"
 
 
 # --- 核心逻辑封装 ---
-def process_audio(epub_file, mode_choice, narrator_file,
-                  m1_file, m2_file, f1_file, f2_file,
-                  ambient_file, chime_file,
-                  enable_recap_flag, user_recap_text,
-                  is_preview=False):
+def run_cinecast(epub_file, mode_choice,
+                 master_json_str, character_voice_files,
+                 narrator_file, ambient_file, chime_file,
+                 is_preview=False):
     """统一处理入口：试听 / 全本压制"""
     if epub_file is None:
-        return None, "❌ 请先上传小说文件 (EPUB/TXT)"
+        return None, "❌ 请先上传小说文件"
 
-    # 1. 保存用户覆盖的资产
+    # 1. 拆包 Master JSON
+    global_cast, custom_recaps, success, msg = process_master_json(master_json_str)
+    if not success:
+        return None, msg
+
+    # 2. 部署通用资产与角色专属音色
     save_uploaded_asset(narrator_file, "narrator.wav", "voices")
-    save_uploaded_asset(m1_file, "m1.wav", "voices")
-    save_uploaded_asset(m2_file, "m2.wav", "voices")
-    save_uploaded_asset(f1_file, "f1.wav", "voices")
-    save_uploaded_asset(f2_file, "f2.wav", "voices")
     save_uploaded_asset(ambient_file, "iceland_wind.wav", "ambient")
     save_uploaded_asset(chime_file, "soft_chime.wav", "transitions")
 
-    # 2. 组装配置
-    is_pure_narrator = "纯净" in mode_choice
+    if character_voice_files:
+        for file_obj in character_voice_files:
+            save_uploaded_asset(file_obj, None, "voices")
+
+    # 3. 组装配置，将拆解后的数据分别注入
+    is_pure = "纯净" in mode_choice
     config = {
         "assets_dir": "./assets",
         "output_dir": "./output/Preview" if is_preview else "./output/Audiobooks",
         "model_path": "../qwentts/models/Qwen3-TTS-MLX-0.6B",
-        "ambient_theme": "iceland_wind",
+        "ambient_theme": "iceland_wind" if ambient_file else "default",
         "target_duration_min": 30,
         "min_tail_min": 10,
         "use_local_llm": True,
-        "enable_recap": enable_recap_flag and not is_pure_narrator,
-        "pure_narrator_mode": is_pure_narrator,
-        "user_recaps": user_recap_text if (user_recap_text and user_recap_text.strip()) else None,
+        "pure_narrator_mode": is_pure,
+        "global_cast": global_cast,        # 🌟 路由给 LLM 导演选角用
+        "custom_recaps": custom_recaps,    # 🌟 路由给主控程序拼接摘要用
+        "enable_auto_recap": False,        # 默认关闭本地摘要，彻底依赖外脑
+        "enable_recap": bool(custom_recaps),  # 有摘要数据时自动启用
+        "user_recaps": None,               # 兼容旧版配置
     }
 
     try:
         producer = CineCastProducer(config=config)
-
-        # 电影配音模式下，将用户上传的角色音色传递给资产管理器
-        if not is_pure_narrator:
-            role_voices = {
-                "narrator": narrator_file,
-                "m1": m1_file,
-                "m2": m2_file,
-                "f1": f1_file,
-                "f2": f2_file,
-            }
-            producer.assets.set_custom_role_voices(role_voices)
-
-        # 🌟 试听模式：拦截长篇，只处理第一章的前10句话
         if is_preview:
-            preview_mp3_path = producer.run_preview_mode(epub_file.name)
-            return preview_mp3_path, "✅ 试听生成成功！请点击播放。"
-
-        # 🚀 全本压制模式：必须严格按 微切片 → 渲染 → 混音 三阶段串行执行
-        if producer.phase_1_generate_scripts(epub_file.name):
-            producer.phase_2_render_dry_audio()
-            producer.phase_3_cinematic_mix()
-            return None, f"✅ 全本压制完成！请前往 {config['output_dir']} 目录查看。"
-        return None, "❌ 阶段一（微切片剧本生成）失败，请检查输入文件和服务状态。"
-
+            mp3 = producer.run_preview_mode(epub_file.name)
+            return mp3, "✅ 试听生成成功！(已应用全局外脑设定)"
+        else:
+            if producer.phase_1_generate_scripts(epub_file.name):
+                producer.phase_2_render_dry_audio()
+                producer.phase_3_cinematic_mix()
+                return None, "✅ 全本压制完成！"
+            return None, "❌ 阶段一（微切片剧本生成）失败，请检查输入文件和服务状态。"
     except Exception as e:
-        return None, f"❌ 发生错误: {e}"
+        return None, f"❌ 错误: {str(e)}"
 
 
 # --- Web UI 界面构建 ---
 theme = gr.themes.Soft(primary_hue="indigo", secondary_hue="blue")
 
-with gr.Blocks(theme=theme, title="CineCast 电影级有声书") as ui:
-    gr.Markdown("# 🎬 CineCast 电影级有声书工业制片厂")
+with gr.Blocks(theme=theme, title="CineCast Pro 3.0") as ui:
+    gr.Markdown("# 🎬 CineCast Pro 电影级有声书制片厂")
     gr.Markdown("上传你的小说，定义你的声场，一键压制具备沉浸式体验的电影级有声书。")
 
     with gr.Row():
-        # 左侧：配置面板
-        with gr.Column(scale=4):
+        with gr.Column(scale=5):
             with gr.Group():
-                gr.Markdown("### 📖 第一步：导入剧本与模式")
+                gr.Markdown("### 📖 第一步：剧本与模式")
                 book_file = gr.File(
-                    label="上传小说 (支持 .epub 或 .txt)",
+                    label="上传小说 (EPUB/TXT)",
                     file_types=[".epub", ".txt"],
                 )
                 mode_selector = gr.Radio(
                     choices=[
-                        "🎙️ 纯净旁白模式 (单音色/秒级解析/100%忠实原文)",
-                        "🎭 智能配音模式 (LLM多角色演绎/自动前情摘要)",
+                        "🎙️ 纯净旁白模式",
+                        "🎭 智能配音模式 (外脑控制版)",
                     ],
-                    value="🎙️ 纯净旁白模式 (单音色/秒级解析/100%忠实原文)",
-                    label="选择制作模式",
+                    value="🎙️ 纯净旁白模式",
+                    label="制作模式",
                 )
 
-            with gr.Group():
-                gr.Markdown("### 🗣️ 第二步：选角与音色 (可选)")
-                gr.Markdown("*如果不上传，将自动使用系统内置的高优预设音色。当角色数量超过已上传的音色数量时，系统会自动分配一个音色，并在全书中保持该分配不变。*")
-                narrator_audio = gr.Audio(label="旁白音色样本 (Narrator)", type="filepath")
+            # 🌟 大一统外脑控制台
+            with gr.Accordion("🧠 第二步：云端外脑控制台 (Brain Node)", open=True, visible=False) as brain_panel:
+                gr.Markdown("将全书扔给外部大模型（如 Kimi / Claude），一次性生成**全书选角设定**与**各章前情提要**，粘贴至下方即可实现全局接管。")
 
-                # 动态隐藏/显示的配音角色面板
-                with gr.Column(visible=False) as role_voices_panel:
-                    with gr.Row():
-                        f1_audio = gr.Audio(label="女声1 (f1)", type="filepath")
-                        m1_audio = gr.Audio(label="男声1 (m1)", type="filepath")
-                    with gr.Row():
-                        f2_audio = gr.Audio(label="女声2 (f2)", type="filepath")
-                        m2_audio = gr.Audio(label="男声2 (m2)", type="filepath")
-
-            # 🌟 前情提要设置面板（仅智能配音模式可见）
-            with gr.Group(visible=False) as recap_panel:
-                gr.Markdown("### 📝 前情提要设置")
-                enable_recap_checkbox = gr.Checkbox(
-                    label="启用前情提要（取消勾选可跳过，节省LLM处理时间）",
-                    value=True,
-                )
-                with gr.Accordion("📋 查看前情提要提示词模板（推荐复制到外部大模型使用）", open=False):
-                    gr.Markdown(
-                        "💡 **推荐工作流**：将下方提示词复制到通义千问、豆包等网络大模型，"
-                        "粘贴整本书的文本，让大模型一次性生成全书的前情提要，"
-                        "然后将结果粘贴到下方输入框中。这样可以跳过本地LLM逐章生成，大幅提升速度。"
-                    )
-                    recap_prompt_display = gr.Textbox(
-                        label="前情提要提示词（可复制）",
-                        value=RECAP_PROMPT_TEMPLATE,
-                        lines=10,
-                        interactive=False,
-                    )
-                user_recap_input = gr.Textbox(
-                    label="粘贴外部生成的前情提要（可选，格式：第N章：摘要内容）",
-                    placeholder="第2章：夜色中，老渔夫的一句话揭开了尘封的往事...\n第3章：年轻人离开港口，带着不安踏上了未知的旅途...",
-                    lines=5,
-                )
-
-            with gr.Group():
-                gr.Markdown("### 🎛️ 第三步：环境声场 (可选)")
                 with gr.Row():
-                    ambient_audio = gr.Audio(
-                        label="背景环境音 (Ambient BGM)", type="filepath"
+                    with gr.Column(scale=1):
+                        master_json = gr.Textbox(
+                            label="在此粘贴外脑返回的 Master JSON",
+                            placeholder='{\n  "characters": {...},\n  "recaps": {...}\n}',
+                            lines=10,
+                        )
+                    with gr.Column(scale=1):
+                        gr.Markdown("#### 专属音色注入")
+                        gr.Markdown("请上传角色音色文件，**文件名必须与 JSON 中的角色标准名一致** (如 `老渔夫.wav`)。系统将自动完成声纹绑定。")
+                        char_voice_files = gr.File(
+                            label="批量上传角色音色 (.wav)",
+                            file_count="multiple",
+                            file_types=[".wav"],
+                        )
+
+                with gr.Accordion("💡 复制此 Prompt 给外部大模型", open=False):
+                    gr.Code(
+                        value=BRAIN_PROMPT_TEMPLATE,
+                        language="markdown",
                     )
-                    chime_audio = gr.Audio(
-                        label="过渡提示音 (Transition Chime)", type="filepath"
-                    )
+
+            with gr.Accordion("🎛️ 第三步：通用声场与旁白", open=False):
+                with gr.Row():
+                    narrator_audio = gr.Audio(label="旁白音色 (Narrator)", type="filepath")
+                    ambient_audio = gr.Audio(label="环境音 (Ambient)", type="filepath")
+                    chime_audio = gr.Audio(label="转场音 (Chime)", type="filepath")
 
             with gr.Row():
                 btn_preview = gr.Button(
-                    "🎧 生成试听 (前10句)", variant="secondary", size="lg"
+                    "🎧 极速试听 (首章前10句)", variant="secondary", size="lg"
                 )
                 btn_full = gr.Button(
-                    "🚀 开始全本压制", variant="primary", size="lg"
+                    "🚀 全本压制", variant="primary", size="lg"
                 )
 
-        # 右侧：结果与播放面板
         with gr.Column(scale=3):
             gr.Markdown("### 🎵 审听室")
-            audio_player = gr.Audio(label="试听成品预览", interactive=False)
+            audio_player = gr.Audio(label="审听室播放器", interactive=False)
             status_box = gr.Textbox(
-                label="系统状态日志", lines=5, interactive=False
+                label="制片日志", lines=15, interactive=False
             )
 
             gr.Markdown("---")
@@ -201,47 +227,39 @@ with gr.Blocks(theme=theme, title="CineCast 电影级有声书") as ui:
                 """
             ### 💡 操作指南：
             1. **纯净旁白模式**：完全绕过大模型，按标点切分，速度极快，适合严肃文学和网文。
-            2. **试听功能**：强烈建议在全本压制前，先点击【生成试听】，系统会在15秒内合成前10句话供您确认音色与混音比例。
-            3. **断点续传**：如果在压制途中停止，再次点击全本压制，系统会自动跳过已生成的音频。
-            4. **前情提要**：智能配音模式下，可选择关闭前情提要以加速处理。也可将提示词复制到外部大模型（通义千问/豆包），一次性生成全书前情提要后粘贴回来，效果更好且速度更快。
+            2. **智能配音模式**：将全书发给外部大模型，一次性获取角色设定与前情提要的 Master JSON，粘贴即可。
+            3. **试听功能**：强烈建议在全本压制前，先点击【极速试听】确认音色与混音比例。
+            4. **断点续传**：如果在压制途中停止，再次点击全本压制，系统会自动跳过已生成的音频。
             """
             )
 
     # --- 动态交互逻辑 ---
-    def toggle_mode(choice):
-        """纯净模式下隐藏配音角色面板和前情提要面板"""
-        if "纯净" in choice:
-            return gr.update(visible=False), gr.update(visible=False)
-        return gr.update(visible=True), gr.update(visible=True)
+    def on_mode_change(mode):
+        is_cast_mode = "智能配音" in mode
+        return gr.update(visible=is_cast_mode)
 
-    mode_selector.change(
-        fn=toggle_mode, inputs=mode_selector, outputs=[role_voices_panel, recap_panel]
-    )
+    mode_selector.change(on_mode_change, mode_selector, brain_panel)
 
     # --- 按钮绑定 ---
-    all_inputs = [
+    inputs_list = [
         book_file,
         mode_selector,
+        master_json,
+        char_voice_files,
         narrator_audio,
-        m1_audio,
-        m2_audio,
-        f1_audio,
-        f2_audio,
         ambient_audio,
         chime_audio,
-        enable_recap_checkbox,
-        user_recap_input,
     ]
 
     btn_preview.click(
-        fn=lambda *args: process_audio(*args, is_preview=True),
-        inputs=all_inputs,
+        fn=lambda *args: run_cinecast(*args, is_preview=True),
+        inputs=inputs_list,
         outputs=[audio_player, status_box],
     )
 
     btn_full.click(
-        fn=lambda *args: process_audio(*args, is_preview=False),
-        inputs=all_inputs,
+        fn=lambda *args: run_cinecast(*args, is_preview=False),
+        inputs=inputs_list,
         outputs=[audio_player, status_box],
     )
 

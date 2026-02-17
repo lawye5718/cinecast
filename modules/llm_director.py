@@ -135,12 +135,13 @@ def merge_consecutive_narrators(script: List[Dict], max_chars: int = 800) -> Lis
     return merged
 
 class LLMScriptDirector:
-    def __init__(self, ollama_url="http://127.0.0.1:11434", use_local_mlx_lm=False):
+    def __init__(self, ollama_url="http://127.0.0.1:11434", use_local_mlx_lm=False, global_cast=None):
         self.api_url = f"{ollama_url}/api/chat"
         self.model_name = "qwen14b-pro"
         self.max_chars_per_chunk = 60 # 微切片红线（智能配音模式）
         self.pure_narrator_chunk_limit = 100  # 纯净旁白模式切片上限（更长更流畅）
         self.use_local_mlx_lm = use_local_mlx_lm
+        self.global_cast = global_cast or {}  # 🌟 外脑全局角色设定集
         
         # Context sliding window state
         self._prev_characters: List[str] = []
