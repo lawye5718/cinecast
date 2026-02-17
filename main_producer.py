@@ -63,7 +63,10 @@ class CineCastProducer:
             "use_local_llm": True,  # 是否使用本地LLM
             "enable_recap": True,  # 🌟 前情提要总开关
             "pure_narrator_mode": False,  # 🌟 纯净旁白模式开关
-            "user_recaps": None  # 🌟 用户提供的前情提要文本（跳过LLM生成）
+            "user_recaps": None,  # 🌟 用户提供的前情提要文本（跳过LLM生成）
+            "global_cast": {},  # 🌟 外脑全局角色设定集（Character Bible）
+            "custom_recaps": {},  # 🌟 外脑前情提要字典 {Chapter_NNN: recap_text}
+            "enable_auto_recap": True,  # 🌟 是否启用本地LLM自动生成摘要
         }
     
     def _initialize_components(self):
@@ -224,7 +227,9 @@ class CineCastProducer:
             chapters = dict(chapter_items)
             logger.info(f"🎧 试听模式：仅处理前 {max_chapters} 个章节")
         
-        director = LLMScriptDirector()
+        director = LLMScriptDirector(
+            global_cast=self.config.get("global_cast", {})
+        )
         prev_chapter_content = None  # 用于存储上一章内容
         failed_chapters = []
 
@@ -235,6 +240,9 @@ class CineCastProducer:
             user_recaps = self.parse_user_recaps(user_recap_text)
             if user_recaps:
                 logger.info(f"📋 检测到用户提供的前情提要，共 {len(user_recaps)} 章")
+
+        # 🌟 获取外脑提供的前情提要字典 (按章节名索引, 如 "Chapter_002")
+        custom_recaps = self.config.get("custom_recaps", {})
 
         chapter_index = 0  # 章节计数器，循环体内先自增，因此第一章为1
         for chapter_name, content in chapters.items():
@@ -274,11 +282,15 @@ class CineCastProducer:
                     if self.config.get("enable_recap", True) and is_main_text:
                         recap_text = None
 
-                        # 🌟 优先使用用户提供的前情提要
-                        if chapter_index in user_recaps:
+                        # 🌟 优先使用外脑提供的前情提要（按章节名索引）
+                        if chapter_name in custom_recaps:
+                            recap_text = custom_recaps[chapter_name]
+                            logger.info(f"📋 使用外脑提供的前情提要: {chapter_name}")
+                        # 🌟 其次使用用户提供的前情提要（按章节序号索引）
+                        elif chapter_index in user_recaps:
                             recap_text = user_recaps[chapter_index]
                             logger.info(f"📋 使用用户提供的前情提要: {chapter_name}")
-                        elif prev_chapter_content is not None:
+                        elif self.config.get("enable_auto_recap", True) and prev_chapter_content is not None:
                             # 只有上一章也是正文，才值得回顾
                             if len(prev_chapter_content) >= 800:
                                 logger.info(f"🔄 正在为 {chapter_name} 生成前情摘要 (Map-Reduce 引擎)...")
