@@ -62,6 +62,11 @@ class AssetManager:
                     "audio": f"{self.asset_dir}/voices/f1.wav", 
                     "text": "女声1", 
                     "speed": 1.0
+                },
+                {
+                    "audio": f"{self.asset_dir}/voices/f2.wav", 
+                    "text": "女声2", 
+                    "speed": 1.0
                 }
             ],
             # "narration" 显式映射到 narrator 音色，避免 dict.get() 隐式回退
@@ -249,6 +254,52 @@ class AssetManager:
         
         logger.info(f"添加自定义音色: {name}")
         return True
+
+    def set_custom_role_voices(self, role_voices):
+        """根据角色名称设置用户上传的自定义音色。
+
+        在电影配音模式下，用户可上传 narrator / f1 / m1 / f2 / m2 五个角色的
+        音色文件。本方法将用户提供的音色覆盖到对应位置，未提供的角色保持默认。
+
+        Args:
+            role_voices: dict, key 为角色名 (narrator/f1/m1/f2/m2),
+                         value 为音频文件路径。值为 None 时跳过该角色。
+        """
+        if not role_voices:
+            return
+
+        # 角色名到 voices 结构的映射
+        role_map = {
+            "narrator": ("narrator", None),
+            "m1": ("male_pool", 0),
+            "m2": ("male_pool", 1),
+            "f1": ("female_pool", 0),
+            "f2": ("female_pool", 1),
+        }
+
+        for role_name, file_path in role_voices.items():
+            if file_path is None or not os.path.exists(file_path):
+                continue
+            if role_name not in role_map:
+                logger.warning(f"⚠️ 未知角色名: {role_name}，跳过")
+                continue
+
+            target_key, pool_idx = role_map[role_name]
+
+            if pool_idx is None:
+                # narrator: 同步更新所有使用 narrator 音频的角色
+                self.voices["narrator"]["audio"] = file_path
+                self.voices["narration"]["audio"] = file_path
+                self.voices["title"]["audio"] = file_path
+                self.voices["subtitle"]["audio"] = file_path
+                logger.info(f"✅ 已设置旁白音色: {file_path}")
+            else:
+                pool = self.voices[target_key]
+                if pool_idx < len(pool):
+                    pool[pool_idx]["audio"] = file_path
+                    logger.info(f"✅ 已设置角色 {role_name} 音色: {file_path}")
+                else:
+                    logger.warning(f"⚠️ 音色池 {target_key} 槽位不足 (需要索引 {pool_idx})，跳过 {role_name}")
 
 if __name__ == "__main__":
     # 测试代码
