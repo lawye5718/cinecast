@@ -188,12 +188,13 @@ class CineCastProducer:
     # ==========================================
     # 🎬 阶段一：剧本化与微切片 (Script & Micro-chunking)
     # ==========================================
-    def phase_1_generate_scripts(self, input_source, max_chapters=None):
+    def phase_1_generate_scripts(self, input_source, max_chapters=None, is_preview=False):
         """阶段一：编剧期 (Ollama) - 生成包含chunk_id和停顿时间的微切片剧本
 
         Args:
             input_source: EPUB文件路径或TXT目录路径
             max_chapters: 最多处理的章节数（None表示全部，试听模式传1）
+            is_preview: 是否为试听模式（强制注入摘要、截断前10句）
         """
         logger.info("\n" + "="*50 + "\n🎬 [阶段一] 编剧期 (Ollama)\n" + "="*50)
         
@@ -227,6 +228,13 @@ class CineCastProducer:
             chapters = dict(chapter_items)
             logger.info(f"🎧 试听模式：仅处理前 {max_chapters} 个章节")
         
+        # 🌟 试听模式核心拦截：只取第一章，且只保留前1000字
+        if is_preview:
+            first_chap_key = list(chapters.keys())[0]
+            first_chap_content = chapters[first_chap_key][:1000]
+            chapters = {first_chap_key: first_chap_content}
+            logger.info(f"🎧 试听防卡死：已切断全书遍历，仅处理首章前1000字")
+
         director = LLMScriptDirector(
             global_cast=self.config.get("global_cast", {})
         )
@@ -248,7 +256,7 @@ class CineCastProducer:
         for chapter_name, content in chapters.items():
             chapter_index += 1
             script_path = os.path.join(self.script_dir, f"{chapter_name}_micro.json")
-            if os.path.exists(script_path):
+            if os.path.exists(script_path) and not is_preview:
                 logger.info(f"⏭️ 微切片剧本已存在，跳过: {chapter_name}")
                 # 保留已有章节的文本给下一章用
                 prev_chapter_content = content
@@ -272,6 +280,7 @@ class CineCastProducer:
                 
                 # 🌟 核心逻辑：智能前情提要判断（纯净模式下跳过）
                 # 判定条件：非纯净模式 + 开关打开 + 不是第一章 + 当前章看起来像正文
+                recap_injected = False
                 if not pure_mode:
                     is_main_text = True
                     # 过滤版权页、目录、致谢等非正文章节 (通过长度和特征词识别)
@@ -297,7 +306,6 @@ class CineCastProducer:
                                 recap_text = director.generate_chapter_recap(prev_chapter_content)
 
                         if recap_text:
-                            # 构建一个标准的前情提要引子单元
                             intro_unit = {
                                 "chunk_id": f"{chapter_name}_recap_intro",
                                 "type": "recap",
@@ -305,7 +313,6 @@ class CineCastProducer:
                                 "content": "前情提要：",
                                 "pause_ms": 500
                             }
-                            # 构建摘要主体单元
                             recap_unit = {
                                 "chunk_id": f"{chapter_name}_recap_body",
                                 "type": "recap",
@@ -313,12 +320,38 @@ class CineCastProducer:
                                 "content": recap_text,
                                 "pause_ms": 1500
                             }
-                            # 将提要插入到本章剧本的最开头（在标题之后，正文之前）
                             micro_script.insert(1, intro_unit)
                             micro_script.insert(2, recap_unit)
+                            recap_injected = True
+
+                # 🌟 试听强制注入逻辑（核心）
+                # 如果是试听模式，且原本这章没摘要（比如第一章），但用户传了外脑字典，我们就强行借用一条来试听！
+                if is_preview and not recap_injected and custom_recaps:
+                    borrowed_recap = next(iter(custom_recaps.values()))
+                    logger.info(f"🎧 试听连通性测试：强制借用一条前情提要进行 Talkover 音色验证！")
+                    intro_unit = {
+                        "chunk_id": f"{chapter_name}_recap_intro",
+                        "type": "recap",
+                        "speaker": "talkover",
+                        "content": "前情提要：",
+                        "pause_ms": 500
+                    }
+                    recap_unit = {
+                        "chunk_id": f"{chapter_name}_recap_body",
+                        "type": "recap",
+                        "speaker": "talkover",
+                        "content": borrowed_recap,
+                        "pause_ms": 1500
+                    }
+                    micro_script.insert(1, intro_unit)
+                    micro_script.insert(2, recap_unit)
                 
                 # 保存当前章的原始文本，供下一章使用
                 prev_chapter_content = content
+                
+                # 🌟 试听模式极速截断：只保留前 10 句话（包含刚注入的提要）
+                if is_preview:
+                    micro_script = micro_script[:10]
                 
                 # 验证每个片段都有必需的字段
                 valid = True
@@ -360,12 +393,26 @@ class CineCastProducer:
     # 🎧 试听模式：极速通道，只处理前 10 句话
     # ==========================================
     def run_preview_mode(self, input_source: str) -> str:
-        """🌟 专属的试听模式：极速通道，只处理前 10 句话
+        """🌟 专属的试听模式：极速通道，测试外脑连通性，只处理前 10 句话
 
         流程：先完成第一阶段微切片，再从第一章剧本中截取前 10 句，
         写入独立的临时剧本文件（不覆盖原始剧本），直接渲染并压制。
         """
-        logger.info("🎧 启动试听通道...")
+        logger.info("🎧 启动极速试听通道...")
+
+        # 🌟 连通性探针：检查外脑数据是否成功穿透 WebUI 到达底层
+        global_cast = self.config.get("global_cast", {})
+        custom_recaps = self.config.get("custom_recaps", {})
+
+        if global_cast:
+            logger.info(f"✅ 试听连通性测试: 成功接收外脑【角色设定集】 ({len(global_cast)} 个角色)")
+        else:
+            logger.info(f"ℹ️ 试听连通性测试: 未检测到外脑角色设定，将使用默认分配策略")
+
+        if custom_recaps:
+            logger.info(f"✅ 试听连通性测试: 成功接收外脑【前情摘要库】 ({len(custom_recaps)} 章)")
+        else:
+            logger.info(f"ℹ️ 试听连通性测试: 未检测到外部前情摘要")
 
         # 临时强制设为极短时长，迫使 CinematicPackager 提前触发导出
         original_duration = self.config["target_duration_min"]
@@ -373,8 +420,8 @@ class CineCastProducer:
         preview_script_path = os.path.join(self.script_dir, "_preview_temp_micro.json")
 
         try:
-            # ── 第一阶段：微切片（仅处理第一章，避免全书解析耗时过长）──
-            self.phase_1_generate_scripts(input_source, max_chapters=1)
+            # ── 第一阶段：微切片（仅处理第一章，传入 is_preview 标识）──
+            self.phase_1_generate_scripts(input_source, is_preview=True)
 
             # 找到第一个生成的剧本
             script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])
