@@ -83,7 +83,7 @@
 
 **文件：** `main_producer.py`（2 处）
 
-**问题：** 原代码使用 `insert_idx = 1 if len(micro_script) > 0 else 0`。当 `micro_script` 只有 1 个元素时，`insert(2, ...)` 可能导致数据结构不稳健。
+**问题：** 原代码使用 `insert_idx = 1 if len(micro_script) > 0 else 0`。当 `micro_script` 只有 1 个元素时（例如极短章节或大模型幻觉导致只解析出一条内容），`insert_idx` 为 1，前情提要会被插入到唯一元素之后，而 `insert(insert_idx + 1, recap_unit)` 即 `insert(2, ...)` 会追加到末尾。虽然 Python 不会报错，但这种定位方式不够稳健——在极端边界情况下可能导致前情提要与内容的顺序不符合预期。
 
 **修复方案：** 使用动态索引 `> 1` 替代 `> 0`（2 处均已修复）：
 ```python
