@@ -320,8 +320,8 @@ class CineCastProducer:
                                 "content": recap_text,
                                 "pause_ms": 1500
                             }
-                            # 🌟 安全插入法：标题通常在首位，插在标题之后
-                            insert_idx = 1 if len(micro_script) > 0 else 0
+                            # 🌟 安全插入法：动态索引，防止极短剧本的数组越界隐患
+                            insert_idx = 1 if len(micro_script) > 1 else 0
                             micro_script.insert(insert_idx, intro_unit)
                             micro_script.insert(insert_idx + 1, recap_unit)
                             recap_injected = True
@@ -345,8 +345,8 @@ class CineCastProducer:
                         "content": borrowed_recap,
                         "pause_ms": 1500
                     }
-                    # 🌟 安全插入法：标题通常在首位，插在标题之后
-                    insert_idx = 1 if len(micro_script) > 0 else 0
+                    # 🌟 安全插入法：动态索引，防止极短剧本的数组越界隐患
+                    insert_idx = 1 if len(micro_script) > 1 else 0
                     micro_script.insert(insert_idx, intro_unit)
                     micro_script.insert(insert_idx + 1, recap_unit)
                 

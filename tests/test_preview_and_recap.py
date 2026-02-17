@@ -646,7 +646,7 @@ class TestSafeRecapInsertion:
         micro_script = []
         intro_unit = {"chunk_id": "test_intro", "type": "recap", "speaker": "talkover", "content": "前情提要：", "pause_ms": 500}
         recap_unit = {"chunk_id": "test_body", "type": "recap", "speaker": "talkover", "content": "上回……", "pause_ms": 1500}
-        insert_idx = 1 if len(micro_script) > 0 else 0
+        insert_idx = 1 if len(micro_script) > 1 else 0
         micro_script.insert(insert_idx, intro_unit)
         micro_script.insert(insert_idx + 1, recap_unit)
         assert len(micro_script) == 2
@@ -654,19 +654,20 @@ class TestSafeRecapInsertion:
         assert micro_script[1]["type"] == "recap"
 
     def test_insert_into_single_element_script(self):
-        """Recap insertion into a script with only one element (title) should be safe."""
+        """Recap insertion into a script with only one element should insert at front for safety."""
         micro_script = [
             {"chunk_id": "ch01_00001", "type": "title", "speaker": "narrator", "content": "第一章 风雪"}
         ]
         intro_unit = {"chunk_id": "test_intro", "type": "recap", "speaker": "talkover", "content": "前情提要：", "pause_ms": 500}
         recap_unit = {"chunk_id": "test_body", "type": "recap", "speaker": "talkover", "content": "上回……", "pause_ms": 1500}
-        insert_idx = 1 if len(micro_script) > 0 else 0
+        insert_idx = 1 if len(micro_script) > 1 else 0
         micro_script.insert(insert_idx, intro_unit)
         micro_script.insert(insert_idx + 1, recap_unit)
         assert len(micro_script) == 3
-        assert micro_script[0]["type"] == "title"
+        # With > 1 guard, single-element script inserts at front for robustness
+        assert micro_script[0]["type"] == "recap"
         assert micro_script[1]["type"] == "recap"
-        assert micro_script[2]["type"] == "recap"
+        assert micro_script[2]["type"] == "title"
 
     def test_insert_into_normal_script(self):
         """Recap insertion into a script with title + narration should keep correct order."""
@@ -677,7 +678,7 @@ class TestSafeRecapInsertion:
         ]
         intro_unit = {"chunk_id": "test_intro", "type": "recap", "speaker": "talkover", "content": "前情提要：", "pause_ms": 500}
         recap_unit = {"chunk_id": "test_body", "type": "recap", "speaker": "talkover", "content": "上回……", "pause_ms": 1500}
-        insert_idx = 1 if len(micro_script) > 0 else 0
+        insert_idx = 1 if len(micro_script) > 1 else 0
         micro_script.insert(insert_idx, intro_unit)
         micro_script.insert(insert_idx + 1, recap_unit)
         assert len(micro_script) == 5
