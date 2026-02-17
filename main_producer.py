@@ -211,6 +211,19 @@ class CineCastProducer:
             if not chapters:
                 logger.error("❌ EPUB 解析失败或无有效文本！")
                 return False
+
+        # 🌟 修复：新增支持 WebUI 上传单文件 TXT 模式
+        elif os.path.isfile(input_source) and input_source.endswith(('.txt', '.md')):
+            try:
+                with open(input_source, 'r', encoding='utf-8') as f:
+                    chapters = {os.path.splitext(os.path.basename(input_source))[0]: f.read()}
+            except UnicodeDecodeError:
+                logger.error("❌ 文本读取失败：请确保你的 TXT 文件是标准的 UTF-8 编码！")
+                return False
+            except OSError as e:
+                logger.error(f"❌ 文本文件读取失败: {e}")
+                return False
+
         else:
             # 处理TXT目录
             text_files = sorted([f for f in os.listdir(input_source) if f.endswith(('.txt', '.md'))])
@@ -604,6 +617,8 @@ def main():
     
     if input_source.endswith('.epub') and os.path.exists(input_source):
         logger.info(f"📚 检测到EPUB文件: {input_source}")
+    elif os.path.isfile(input_source) and input_source.endswith(('.txt', '.md')):
+        logger.info(f"📝 检测到单文件TXT模式: {input_source}")
     elif os.path.isdir(input_source):
         if not os.listdir(input_source):
             logger.warning(f"⚠️ 请先在 {input_source} 文件夹中放入测试用的 .txt 章节！")
