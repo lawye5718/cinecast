@@ -220,6 +220,9 @@ class CineCastProducer:
             except UnicodeDecodeError:
                 logger.error("❌ 文本读取失败：请确保你的 TXT 文件是标准的 UTF-8 编码！")
                 return False
+            except OSError as e:
+                logger.error(f"❌ 文本文件读取失败: {e}")
+                return False
 
         else:
             # 处理TXT目录
