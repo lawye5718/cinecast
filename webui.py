@@ -23,7 +23,8 @@ def save_uploaded_asset(file_path, target_filename, folder):
 
 
 # --- 核心逻辑封装 ---
-def process_audio(epub_file, mode_choice, narrator_file, male_file, female_file,
+def process_audio(epub_file, mode_choice, narrator_file,
+                  m1_file, m2_file, f1_file, f2_file,
                   ambient_file, chime_file, is_preview=False):
     """统一处理入口：试听 / 全本压制"""
     if epub_file is None:
@@ -31,8 +32,10 @@ def process_audio(epub_file, mode_choice, narrator_file, male_file, female_file,
 
     # 1. 保存用户覆盖的资产
     save_uploaded_asset(narrator_file, "narrator.wav", "voices")
-    save_uploaded_asset(male_file, "m1.wav", "voices")
-    save_uploaded_asset(female_file, "f1.wav", "voices")
+    save_uploaded_asset(m1_file, "m1.wav", "voices")
+    save_uploaded_asset(m2_file, "m2.wav", "voices")
+    save_uploaded_asset(f1_file, "f1.wav", "voices")
+    save_uploaded_asset(f2_file, "f2.wav", "voices")
     save_uploaded_asset(ambient_file, "iceland_wind.wav", "ambient")
     save_uploaded_asset(chime_file, "soft_chime.wav", "transitions")
 
@@ -52,6 +55,17 @@ def process_audio(epub_file, mode_choice, narrator_file, male_file, female_file,
 
     try:
         producer = CineCastProducer(config=config)
+
+        # 电影配音模式下，将用户上传的角色音色传递给资产管理器
+        if not is_pure_narrator:
+            role_voices = {
+                "narrator": narrator_file,
+                "m1": m1_file,
+                "m2": m2_file,
+                "f1": f1_file,
+                "f2": f2_file,
+            }
+            producer.assets.set_custom_role_voices(role_voices)
 
         # 🌟 试听模式：拦截长篇，只处理第一章的前10句话
         if is_preview:
@@ -96,13 +110,17 @@ with gr.Blocks(theme=theme, title="CineCast 电影级有声书") as ui:
 
             with gr.Group():
                 gr.Markdown("### 🗣️ 第二步：选角与音色 (可选)")
-                gr.Markdown("*如果不上传，将自动使用系统内置的高优预设音色。*")
+                gr.Markdown("*如果不上传，将自动使用系统内置的高优预设音色。当角色数量超过已上传的音色数量时，系统会自动随机分配一个音色，并在全书中保持该分配不变。*")
                 narrator_audio = gr.Audio(label="旁白音色样本 (Narrator)", type="filepath")
 
                 # 动态隐藏/显示的配音角色面板
-                with gr.Row(visible=False) as role_voices_panel:
-                    male_audio = gr.Audio(label="男声预设样本", type="filepath")
-                    female_audio = gr.Audio(label="女声预设样本", type="filepath")
+                with gr.Column(visible=False) as role_voices_panel:
+                    with gr.Row():
+                        f1_audio = gr.Audio(label="女声1 (f1)", type="filepath")
+                        m1_audio = gr.Audio(label="男声1 (m1)", type="filepath")
+                    with gr.Row():
+                        f2_audio = gr.Audio(label="女声2 (f2)", type="filepath")
+                        m2_audio = gr.Audio(label="男声2 (m2)", type="filepath")
 
             with gr.Group():
                 gr.Markdown("### 🎛️ 第三步：环境声场 (可选)")
@@ -153,15 +171,17 @@ with gr.Blocks(theme=theme, title="CineCast 电影级有声书") as ui:
 
     # --- 按钮绑定 ---
     btn_preview.click(
-        fn=lambda a, b, c, d, e, f, g: process_audio(
-            a, b, c, d, e, f, g, is_preview=True
+        fn=lambda a, b, c, d, e, f, g, h, i: process_audio(
+            a, b, c, d, e, f, g, h, i, is_preview=True
         ),
         inputs=[
             book_file,
             mode_selector,
             narrator_audio,
-            male_audio,
-            female_audio,
+            m1_audio,
+            m2_audio,
+            f1_audio,
+            f2_audio,
             ambient_audio,
             chime_audio,
         ],
@@ -169,15 +189,17 @@ with gr.Blocks(theme=theme, title="CineCast 电影级有声书") as ui:
     )
 
     btn_full.click(
-        fn=lambda a, b, c, d, e, f, g: process_audio(
-            a, b, c, d, e, f, g, is_preview=False
+        fn=lambda a, b, c, d, e, f, g, h, i: process_audio(
+            a, b, c, d, e, f, g, h, i, is_preview=False
         ),
         inputs=[
             book_file,
             mode_selector,
             narrator_audio,
-            male_audio,
-            female_audio,
+            m1_audio,
+            m2_audio,
+            f1_audio,
+            f2_audio,
             ambient_audio,
             chime_audio,
         ],
