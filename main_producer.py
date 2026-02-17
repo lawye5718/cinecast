@@ -62,7 +62,8 @@ class CineCastProducer:
             "min_tail_min": 10,  # 最小尾部时长（分钟）
             "use_local_llm": True,  # 是否使用本地LLM
             "enable_recap": True,  # 🌟 前情提要总开关
-            "pure_narrator_mode": False  # 🌟 纯净旁白模式开关
+            "pure_narrator_mode": False,  # 🌟 纯净旁白模式开关
+            "user_recaps": None  # 🌟 用户提供的前情提要文本（跳过LLM生成）
         }
     
     def _initialize_components(self):
@@ -99,6 +100,45 @@ class CineCastProducer:
             logger.error(f"❌ 组件初始化失败: {e}")
             raise
     
+    @staticmethod
+    def parse_user_recaps(raw_text: str) -> dict:
+        """解析用户提供的前情提要文本，返回 {章节序号: 摘要文本} 字典。
+
+        支持的格式（每章之间用空行或章节标记分隔）：
+            第1章：摘要内容...
+            第2章：摘要内容...
+        或：
+            Chapter 1: recap text...
+            Chapter 2: recap text...
+        或简单的按行分隔（每行对应一章的前情提要，第1行用于第2章，第2行用于第3章，以此类推）：
+            第一章的摘要内容（将作为第2章的前情提要）
+            第二章的摘要内容（将作为第3章的前情提要）
+        """
+        if not raw_text or not raw_text.strip():
+            return {}
+
+        recaps = {}
+        # 尝试匹配 "第N章" 或 "Chapter_NNN" 或 "Chapter N" 格式
+        pattern = re.compile(
+            r'(?:第\s*(\d+)\s*章|Chapter[_ ]?(\d+))\s*[：:]\s*(.+?)(?=\n\s*(?:第\s*\d+\s*章|Chapter[_ ]?\d+)|$)',
+            re.DOTALL | re.IGNORECASE
+        )
+        matches = pattern.findall(raw_text)
+
+        if matches:
+            for m in matches:
+                chapter_num = int(m[0] or m[1])
+                recap_text = m[2].strip()
+                if recap_text:
+                    recaps[chapter_num] = recap_text
+        else:
+            # 回退：按非空行分割，第 N 行对应第 N+1 章（因为第1章没有前情提要）
+            lines = [line.strip() for line in raw_text.strip().split('\n') if line.strip()]
+            for idx, line in enumerate(lines):
+                recaps[idx + 2] = line  # 从第2章开始
+
+        return recaps
+
     def _extract_epub_chapters(self, epub_path: str) -> dict:
         """🌟 从 EPUB 提取干净的章节文本字典 {章节名: 文本内容}"""
         logger.info(f"📖 正在解析 EPUB 文件: {epub_path}")
@@ -145,8 +185,13 @@ class CineCastProducer:
     # ==========================================
     # 🎬 阶段一：剧本化与微切片 (Script & Micro-chunking)
     # ==========================================
-    def phase_1_generate_scripts(self, input_source):
-        """阶段一：编剧期 (Ollama) - 生成包含chunk_id和停顿时间的微切片剧本"""
+    def phase_1_generate_scripts(self, input_source, max_chapters=None):
+        """阶段一：编剧期 (Ollama) - 生成包含chunk_id和停顿时间的微切片剧本
+
+        Args:
+            input_source: EPUB文件路径或TXT目录路径
+            max_chapters: 最多处理的章节数（None表示全部，试听模式传1）
+        """
         logger.info("\n" + "="*50 + "\n🎬 [阶段一] 编剧期 (Ollama)\n" + "="*50)
         
         pure_mode = self.config.get("pure_narrator_mode", False)
@@ -172,12 +217,28 @@ class CineCastProducer:
             for file_name in text_files:
                 with open(os.path.join(input_source, file_name), 'r', encoding='utf-8') as f:
                     chapters[os.path.splitext(file_name)[0]] = f.read()
+
+        # 🌟 试听模式优化：只处理前 max_chapters 个章节，避免全书解析
+        if max_chapters is not None:
+            chapter_items = list(chapters.items())[:max_chapters]
+            chapters = dict(chapter_items)
+            logger.info(f"🎧 试听模式：仅处理前 {max_chapters} 个章节")
         
         director = LLMScriptDirector()
         prev_chapter_content = None  # 用于存储上一章内容
         failed_chapters = []
-        
+
+        # 🌟 解析用户提供的前情提要（如果有）
+        user_recaps = {}
+        user_recap_text = self.config.get("user_recaps")
+        if user_recap_text:
+            user_recaps = self.parse_user_recaps(user_recap_text)
+            if user_recaps:
+                logger.info(f"📋 检测到用户提供的前情提要，共 {len(user_recaps)} 章")
+
+        chapter_index = 0  # 章节计数器，循环体内先自增，因此第一章为1
         for chapter_name, content in chapters.items():
+            chapter_index += 1
             script_path = os.path.join(self.script_dir, f"{chapter_name}_micro.json")
             if os.path.exists(script_path):
                 logger.info(f"⏭️ 微切片剧本已存在，跳过: {chapter_name}")
@@ -202,7 +263,7 @@ class CineCastProducer:
                     continue
                 
                 # 🌟 核心逻辑：智能前情提要判断（纯净模式下跳过）
-                # 判定条件：非纯净模式 + 开关打开 + 不是第一章 + 上一章有足够内容 + 当前章看起来像正文
+                # 判定条件：非纯净模式 + 开关打开 + 不是第一章 + 当前章看起来像正文
                 if not pure_mode:
                     is_main_text = True
                     # 过滤版权页、目录、致谢等非正文章节 (通过长度和特征词识别)
@@ -210,32 +271,39 @@ class CineCastProducer:
                         is_main_text = False
                         logger.info(f"⏭️ 判定 {chapter_name} 为非正文/短章节，跳过生成前情摘要。")
 
-                    if self.config.get("enable_recap", True) and prev_chapter_content is not None and is_main_text:
-                        # 只有上一章也是正文，才值得回顾
-                        if len(prev_chapter_content) >= 800:
-                            logger.info(f"🔄 正在为 {chapter_name} 生成前情摘要 (Map-Reduce 引擎)...")
-                            recap_text = director.generate_chapter_recap(prev_chapter_content)
-                        
-                            if recap_text:
-                                # 构建一个标准的前情提要引子单元
-                                intro_unit = {
-                                    "chunk_id": f"{chapter_name}_recap_intro",
-                                    "type": "recap",
-                                    "speaker": "talkover",
-                                    "content": "前情提要：",
-                                    "pause_ms": 500
-                                }
-                                # 构建摘要主体单元
-                                recap_unit = {
-                                    "chunk_id": f"{chapter_name}_recap_body",
-                                    "type": "recap",
-                                    "speaker": "talkover",
-                                    "content": recap_text,
-                                    "pause_ms": 1500
-                                }
-                                # 将提要插入到本章剧本的最开头（在标题之后，正文之前）
-                                micro_script.insert(1, intro_unit)
-                                micro_script.insert(2, recap_unit)
+                    if self.config.get("enable_recap", True) and is_main_text:
+                        recap_text = None
+
+                        # 🌟 优先使用用户提供的前情提要
+                        if chapter_index in user_recaps:
+                            recap_text = user_recaps[chapter_index]
+                            logger.info(f"📋 使用用户提供的前情提要: {chapter_name}")
+                        elif prev_chapter_content is not None:
+                            # 只有上一章也是正文，才值得回顾
+                            if len(prev_chapter_content) >= 800:
+                                logger.info(f"🔄 正在为 {chapter_name} 生成前情摘要 (Map-Reduce 引擎)...")
+                                recap_text = director.generate_chapter_recap(prev_chapter_content)
+
+                        if recap_text:
+                            # 构建一个标准的前情提要引子单元
+                            intro_unit = {
+                                "chunk_id": f"{chapter_name}_recap_intro",
+                                "type": "recap",
+                                "speaker": "talkover",
+                                "content": "前情提要：",
+                                "pause_ms": 500
+                            }
+                            # 构建摘要主体单元
+                            recap_unit = {
+                                "chunk_id": f"{chapter_name}_recap_body",
+                                "type": "recap",
+                                "speaker": "talkover",
+                                "content": recap_text,
+                                "pause_ms": 1500
+                            }
+                            # 将提要插入到本章剧本的最开头（在标题之后，正文之前）
+                            micro_script.insert(1, intro_unit)
+                            micro_script.insert(2, recap_unit)
                 
                 # 保存当前章的原始文本，供下一章使用
                 prev_chapter_content = content
@@ -293,8 +361,8 @@ class CineCastProducer:
         preview_script_path = os.path.join(self.script_dir, "_preview_temp_micro.json")
 
         try:
-            # ── 第一阶段：微切片（必须先完成！）──
-            self.phase_1_generate_scripts(input_source)
+            # ── 第一阶段：微切片（仅处理第一章，避免全书解析耗时过长）──
+            self.phase_1_generate_scripts(input_source, max_chapters=1)
 
             # 找到第一个生成的剧本
             script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])

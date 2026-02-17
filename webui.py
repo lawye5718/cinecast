@@ -10,6 +10,26 @@ import shutil
 import gradio as gr
 from main_producer import CineCastProducer
 
+# 前情提要提示词模板（供用户复制到外部大模型使用）
+RECAP_PROMPT_TEMPLATE = """\
+请为以下小说的每一章生成"前情提要"。
+
+要求：
+1. 为每一章（从第2章开始）写一段不超过100字的前情摘要。
+2. 语言必须高度凝练，具有美剧片头的电影感（"Previously on..."的风格）。
+3. 只保留最具张力的剧情矛盾。
+4. 最后一句必须是一个引出下一章的"悬念钩子"。
+5. 不要输出"前情提要："这样的标题前缀。
+
+输出格式（严格按以下格式，每章一条）：
+第2章：[第1章的摘要，作为第2章的前情提要]
+第3章：[第2章的摘要，作为第3章的前情提要]
+第4章：[第3章的摘要，作为第4章的前情提要]
+...以此类推
+
+请将整本小说的文本粘贴到下方，然后发送给大模型（推荐使用通义千问、豆包等支持长文本的模型）。
+"""
+
 
 # --- 辅助函数：保存用户上传的资产 ---
 def save_uploaded_asset(file_path, target_filename, folder):
@@ -25,7 +45,9 @@ def save_uploaded_asset(file_path, target_filename, folder):
 # --- 核心逻辑封装 ---
 def process_audio(epub_file, mode_choice, narrator_file,
                   m1_file, m2_file, f1_file, f2_file,
-                  ambient_file, chime_file, is_preview=False):
+                  ambient_file, chime_file,
+                  enable_recap_flag, user_recap_text,
+                  is_preview=False):
     """统一处理入口：试听 / 全本压制"""
     if epub_file is None:
         return None, "❌ 请先上传小说文件 (EPUB/TXT)"
@@ -49,8 +71,9 @@ def process_audio(epub_file, mode_choice, narrator_file,
         "target_duration_min": 30,
         "min_tail_min": 10,
         "use_local_llm": True,
-        "enable_recap": not is_pure_narrator,
+        "enable_recap": enable_recap_flag and not is_pure_narrator,
         "pure_narrator_mode": is_pure_narrator,
+        "user_recaps": user_recap_text if (user_recap_text and user_recap_text.strip()) else None,
     }
 
     try:
@@ -122,6 +145,31 @@ with gr.Blocks(theme=theme, title="CineCast 电影级有声书") as ui:
                         f2_audio = gr.Audio(label="女声2 (f2)", type="filepath")
                         m2_audio = gr.Audio(label="男声2 (m2)", type="filepath")
 
+            # 🌟 前情提要设置面板（仅智能配音模式可见）
+            with gr.Group(visible=False) as recap_panel:
+                gr.Markdown("### 📝 前情提要设置")
+                enable_recap_checkbox = gr.Checkbox(
+                    label="启用前情提要（取消勾选可跳过，节省LLM处理时间）",
+                    value=True,
+                )
+                with gr.Accordion("📋 查看前情提要提示词模板（推荐复制到外部大模型使用）", open=False):
+                    gr.Markdown(
+                        "💡 **推荐工作流**：将下方提示词复制到通义千问、豆包等网络大模型，"
+                        "粘贴整本书的文本，让大模型一次性生成全书的前情提要，"
+                        "然后将结果粘贴到下方输入框中。这样可以跳过本地LLM逐章生成，大幅提升速度。"
+                    )
+                    recap_prompt_display = gr.Textbox(
+                        label="前情提要提示词（可复制）",
+                        value=RECAP_PROMPT_TEMPLATE,
+                        lines=10,
+                        interactive=False,
+                    )
+                user_recap_input = gr.Textbox(
+                    label="粘贴外部生成的前情提要（可选，格式：第N章：摘要内容）",
+                    placeholder="第2章：夜色中，老渔夫的一句话揭开了尘封的往事...\n第3章：年轻人离开港口，带着不安踏上了未知的旅途...",
+                    lines=5,
+                )
+
             with gr.Group():
                 gr.Markdown("### 🎛️ 第三步：环境声场 (可选)")
                 with gr.Row():
@@ -155,54 +203,45 @@ with gr.Blocks(theme=theme, title="CineCast 电影级有声书") as ui:
             1. **纯净旁白模式**：完全绕过大模型，按标点切分，速度极快，适合严肃文学和网文。
             2. **试听功能**：强烈建议在全本压制前，先点击【生成试听】，系统会在15秒内合成前10句话供您确认音色与混音比例。
             3. **断点续传**：如果在压制途中停止，再次点击全本压制，系统会自动跳过已生成的音频。
+            4. **前情提要**：智能配音模式下，可选择关闭前情提要以加速处理。也可将提示词复制到外部大模型（通义千问/豆包），一次性生成全书前情提要后粘贴回来，效果更好且速度更快。
             """
             )
 
     # --- 动态交互逻辑 ---
     def toggle_mode(choice):
-        """纯净模式下隐藏男女主音色上传框"""
+        """纯净模式下隐藏配音角色面板和前情提要面板"""
         if "纯净" in choice:
-            return gr.update(visible=False)
-        return gr.update(visible=True)
+            return gr.update(visible=False), gr.update(visible=False)
+        return gr.update(visible=True), gr.update(visible=True)
 
     mode_selector.change(
-        fn=toggle_mode, inputs=mode_selector, outputs=role_voices_panel
+        fn=toggle_mode, inputs=mode_selector, outputs=[role_voices_panel, recap_panel]
     )
 
     # --- 按钮绑定 ---
+    all_inputs = [
+        book_file,
+        mode_selector,
+        narrator_audio,
+        m1_audio,
+        m2_audio,
+        f1_audio,
+        f2_audio,
+        ambient_audio,
+        chime_audio,
+        enable_recap_checkbox,
+        user_recap_input,
+    ]
+
     btn_preview.click(
-        fn=lambda a, b, c, d, e, f, g, h, i: process_audio(
-            a, b, c, d, e, f, g, h, i, is_preview=True
-        ),
-        inputs=[
-            book_file,
-            mode_selector,
-            narrator_audio,
-            m1_audio,
-            m2_audio,
-            f1_audio,
-            f2_audio,
-            ambient_audio,
-            chime_audio,
-        ],
+        fn=lambda *args: process_audio(*args, is_preview=True),
+        inputs=all_inputs,
         outputs=[audio_player, status_box],
     )
 
     btn_full.click(
-        fn=lambda a, b, c, d, e, f, g, h, i: process_audio(
-            a, b, c, d, e, f, g, h, i, is_preview=False
-        ),
-        inputs=[
-            book_file,
-            mode_selector,
-            narrator_audio,
-            m1_audio,
-            m2_audio,
-            f1_audio,
-            f2_audio,
-            ambient_audio,
-            chime_audio,
-        ],
+        fn=lambda *args: process_audio(*args, is_preview=False),
+        inputs=all_inputs,
         outputs=[audio_player, status_box],
     )
 
