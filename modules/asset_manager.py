@@ -187,7 +187,14 @@ class AssetManager:
                     # 使用确定性哈希分配，确保同名角色跨进程仍获得同一音色
                     digest = int(hashlib.md5(speaker_name.encode()).hexdigest(), 16)
                     idx = digest % len(pool)
-                    self.role_voice_map[speaker_name] = pool[idx]
+                    candidate_voice = pool[idx]
+                    
+                    # 🌟 核心修复：防止底层 C 库由于音频文件不存在而引发静默闪退！
+                    if not os.path.exists(candidate_voice["audio"]):
+                        logger.warning(f"⚠️ 角色 [{speaker_name}] 匹配的默认音色 {candidate_voice['audio']} 不存在！强制降级为 narrator 旁白音色。")
+                        self.role_voice_map[speaker_name] = self.voices["narrator"]
+                    else:
+                        self.role_voice_map[speaker_name] = candidate_voice
             
         if speaker_name:
             return self.role_voice_map.get(speaker_name, self.voices["narrator"])

@@ -31,6 +31,16 @@ def manager():
 
 
 @pytest.fixture
+def manager_with_voices(tmp_path):
+    """Create an AssetManager with actual voice files on disk."""
+    voices_dir = tmp_path / "voices"
+    voices_dir.mkdir()
+    for name in ("narrator.wav", "m1.wav", "m2.wav", "f1.wav", "f2.wav"):
+        (voices_dir / name).write_bytes(b"RIFF" + b"\x00" * 40)
+    return AssetManager(asset_dir=str(tmp_path))
+
+
+@pytest.fixture
 def tmp_wav(tmp_path):
     """Create a tiny temporary WAV file for upload simulation."""
     wav = tmp_path / "custom_voice.wav"
@@ -175,14 +185,14 @@ class TestFallbackVoiceConsistency:
             v = manager.get_voice_for_role("dialogue", s, "female")
             assert v["audio"] == first_pass[s]
 
-    def test_voice_from_pool(self, manager):
+    def test_voice_from_pool(self, manager_with_voices):
         """Each assigned voice should come from the correct gender pool."""
-        v_m = manager.get_voice_for_role("dialogue", "某男", "male")
-        pool_audios = [e["audio"] for e in manager.voices["male_pool"]]
+        v_m = manager_with_voices.get_voice_for_role("dialogue", "某男", "male")
+        pool_audios = [e["audio"] for e in manager_with_voices.voices["male_pool"]]
         assert v_m["audio"] in pool_audios
 
-        v_f = manager.get_voice_for_role("dialogue", "某女", "female")
-        pool_audios_f = [e["audio"] for e in manager.voices["female_pool"]]
+        v_f = manager_with_voices.get_voice_for_role("dialogue", "某女", "female")
+        pool_audios_f = [e["audio"] for e in manager_with_voices.voices["female_pool"]]
         assert v_f["audio"] in pool_audios_f
 
     def test_consistency_across_100_calls(self, manager):

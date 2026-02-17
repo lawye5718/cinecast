@@ -292,52 +292,52 @@ class CineCastProducer:
                     continue
                 
                 # 🌟 核心逻辑：智能前情提要判断（纯净模式下跳过）
-                # 判定条件：非纯净模式 + 开关打开 + 不是第一章 + 当前章看起来像正文
                 recap_injected = False
                 if not pure_mode:
-                    is_main_text = True
-                    # 过滤版权页、目录、致谢等非正文章节 (通过长度和特征词识别)
-                    if len(content) < 500 or any(keyword in content[:200] for keyword in ["版权", "目录", "出版", "ISBN", "序言", "致谢"]):
-                        is_main_text = False
-                        logger.info(f"⏭️ 判定 {chapter_name} 为非正文/短章节，跳过生成前情摘要。")
+                    recap_text = None
 
-                    if self.config.get("enable_recap", True) and is_main_text:
-                        recap_text = None
+                    # 🌟 1. 强制最高优先级：只要用户/外脑提供了前情提要，无视章节长度，直接使用！
+                    if chapter_name in custom_recaps:
+                        recap_text = custom_recaps[chapter_name]
+                        logger.info(f"📋 强制使用外脑提供的前情提要: {chapter_name}")
+                    elif chapter_index in user_recaps:
+                        recap_text = user_recaps[chapter_index]
+                        logger.info(f"📋 强制使用用户提供的前情提要: {chapter_name}")
+                    
+                    # 🌟 2. 如果用户没提供，再去判断是否是正文，以及是否需要大模型自动生成
+                    elif self.config.get("enable_recap", True):
+                        is_main_text = True
+                        # 过滤版权页、目录、致谢等非正文章节
+                        if len(content) < 500 or any(keyword in content[:200] for keyword in ["版权", "目录", "出版", "ISBN", "序言", "致谢"]):
+                            is_main_text = False
+                            logger.info(f"⏭️ 判定 {chapter_name} 为非正文/短章节，跳过生成前情摘要。")
 
-                        # 🌟 优先使用外脑提供的前情提要（按章节名索引）
-                        if chapter_name in custom_recaps:
-                            recap_text = custom_recaps[chapter_name]
-                            logger.info(f"📋 使用外脑提供的前情提要: {chapter_name}")
-                        # 🌟 其次使用用户提供的前情提要（按章节序号索引）
-                        elif chapter_index in user_recaps:
-                            recap_text = user_recaps[chapter_index]
-                            logger.info(f"📋 使用用户提供的前情提要: {chapter_name}")
-                        elif self.config.get("enable_auto_recap", True) and prev_chapter_content is not None:
-                            # 只有上一章也是正文，才值得回顾
+                        if is_main_text and self.config.get("enable_auto_recap", True) and prev_chapter_content is not None:
                             if len(prev_chapter_content) >= 800:
                                 logger.info(f"🔄 正在为 {chapter_name} 生成前情摘要 (Map-Reduce 引擎)...")
                                 recap_text = director.generate_chapter_recap(prev_chapter_content)
 
-                        if recap_text:
-                            intro_unit = {
-                                "chunk_id": f"{chapter_name}_recap_intro",
-                                "type": "recap",
-                                "speaker": "talkover",
-                                "content": "前情提要：",
-                                "pause_ms": 500
-                            }
-                            recap_unit = {
-                                "chunk_id": f"{chapter_name}_recap_body",
-                                "type": "recap",
-                                "speaker": "talkover",
-                                "content": recap_text,
-                                "pause_ms": 1500
-                            }
-                            # 🌟 安全插入法：动态索引，防止极短剧本的数组越界隐患
-                            insert_idx = 1 if len(micro_script) > 1 else 0
-                            micro_script.insert(insert_idx, intro_unit)
-                            micro_script.insert(insert_idx + 1, recap_unit)
-                            recap_injected = True
+                    # 🌟 3. 执行提要注入
+                    if recap_text:
+                        intro_unit = {
+                            "chunk_id": f"{chapter_name}_recap_intro",
+                            "type": "recap",
+                            "speaker": "talkover",
+                            "content": "前情提要：",
+                            "pause_ms": 500
+                        }
+                        recap_unit = {
+                            "chunk_id": f"{chapter_name}_recap_body",
+                            "type": "recap",
+                            "speaker": "talkover",
+                            "content": recap_text,
+                            "pause_ms": 1500
+                        }
+                        # 安全插入法
+                        insert_idx = 1 if len(micro_script) > 1 else 0
+                        micro_script.insert(insert_idx, intro_unit)
+                        micro_script.insert(insert_idx + 1, recap_unit)
+                        recap_injected = True
 
                 # 🌟 试听强制注入逻辑（核心）
                 # 如果是试听模式，且原本这章没摘要（比如第一章），但用户传了外脑字典，我们就强行借用一条来试听！
