@@ -110,9 +110,9 @@ class CineCastProducer:
         或：
             Chapter 1: recap text...
             Chapter 2: recap text...
-        或简单的按行分隔（每行对应一章，从第2章开始使用）：
-            第一章的摘要
-            第二章的摘要
+        或简单的按行分隔（每行对应一章的前情提要，第1行用于第2章，第2行用于第3章，以此类推）：
+            第一章的摘要内容（将作为第2章的前情提要）
+            第二章的摘要内容（将作为第3章的前情提要）
         """
         if not raw_text or not raw_text.strip():
             return {}
@@ -236,7 +236,7 @@ class CineCastProducer:
             if user_recaps:
                 logger.info(f"📋 检测到用户提供的前情提要，共 {len(user_recaps)} 章")
 
-        chapter_index = 0  # 当前章节序号（从0开始）
+        chapter_index = 0  # 章节计数器，循环体内先自增，因此第一章为1
         for chapter_name, content in chapters.items():
             chapter_index += 1
             script_path = os.path.join(self.script_dir, f"{chapter_name}_micro.json")

@@ -71,7 +71,7 @@ def process_audio(epub_file, mode_choice, narrator_file,
         "target_duration_min": 30,
         "min_tail_min": 10,
         "use_local_llm": True,
-        "enable_recap": enable_recap_flag if not is_pure_narrator else False,
+        "enable_recap": enable_recap_flag and not is_pure_narrator,
         "pure_narrator_mode": is_pure_narrator,
         "user_recaps": user_recap_text if (user_recap_text and user_recap_text.strip()) else None,
     }

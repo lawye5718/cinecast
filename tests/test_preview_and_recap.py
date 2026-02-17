@@ -163,6 +163,7 @@ class TestPreviewModeMaxChapters:
             os.makedirs(input_dir)
             for i in range(1, 4):
                 with open(os.path.join(input_dir, f"ch{i:02d}.txt"), "w", encoding="utf-8") as f:
+                    # Repeat to exceed 100-char minimum filter in _extract_epub_chapters
                     f.write(f"第{i}章\n这是第{i}章的内容，足够长的文本以确保不会被过滤掉。" * 10)
 
             config = {
@@ -205,6 +206,7 @@ class TestPreviewModeMaxChapters:
             os.makedirs(input_dir)
             for i in range(1, 4):
                 with open(os.path.join(input_dir, f"ch{i:02d}.txt"), "w", encoding="utf-8") as f:
+                    # Repeat to exceed 100-char minimum filter in _extract_epub_chapters
                     f.write(f"第{i}章\n这是第{i}章的内容，足够长的文本。" * 10)
 
             config = {
