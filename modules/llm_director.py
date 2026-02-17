@@ -583,7 +583,7 @@ class LLMScriptDirector:
             cast_listing = ", ".join(cast_info_parts)
             system_prompt += f"""
 
-        【五、 全局选角纪律（Cast Whitelist）】
+        【全局选角纪律（Cast Whitelist）】
         - 以下是本书的官方角色名单（标准名）：{cast_listing}
         - 你在 speaker 字段中使用的角色名，必须严格使用上述标准名！
         - 严禁自行发明或使用任何不在名单中的角色名！

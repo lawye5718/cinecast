@@ -167,8 +167,9 @@ class AssetManager:
         if role_type in ["title", "subtitle", "narration", "recap"]:
             return self.voices.get(role_type, self.voices["narrator"])
             
-        # 🌟 角色专属音色匹配：如果 assets/voices/ 下有与角色同名的 .wav 文件，直接绑定
+        # 对话角色音色记忆（含专属音色匹配）
         if speaker_name and speaker_name not in self.role_voice_map:
+            # 🌟 角色专属音色匹配：如果 assets/voices/ 下有与角色同名的 .wav 文件，直接绑定
             custom_voice_path = os.path.join(self.asset_dir, "voices", f"{speaker_name}.wav")
             if os.path.exists(custom_voice_path):
                 self.role_voice_map[speaker_name] = {
@@ -177,19 +178,16 @@ class AssetManager:
                     "speed": 1.0
                 }
                 logger.info(f"✅ 角色 [{speaker_name}] 已绑定专属音色: {custom_voice_path}")
-                return self.role_voice_map[speaker_name]
-
-        # 对话角色音色记忆
-        if speaker_name and speaker_name not in self.role_voice_map:
-            # 🌟 修复：除非明确是 female，否则未知角色一律默认用男声池
-            pool = self.voices["female_pool"] if gender == "female" else self.voices["male_pool"]
-            if not pool:
-                self.role_voice_map[speaker_name] = self.voices["narrator"]
             else:
-                # 使用确定性哈希分配，确保同名角色跨进程仍获得同一音色
-                digest = int(hashlib.md5(speaker_name.encode()).hexdigest(), 16)
-                idx = digest % len(pool)
-                self.role_voice_map[speaker_name] = pool[idx]
+                # 🌟 修复：除非明确是 female，否则未知角色一律默认用男声池
+                pool = self.voices["female_pool"] if gender == "female" else self.voices["male_pool"]
+                if not pool:
+                    self.role_voice_map[speaker_name] = self.voices["narrator"]
+                else:
+                    # 使用确定性哈希分配，确保同名角色跨进程仍获得同一音色
+                    digest = int(hashlib.md5(speaker_name.encode()).hexdigest(), 16)
+                    idx = digest % len(pool)
+                    self.role_voice_map[speaker_name] = pool[idx]
             
         if speaker_name:
             return self.role_voice_map.get(speaker_name, self.voices["narrator"])
