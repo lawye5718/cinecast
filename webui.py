@@ -58,11 +58,12 @@ def process_audio(epub_file, mode_choice, narrator_file, male_file, female_file,
             preview_mp3_path = producer.run_preview_mode(epub_file.name)
             return preview_mp3_path, "✅ 试听生成成功！请点击播放。"
 
-        # 🚀 全本压制模式
+        # 🚀 全本压制模式：必须严格按 微切片 → 渲染 → 混音 三阶段串行执行
         if producer.phase_1_generate_scripts(epub_file.name):
             producer.phase_2_render_dry_audio()
             producer.phase_3_cinematic_mix()
-        return None, f"✅ 全本压制完成！请前往 {config['output_dir']} 目录查看。"
+            return None, f"✅ 全本压制完成！请前往 {config['output_dir']} 目录查看。"
+        return None, "❌ 阶段一（微切片剧本生成）失败，请检查输入文件和服务状态。"
 
     except Exception as e:
         return None, f"❌ 发生错误: {e}"
