@@ -290,6 +290,7 @@ class CineCastProducer:
         # 临时强制设为极短时长，迫使 CinematicPackager 提前触发导出
         original_duration = self.config["target_duration_min"]
         self.config["target_duration_min"] = 0.5  # 30秒就发版
+        preview_script_path = os.path.join(self.script_dir, "_preview_temp_micro.json")
 
         try:
             # ── 第一阶段：微切片（必须先完成！）──
@@ -308,7 +309,6 @@ class CineCastProducer:
             preview_script = micro_script[:10]
 
             # 🌟 写入独立的临时预览剧本，不覆盖原始剧本（保护全本压制的断点续传）
-            preview_script_path = os.path.join(self.script_dir, "_preview_temp_micro.json")
             with open(preview_script_path, 'w', encoding='utf-8') as f:
                 json.dump(preview_script, f, ensure_ascii=False)
 
@@ -328,7 +328,6 @@ class CineCastProducer:
             # 恢复配置以免污染正式的全本压制
             self.config["target_duration_min"] = original_duration
             # 清理临时预览剧本（无论成功/失败都要清理）
-            preview_script_path = os.path.join(self.script_dir, "_preview_temp_micro.json")
             if os.path.exists(preview_script_path):
                 os.remove(preview_script_path)
 

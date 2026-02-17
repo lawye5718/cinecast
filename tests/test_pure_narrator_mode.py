@@ -221,7 +221,6 @@ class TestPureNarratorChunkLimit:
 
     def test_short_sentences_not_split_under_100(self, director):
         """短于 100 字的句子不应被逗号次级切分。"""
-        # 80 chars sentence - should NOT be sub-split
         text = "他站在窗前，望着远方的群山，心中涌起一阵莫名的感伤，仿佛一切都在这一刻停滞了。"
         result = director.generate_pure_narrator_script(text)
         assert len(result) == 1, f"Expected 1 chunk for short sentence, got {len(result)}"
