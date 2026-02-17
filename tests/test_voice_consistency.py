@@ -142,6 +142,61 @@ class TestDialogueWithoutSpeaker:
 # Non-dialogue types consistency
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Gender fallback: unknown gender uses male pool (Bug fix)
+# ---------------------------------------------------------------------------
+
+class TestGenderUnknownFallback:
+    def test_unknown_gender_uses_male_pool(self, manager):
+        """When gender='unknown', dialogue speaker should get a male voice (not female)."""
+        voice = manager.get_voice_for_role("dialogue", "路人甲_unknown", "unknown")
+        assert voice in manager.voices["male_pool"]
+
+    def test_unknown_gender_does_not_pick_female(self, manager):
+        """When gender='unknown', dialogue speaker should NOT get a female voice."""
+        voice = manager.get_voice_for_role("dialogue", "路人乙_unknown", "unknown")
+        assert voice not in manager.voices["female_pool"]
+
+    def test_female_gender_still_uses_female_pool(self, manager):
+        """When gender='female', dialogue speaker should get a female voice."""
+        voice = manager.get_voice_for_role("dialogue", "艾米莉_test", "female")
+        assert voice in manager.voices["female_pool"]
+
+    def test_male_gender_uses_male_pool(self, manager):
+        """When gender='male', dialogue speaker should get a male voice."""
+        voice = manager.get_voice_for_role("dialogue", "老渔夫_test_m", "male")
+        assert voice in manager.voices["male_pool"]
+
+
+# ---------------------------------------------------------------------------
+# Custom .wav voice binding for named characters
+# ---------------------------------------------------------------------------
+
+class TestCustomWavVoiceBinding:
+    def test_custom_wav_binds_to_speaker(self, tmp_path):
+        """If assets/voices/<speaker>.wav exists, it should be used."""
+        voices_dir = tmp_path / "voices"
+        voices_dir.mkdir()
+        custom_wav = voices_dir / "老渔夫.wav"
+        custom_wav.write_bytes(b"RIFF" + b"\x00" * 40)
+        # Create narrator.wav stub for AssetManager init
+        narrator_wav = voices_dir / "narrator.wav"
+        narrator_wav.write_bytes(b"RIFF" + b"\x00" * 40)
+
+        mgr = AssetManager(asset_dir=str(tmp_path))
+        voice = mgr.get_voice_for_role("dialogue", "老渔夫", "male")
+        assert voice["audio"] == str(custom_wav)
+
+    def test_no_custom_wav_uses_pool(self, manager):
+        """Without a custom .wav file, speaker uses pool-based assignment."""
+        voice = manager.get_voice_for_role("dialogue", "张三_no_wav", "male")
+        assert voice in manager.voices["male_pool"]
+
+
+# ---------------------------------------------------------------------------
+# Non-dialogue types consistency
+# ---------------------------------------------------------------------------
+
 class TestNonDialogueTypes:
     def test_title_consistent(self, manager):
         v1 = manager.get_voice_for_role("title")

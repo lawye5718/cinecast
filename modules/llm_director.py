@@ -570,6 +570,26 @@ class LLMScriptDirector:
         ]
         """
 
+        # 🌟 全局选角纪律注入：如果有外脑提供的角色白名单，追加到 system_prompt
+        if self.global_cast:
+            cast_names = list(self.global_cast.keys())
+            cast_info_parts = []
+            for name, info in self.global_cast.items():
+                if isinstance(info, dict):
+                    g = info.get("gender", "unknown")
+                    cast_info_parts.append(f'"{name}"(gender={g})')
+                else:
+                    cast_info_parts.append(f'"{name}"')
+            cast_listing = ", ".join(cast_info_parts)
+            system_prompt += f"""
+
+        【五、 全局选角纪律（Cast Whitelist）】
+        - 以下是本书的官方角色名单（标准名）：{cast_listing}
+        - 你在 speaker 字段中使用的角色名，必须严格使用上述标准名！
+        - 严禁自行发明或使用任何不在名单中的角色名！
+        - 如果遇到名单外的龙套角色，统一使用 "路人" 作为 speaker。
+        """
+
         user_content = "请严格按照规范，将以下文本拆解为纯净的 JSON 剧本（绝不改写原意）：\n\n"
         if context:
             user_content += f"【上文参考（仅供角色一致性参考，不要翻译此段）】\n{context}\n\n"
