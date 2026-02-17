@@ -294,7 +294,7 @@ class CineCastProducer:
             # 找到第一个生成的剧本
             script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])
             if not script_files:
-                raise Exception("未找到剧本")
+                raise Exception(f"未找到剧本，请检查阶段一是否成功 (script_dir={self.script_dir})")
 
             first_script_path = os.path.join(self.script_dir, script_files[0])
             with open(first_script_path, 'r', encoding='utf-8') as f:

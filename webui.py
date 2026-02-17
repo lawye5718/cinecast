@@ -62,7 +62,7 @@ def process_audio(epub_file, mode_choice, narrator_file, male_file, female_file,
         if producer.phase_1_generate_scripts(epub_file.name):
             producer.phase_2_render_dry_audio()
             producer.phase_3_cinematic_mix()
-        return None, "✅ 全本压制完成！请前往 output/Audiobooks 目录查看。"
+        return None, f"✅ 全本压制完成！请前往 {config['output_dir']} 目录查看。"
 
     except Exception as e:
         return None, f"❌ 发生错误: {e}"
@@ -184,4 +184,4 @@ with gr.Blocks(theme=theme, title="CineCast 电影级有声书") as ui:
     )
 
 if __name__ == "__main__":
-    ui.launch(inbrowser=True, server_name="0.0.0.0", server_port=7860)
+    ui.launch(inbrowser=True, server_name="127.0.0.1", server_port=7860)
