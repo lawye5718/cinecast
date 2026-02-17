@@ -27,6 +27,16 @@ def manager():
     return AssetManager(asset_dir="./assets")
 
 
+@pytest.fixture
+def manager_with_voices(tmp_path):
+    """Create an AssetManager with actual voice files on disk."""
+    voices_dir = tmp_path / "voices"
+    voices_dir.mkdir()
+    for name in ("narrator.wav", "m1.wav", "m2.wav", "f1.wav", "f2.wav"):
+        (voices_dir / name).write_bytes(b"RIFF" + b"\x00" * 40)
+    return AssetManager(asset_dir=str(tmp_path))
+
+
 # ---------------------------------------------------------------------------
 # Narration key exists in voices dict
 # ---------------------------------------------------------------------------
@@ -74,11 +84,11 @@ class TestPureNarratorVoiceConsistency:
 # ---------------------------------------------------------------------------
 
 class TestGenderNoneHandling:
-    def test_gender_none_uses_male_pool(self, manager):
+    def test_gender_none_uses_male_pool(self, manager_with_voices):
         """When gender=None, dialogue speaker should get a male voice."""
-        voice = manager.get_voice_for_role("dialogue", "test_speaker_m", None)
+        voice = manager_with_voices.get_voice_for_role("dialogue", "test_speaker_m", None)
         # Should have been assigned from male_pool
-        assert voice in manager.voices["male_pool"]
+        assert voice in manager_with_voices.voices["male_pool"]
 
     def test_gender_none_does_not_pick_female(self, manager):
         """When gender=None, dialogue speaker should NOT get a female voice."""
@@ -147,25 +157,25 @@ class TestDialogueWithoutSpeaker:
 # ---------------------------------------------------------------------------
 
 class TestGenderUnknownFallback:
-    def test_unknown_gender_uses_male_pool(self, manager):
+    def test_unknown_gender_uses_male_pool(self, manager_with_voices):
         """When gender='unknown', dialogue speaker should get a male voice (not female)."""
-        voice = manager.get_voice_for_role("dialogue", "路人甲_unknown", "unknown")
-        assert voice in manager.voices["male_pool"]
+        voice = manager_with_voices.get_voice_for_role("dialogue", "路人甲_unknown", "unknown")
+        assert voice in manager_with_voices.voices["male_pool"]
 
-    def test_unknown_gender_does_not_pick_female(self, manager):
+    def test_unknown_gender_does_not_pick_female(self, manager_with_voices):
         """When gender='unknown', dialogue speaker should NOT get a female voice."""
-        voice = manager.get_voice_for_role("dialogue", "路人乙_unknown", "unknown")
-        assert voice not in manager.voices["female_pool"]
+        voice = manager_with_voices.get_voice_for_role("dialogue", "路人乙_unknown", "unknown")
+        assert voice not in manager_with_voices.voices["female_pool"]
 
-    def test_female_gender_still_uses_female_pool(self, manager):
+    def test_female_gender_still_uses_female_pool(self, manager_with_voices):
         """When gender='female', dialogue speaker should get a female voice."""
-        voice = manager.get_voice_for_role("dialogue", "艾米莉_test", "female")
-        assert voice in manager.voices["female_pool"]
+        voice = manager_with_voices.get_voice_for_role("dialogue", "艾米莉_test", "female")
+        assert voice in manager_with_voices.voices["female_pool"]
 
-    def test_male_gender_uses_male_pool(self, manager):
+    def test_male_gender_uses_male_pool(self, manager_with_voices):
         """When gender='male', dialogue speaker should get a male voice."""
-        voice = manager.get_voice_for_role("dialogue", "老渔夫_test_m", "male")
-        assert voice in manager.voices["male_pool"]
+        voice = manager_with_voices.get_voice_for_role("dialogue", "老渔夫_test_m", "male")
+        assert voice in manager_with_voices.voices["male_pool"]
 
 
 # ---------------------------------------------------------------------------
@@ -187,10 +197,10 @@ class TestCustomWavVoiceBinding:
         voice = mgr.get_voice_for_role("dialogue", "老渔夫", "male")
         assert voice["audio"] == str(custom_wav)
 
-    def test_no_custom_wav_uses_pool(self, manager):
+    def test_no_custom_wav_uses_pool(self, manager_with_voices):
         """Without a custom .wav file, speaker uses pool-based assignment."""
-        voice = manager.get_voice_for_role("dialogue", "张三_no_wav", "male")
-        assert voice in manager.voices["male_pool"]
+        voice = manager_with_voices.get_voice_for_role("dialogue", "张三_no_wav", "male")
+        assert voice in manager_with_voices.voices["male_pool"]
 
 
 # ---------------------------------------------------------------------------
@@ -212,3 +222,25 @@ class TestNonDialogueTypes:
         v1 = manager.get_voice_for_role("recap")
         v2 = manager.get_voice_for_role("recap")
         assert v1["audio"] == v2["audio"]
+
+
+# ---------------------------------------------------------------------------
+# Missing voice file fallback to narrator (Bug fix for silent crash)
+# ---------------------------------------------------------------------------
+
+class TestMissingVoiceFileFallback:
+    def test_missing_pool_voice_falls_back_to_narrator(self, manager):
+        """When pool voice audio file does not exist, should fall back to narrator."""
+        voice = manager.get_voice_for_role("dialogue", "碧雅_missing", "female")
+        assert voice["audio"] == manager.voices["narrator"]["audio"]
+
+    def test_missing_male_pool_voice_falls_back_to_narrator(self, manager):
+        """When male pool voice audio file does not exist, should fall back to narrator."""
+        voice = manager.get_voice_for_role("dialogue", "路人_missing", "male")
+        assert voice["audio"] == manager.voices["narrator"]["audio"]
+
+    def test_existing_pool_voice_uses_pool(self, manager_with_voices):
+        """When pool voice audio file exists, should use it from the pool."""
+        voice = manager_with_voices.get_voice_for_role("dialogue", "碧雅_exists", "female")
+        pool_audios = [e["audio"] for e in manager_with_voices.voices["female_pool"]]
+        assert voice["audio"] in pool_audios
