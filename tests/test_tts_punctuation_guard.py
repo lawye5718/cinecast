@@ -37,11 +37,20 @@ def _apply_text_cleaning(text: str) -> str:
     """Mirror the full aggressive text cleaning logic in render_dry_chunk."""
     render_text = text.strip()
     render_text = re.sub(r'[…]+', '。', render_text)
-    render_text = re.sub(r'[—]+', '，', render_text)
     render_text = re.sub(r'\.{3,}', '。', render_text)
+    render_text = re.sub(r'[—]+', '，', render_text)
+    render_text = re.sub(r'[-]{2,}', '，', render_text)
+    render_text = re.sub(r'[~～]+', '。', render_text)
     if not _CLOSING_PUNCT_RE.search(render_text):
         render_text += "。"
     return render_text
+
+
+def _is_pure_punctuation(text: str) -> bool:
+    """Return True if cleaned text contains no real characters (only punctuation)."""
+    cleaned = _apply_text_cleaning(text)
+    pure_text = re.sub(r'[。，！？；、\u201c\u201d\u2018\u2019（）《》,.!?;:\'\"()\-\s]', '', cleaned)
+    return not pure_text
 
 
 # ---------------------------------------------------------------------------
@@ -174,6 +183,83 @@ class TestAggressiveTextCleaning:
 
 
 # ---------------------------------------------------------------------------
+# Tests: English dash and tilde cleaning (new ultimate defense rules)
+# ---------------------------------------------------------------------------
+
+class TestUltimateDefenseCleaning:
+    """Verify the additional cleaning rules for English dashes and tildes."""
+
+    def test_double_english_dash_replaced(self):
+        """Double English dashes -- should be replaced with ，"""
+        assert _apply_text_cleaning("他说--好的") == "他说，好的。"
+
+    def test_triple_english_dash_replaced(self):
+        """Triple English dashes --- should be replaced with ，"""
+        assert _apply_text_cleaning("他说---好的") == "他说，好的。"
+
+    def test_single_english_dash_not_replaced(self):
+        """A single English dash should NOT be replaced."""
+        result = _apply_text_cleaning("他说-好的")
+        assert "-" in result
+
+    def test_chinese_tilde_replaced(self):
+        """Chinese tilde ～ should be replaced with 。"""
+        assert _apply_text_cleaning("好的～") == "好的。"
+
+    def test_english_tilde_replaced(self):
+        """English tilde ~ should be replaced with 。"""
+        assert _apply_text_cleaning("好的~") == "好的。"
+
+    def test_multiple_tildes_replaced(self):
+        """Multiple tildes should be collapsed into a single 。"""
+        assert _apply_text_cleaning("好的~~~") == "好的。"
+        assert _apply_text_cleaning("好的～～～") == "好的。"
+
+    def test_mixed_tildes_replaced(self):
+        """Mixed English and Chinese tildes should be collapsed."""
+        assert _apply_text_cleaning("好的~～~") == "好的。"
+
+
+# ---------------------------------------------------------------------------
+# Tests: Pure punctuation (empty text) defense
+# ---------------------------------------------------------------------------
+
+class TestPurePunctuationDefense:
+    """Verify the 'kill switch' that detects text with no real characters."""
+
+    def test_only_ellipsis_is_pure_punctuation(self):
+        """Text that is only ellipsis should be detected as pure punctuation."""
+        assert _is_pure_punctuation("……")
+
+    def test_only_em_dash_is_pure_punctuation(self):
+        """Text that is only em-dashes should be detected as pure punctuation."""
+        assert _is_pure_punctuation("——")
+
+    def test_only_tildes_is_pure_punctuation(self):
+        """Text that is only tildes should be detected as pure punctuation."""
+        assert _is_pure_punctuation("~~~")
+        assert _is_pure_punctuation("～～～")
+
+    def test_only_punctuation_marks(self):
+        """Text with only punctuation marks should be detected."""
+        assert _is_pure_punctuation("，。！？")
+
+    def test_empty_string_is_pure_punctuation(self):
+        """Empty string should be detected as pure punctuation."""
+        assert _is_pure_punctuation("")
+        assert _is_pure_punctuation("   ")
+
+    def test_real_text_not_pure_punctuation(self):
+        """Text with real characters should NOT be detected."""
+        assert not _is_pure_punctuation("你好")
+        assert not _is_pure_punctuation("Hello")
+
+    def test_mixed_text_and_punctuation_not_pure(self):
+        """Text with both characters and punctuation should NOT be detected."""
+        assert not _is_pure_punctuation("他说，好的。")
+
+
+# ---------------------------------------------------------------------------
 # Tests: Preview mode script truncation
 # ---------------------------------------------------------------------------
 
@@ -253,7 +339,7 @@ class TestSourceCodeGuard:
         assert 'render_text += "。"' in source, "Punctuation append not found"
 
     def test_aggressive_cleaning_in_source(self):
-        """The aggressive ellipsis/em-dash cleaning must exist in mlx_tts_engine.py."""
+        """The aggressive ellipsis/em-dash/tilde cleaning must exist in mlx_tts_engine.py."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "modules", "mlx_tts_engine.py",
@@ -263,6 +349,19 @@ class TestSourceCodeGuard:
         assert r"[…]+" in source, "Ellipsis cleaning regex not found"
         assert r"[—]+" in source, "Em-dash cleaning regex not found"
         assert r"\.{3,}" in source, "Triple-dot cleaning regex not found"
+        assert r"[-]{2,}" in source, "English double-dash cleaning regex not found"
+        assert r"[~～]+" in source, "Tilde cleaning regex not found"
+
+    def test_pure_punctuation_guard_in_source(self):
+        """The pure-punctuation kill switch must exist in mlx_tts_engine.py."""
+        source_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "modules", "mlx_tts_engine.py",
+        )
+        with open(source_path, "r", encoding="utf-8") as f:
+            source = f.read()
+        assert "pure_text" in source, "pure_text variable not found"
+        assert "np.zeros" in source, "Silent audio generation not found"
 
     def test_gc_collect_in_source(self):
         """gc.collect() must be called in the finally block."""
