@@ -119,12 +119,12 @@ class TestAudioScanner:
 
 
 class TestAudioFileInfo:
-    def test_repr_pending(self):
-        info = AudioFileInfo("/tmp/test.mp3")
+    def test_repr_pending(self, tmp_path):
+        info = AudioFileInfo(str(tmp_path / "test.mp3"))
         assert "⏳" in repr(info)
 
-    def test_repr_needs_fix(self):
-        info = AudioFileInfo("/tmp/test.mp3")
+    def test_repr_needs_fix(self, tmp_path):
+        info = AudioFileInfo(str(tmp_path / "test.mp3"))
         info.status = FileStatus.NEEDS_FIX
         info.glitches = [1.0, 2.0, 3.0]
         r = repr(info)

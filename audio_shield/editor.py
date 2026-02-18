@@ -139,8 +139,13 @@ class AudioBufferManager:
         if len(self.audio) == 0:
             return
 
+        peak = self.audio.max_dBFS
+        if peak == float("-inf"):
+            # 完全静音的音频无法归一化
+            return
+
         self.history.append(self.audio)
-        change = target_dbfs - self.audio.max_dBFS
+        change = target_dbfs - peak
         self.audio = self.audio.apply_gain(change)
         logger.info(f"📊 已归一化到 {target_dbfs} dBFS (增益 {change:+.1f} dB)")
 

@@ -12,6 +12,10 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+# Threshold multiplier: controls how many standard deviations above the mean
+# the first-order difference must exceed to be classified as a glitch.
+_THRESHOLD_MULTIPLIER = 5
+
 # ---------------------------------------------------------------------------
 # 尝试导入 librosa；CI 等轻量环境可能没有安装
 # ---------------------------------------------------------------------------
@@ -70,7 +74,7 @@ def detect_audio_glitches(
     if std_diff == 0:
         return []
 
-    threshold = mean_diff + (std_diff * (1 / sensitivity) * 5)
+    threshold = mean_diff + (std_diff * (1 / sensitivity) * _THRESHOLD_MULTIPLIER)
 
     # 3. 找到超过阈值的索引
     glitch_indices = np.where(diff > threshold)[0]
@@ -127,7 +131,7 @@ def detect_glitches_from_array(
     if std_diff == 0:
         return []
 
-    threshold = mean_diff + (std_diff * (1 / sensitivity) * 5)
+    threshold = mean_diff + (std_diff * (1 / sensitivity) * _THRESHOLD_MULTIPLIER)
 
     glitch_indices = np.where(diff > threshold)[0]
     # 将采样索引转换为时间（秒）

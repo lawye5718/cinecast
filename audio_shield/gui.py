@@ -100,6 +100,11 @@ class AnalysisWorker(QThread if _QT_AVAILABLE else object):
 class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
     """CineCast Audio Shield 主窗口"""
 
+    # Maximum number of waveform points to render (for performance)
+    MAX_WAVEFORM_POINTS = 50000
+    # Time tolerance (seconds) when navigating between glitch points
+    GLITCH_NAV_TOLERANCE_SEC = 0.1
+
     def __init__(self):
         _check_qt()
         super().__init__()
@@ -347,8 +352,8 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         sr = audio.frame_rate
         time_axis = np.arange(len(samples)) / sr
 
-        # 降采样以加速绘制（最多显示 50000 个点）
-        max_points = 50000
+        # 降采样以加速绘制
+        max_points = self.MAX_WAVEFORM_POINTS
         if len(samples) > max_points:
             step = len(samples) // max_points
             samples = samples[::step]
@@ -381,10 +386,12 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         current_center = (view_range[0][0] + view_range[0][1]) / 2
 
         if direction > 0:
-            candidates = [t for t in self._current_glitches if t > current_center + 0.1]
+            candidates = [t for t in self._current_glitches
+                         if t > current_center + self.GLITCH_NAV_TOLERANCE_SEC]
             target = candidates[0] if candidates else self._current_glitches[0]
         else:
-            candidates = [t for t in self._current_glitches if t < current_center - 0.1]
+            candidates = [t for t in self._current_glitches
+                         if t < current_center - self.GLITCH_NAV_TOLERANCE_SEC]
             target = candidates[-1] if candidates else self._current_glitches[-1]
 
         # 设置视图到噪音点前 1 秒
