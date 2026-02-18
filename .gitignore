@@ -37,6 +37,7 @@ Thumbs.db
 config.local.py
 config.local.json
 .env
+.cinecast_workspace.json
 
 # 资产文件（大型二进制文件）
 assets/voices/

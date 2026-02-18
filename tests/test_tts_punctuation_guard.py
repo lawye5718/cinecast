@@ -33,7 +33,7 @@ def _needs_punctuation_guard(text: str) -> bool:
     return not _CLOSING_PUNCT_RE.search(stripped)
 
 
-def _apply_text_cleaning(text: str) -> str:
+def _apply_text_cleaning(text: str, max_chars: int = 60) -> str:
     """Mirror the full aggressive text cleaning logic in render_dry_chunk."""
     render_text = text.strip()
     render_text = re.sub(r'[…]+', '。', render_text)
@@ -42,8 +42,8 @@ def _apply_text_cleaning(text: str) -> str:
     render_text = re.sub(r'[-]{2,}', '，', render_text)
     render_text = re.sub(r'[~～]+', '。', render_text)
     render_text = re.sub(r'\s+', ' ', render_text).strip()
-    if len(render_text) > 80:
-        render_text = render_text[:80] + "。"
+    if len(render_text) > max_chars:
+        render_text = render_text[:max_chars] + "。"
     if not _CLOSING_PUNCT_RE.search(render_text):
         render_text += "。"
     return render_text
