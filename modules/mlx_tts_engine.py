@@ -66,6 +66,13 @@ class MLXRenderEngine:
             logger.error(f"❌ MLX渲染引擎初始化失败: {e}")
             raise
     
+    def destroy(self):
+        """显式清理 MLX 模型资源，释放显存"""
+        if hasattr(self, 'model'):
+            del self.model
+        mx.clear_cache()
+        logger.info("🧹 MLX 渲染引擎资源已显式释放")
+    
     def render_dry_chunk(self, content: str, voice_cfg: dict, save_path: str, emotion: str = "平静") -> bool:
         """
         只负责将文本变成 WAV 文件，绝不维护状态
@@ -89,16 +96,21 @@ class MLXRenderEngine:
             
             # 🌟 终极暴力清洗：消灭一切导致复读的特殊符号
             render_text = re.sub(r'[…]+', '。', render_text)       # 中文省略号
-            render_text = re.sub(r'\.{3,}', '。', render_text)     # 英文省略号
+            render_text = re.sub(r'\.{2,}', '。', render_text)     # 英文省略号（含双点）
             render_text = re.sub(r'[—]+', '，', render_text)       # 中文破折号
             render_text = re.sub(r'[-]{2,}', '，', render_text)    # 英文破折号
             render_text = re.sub(r'[~～]+', '。', render_text)     # 波浪号
+            # 清洗所有内部换行和异常空白
+            render_text = re.sub(r'\s+', ' ', render_text).strip()
+            # 强制防卡死长度截断
+            if len(render_text) > 80:
+                render_text = render_text[:80] + "。"
             
             if not re.search(r'[。！？；.!?;]$', render_text):
                 render_text += "。"
 
             # 🌟 绝杀防御：检查清理后是否只剩下标点符号（无实际文字）
-            pure_text = re.sub(r'[。，！？；、""''（）《》,.!?;:\'\"()\-\s]', '', render_text)
+            pure_text = re.sub(r'[。，！？；、\u201c\u201d\u2018\u2019（）《》,.!?;:\'\"()\s-]', '', render_text)
             if not pure_text:
                 logger.warning(f"⚠️ 切片无有效文字，跳过大模型渲染，生成 0.5s 空白音频: {save_path}")
                 # 强行生成 0.5 秒的静音，避免后续混音时找不到文件报错

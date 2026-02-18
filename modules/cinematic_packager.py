@@ -23,17 +23,18 @@ class CinematicPackager:
     FADE_IN_MS = 3000   # 淡入时长（毫秒）
     FADE_OUT_MS = 2000  # 淡出时长（毫秒）
 
-    def __init__(self, output_dir="output"):
+    def __init__(self, output_dir="output", target_duration_min=30):
         """
         初始化电影级混音台
         
         Args:
             output_dir: 输出目录
+            target_duration_min: 目标分卷时长（分钟），默认30分钟
         """
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
         
-        self.target_duration_ms = 30 * 60 * 1000  # 30分钟打包
+        self.target_duration_ms = target_duration_min * 60 * 1000
         self.min_tail_ms = 10 * 60 * 1000         # 10分钟尾部阈值
         self.sample_rate = 22050                  # 标准采样率
         
@@ -109,11 +110,8 @@ class CinematicPackager:
             )
             speed_factor = voice_cfg.get("speed", 1.0)
             
-            if speed_factor != 1.0:
-                new_frame_rate = int(segment.frame_rate * speed_factor)
-                segment = segment._spawn(segment.raw_data, overrides={
-                    "frame_rate": new_frame_rate
-                }).set_frame_rate(self.sample_rate)
+            # 🌟 注意：调速应在 TTS 生成时控制，不在混音阶段通过修改帧率实现
+            # 直接修改 frame_rate 会导致音调失真（变调变声），因此此处跳过速度调整
             
             # 🌟 动态停顿：同角色连续对白用短停顿，跨角色切换用长停顿
             current_speaker = item.get("speaker", "narrator")
@@ -286,8 +284,9 @@ class CinematicPackager:
             if ambient:
                 tail_audio = self.mix_ambient(tail_audio, ambient)
             
-            # 合并音频
-            merged = prev_audio + tail_audio
+            # 使用交叉淡化合并，避免前卷 fade_out 与尾部音频之间产生音量断层
+            crossfade_ms = min(2000, len(prev_audio), len(tail_audio))
+            merged = prev_audio.append(tail_audio, crossfade=crossfade_ms)
             
             # 重新导出
             merged.export(prev_file, format="mp3", bitrate="128k")
