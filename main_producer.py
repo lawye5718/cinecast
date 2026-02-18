@@ -502,7 +502,8 @@ class CineCastProducer:
                 save_path = os.path.join(self.cache_dir, f"{item['chunk_id']}.wav")
                 engine.render_dry_chunk(item["content"], group_voice_cfg, save_path)
 
-        engine.destroy()
+        if hasattr(engine, 'destroy'):
+            engine.destroy()
         del engine
 
     def _mix_script_chunks(self, micro_script: list):
@@ -593,7 +594,8 @@ class CineCastProducer:
                             os.remove(save_path)
                             logger.info(f"🗑️ 已销毁超时产生的脏音频: {save_path}")
                         logger.info("🔄 正在触发引擎自愈重置协议...")
-                        engine.destroy()
+                        if hasattr(engine, 'destroy'):
+                            engine.destroy()
                         del engine
                         gc.collect()
                         logger.info("✨ 内存已清空，正在重新加载 MLX TTS 引擎...")
@@ -609,7 +611,8 @@ class CineCastProducer:
                         logger.info(f"   🎵 进度: {rendered_chunks}/{total_chunks} 片段已渲染")
         
         # 释放 MLX 模型显存
-        engine.destroy()
+        if hasattr(engine, 'destroy'):
+            engine.destroy()
         del engine
         logger.info(f"✅ 阶段二完成 ({rendered_chunks}/{total_chunks} 片段)，MLX 已从内存中安全撤离！")
         

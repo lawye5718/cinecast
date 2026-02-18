@@ -33,7 +33,7 @@ from modules.cinematic_packager import CinematicPackager
 _CLOSING_PUNCT_RE = re.compile(r'[。！？；.!?;]$')
 
 
-def _apply_text_cleaning(text: str) -> str:
+def _apply_text_cleaning(text: str, max_chars: int = 60) -> str:
     """Mirror the full aggressive text cleaning logic in render_dry_chunk."""
     render_text = text.strip()
     render_text = re.sub(r'[…]+', '。', render_text)
@@ -42,8 +42,8 @@ def _apply_text_cleaning(text: str) -> str:
     render_text = re.sub(r'[-]{2,}', '，', render_text)
     render_text = re.sub(r'[~～]+', '。', render_text)
     render_text = re.sub(r'\s+', ' ', render_text).strip()
-    if len(render_text) > 80:
-        render_text = render_text[:80] + "。"
+    if len(render_text) > max_chars:
+        render_text = render_text[:max_chars] + "。"
     if not _CLOSING_PUNCT_RE.search(render_text):
         render_text += "。"
     return render_text
@@ -112,22 +112,22 @@ class TestEnhancedTextCleaning:
         result = _apply_text_cleaning("他走了..")
         assert ".." not in result
 
-    def test_long_text_truncated_at_80(self):
-        """Text longer than 80 characters should be truncated with 。"""
+    def test_long_text_truncated_at_max_chars(self):
+        """Text longer than max_chars (60) should be truncated with 。"""
         long_text = "这" * 100
         result = _apply_text_cleaning(long_text)
-        assert len(result) <= 82  # 80 chars + "。"
+        assert len(result) <= 62  # 60 chars + "。"
         assert result.endswith("。")
 
-    def test_text_at_80_not_truncated(self):
-        """Text exactly 80 characters should not be truncated."""
-        text_80 = "这" * 80
-        result = _apply_text_cleaning(text_80)
+    def test_text_at_max_chars_not_truncated(self):
+        """Text exactly 60 characters should not be truncated."""
+        text_60 = "这" * 60
+        result = _apply_text_cleaning(text_60)
         # Should not be truncated, just get a period appended
-        assert result == text_80 + "。"
+        assert result == text_60 + "。"
 
-    def test_text_under_80_not_truncated(self):
-        """Text under 80 characters should not be truncated."""
+    def test_text_under_max_chars_not_truncated(self):
+        """Text under 60 characters should not be truncated."""
         text_50 = "这" * 50
         result = _apply_text_cleaning(text_50)
         assert result == text_50 + "。"
@@ -143,14 +143,14 @@ class TestEnhancedTextCleaning:
         assert r"\s+" in source, "Whitespace normalization regex not found"
 
     def test_source_has_length_truncation(self):
-        """Verify mlx_tts_engine.py contains length truncation."""
+        """Verify mlx_tts_engine.py contains length truncation using self.max_chars."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "modules", "mlx_tts_engine.py",
         )
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
-        assert "len(render_text) > 80" in source, "Length truncation check not found"
+        assert "len(render_text) > self.max_chars" in source, "Length truncation check not found"
 
 
 # ---------------------------------------------------------------------------
@@ -300,7 +300,7 @@ class TestEngineDestroyMethod:
         assert "del self.model" in source, "Model cleanup in destroy not found"
 
     def test_destroy_called_in_main_producer(self):
-        """main_producer.py should call engine.destroy() before del engine."""
+        """main_producer.py should call engine.destroy() with hasattr guard."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "main_producer.py",
@@ -308,3 +308,4 @@ class TestEngineDestroyMethod:
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
         assert "engine.destroy()" in source, "engine.destroy() call not found"
+        assert "hasattr(engine, 'destroy')" in source, "hasattr guard for engine.destroy() not found"

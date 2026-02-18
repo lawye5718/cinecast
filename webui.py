@@ -3,6 +3,7 @@
 CineCast Web UI
 基于 Gradio Blocks API 的现代化图形界面
 支持纯净旁白/智能配音双模式、云端外脑 Master JSON 统一输入、极速试听与全本压制
+包含：工作区断点记忆与自动恢复功能
 """
 
 import os
@@ -10,6 +11,38 @@ import json
 import shutil
 import gradio as gr
 from main_producer import CineCastProducer
+
+# --- 🌟 新增：工作区状态持久化 ---
+WORKSPACE_FILE = "./.cinecast_workspace.json"
+
+
+def load_workspace():
+    """启动时加载上一次的工作区状态"""
+    if os.path.exists(WORKSPACE_FILE):
+        try:
+            with open(WORKSPACE_FILE, 'r', encoding='utf-8') as f:
+                state = json.load(f)
+                print(f"🔄 已恢复上次的工作区断点状态: {state.get('book_file', '无文件')}")
+                return state
+        except Exception as e:
+            print(f"⚠️ 工作区状态读取失败，使用默认设置: {e}")
+    return {"book_file": None, "mode": "🎙️ 纯净旁白模式", "master_json": ""}
+
+
+def save_workspace(book_file, mode, master_json):
+    """每次触发任务时，保存当前状态"""
+    # 获取文件的绝对路径 (Gradio 的 file_obj 可能是路径字符串或具有 name 属性的对象)
+    file_path = book_file.name if hasattr(book_file, "name") else book_file
+    state = {
+        "book_file": file_path,
+        "mode": mode,
+        "master_json": master_json
+    }
+    try:
+        with open(WORKSPACE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(state, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"⚠️ 工作区状态保存失败: {e}")
 
 # 🌟 终极"云端外脑" Prompt 规范（供用户复制给 Kimi、豆包或 Claude 等长文本大模型）
 BRAIN_PROMPT_TEMPLATE = """\
@@ -104,6 +137,9 @@ def run_cinecast(epub_file, mode_choice,
     if epub_file is None:
         return None, "❌ 请先上传小说文件"
 
+    # 🌟 新增：触发任务时，静默存档当前工作区状态
+    save_workspace(epub_file, mode_choice, master_json_str)
+
     # 1. 拆包 Master JSON
     global_cast, custom_recaps, success, msg = process_master_json(master_json_str)
     if not success:
@@ -154,6 +190,9 @@ def run_cinecast(epub_file, mode_choice,
 # --- Web UI 界面构建 ---
 theme = gr.themes.Soft(primary_hue="indigo", secondary_hue="blue")
 
+# 🌟 启动前加载上次存档
+last_state = load_workspace()
+
 with gr.Blocks(theme=theme, title="CineCast Pro 3.0") as ui:
     gr.Markdown("# 🎬 CineCast Pro 电影级有声书制片厂")
     gr.Markdown("上传你的小说，定义你的声场，一键压制具备沉浸式体验的电影级有声书。")
@@ -162,21 +201,26 @@ with gr.Blocks(theme=theme, title="CineCast Pro 3.0") as ui:
         with gr.Column(scale=5):
             with gr.Group():
                 gr.Markdown("### 📖 第一步：剧本与模式")
+                # 🌟 从存档恢复上次文件（验证文件是否还存在）
+                saved_file = last_state.get("book_file")
+                default_file = saved_file if saved_file and os.path.exists(saved_file) else None
                 book_file = gr.File(
                     label="上传小说 (EPUB/TXT)",
                     file_types=[".epub", ".txt"],
+                    value=default_file,
                 )
                 mode_selector = gr.Radio(
                     choices=[
                         "🎙️ 纯净旁白模式",
                         "🎭 智能配音模式 (外脑控制版)",
                     ],
-                    value="🎙️ 纯净旁白模式",
+                    value=last_state.get("mode", "🎙️ 纯净旁白模式"),
                     label="制作模式",
                 )
 
-            # 🌟 大一统外脑控制台
-            with gr.Accordion("🧠 第二步：云端外脑控制台 (Brain Node)", open=True, visible=False) as brain_panel:
+            # 🌟 大一统外脑控制台（根据上次保存的模式动态设置可见性）
+            init_brain_visible = "智能配音" in last_state.get("mode", "")
+            with gr.Accordion("🧠 第二步：云端外脑控制台 (Brain Node)", open=True, visible=init_brain_visible) as brain_panel:
                 gr.Markdown("将全书扔给外部大模型（如 Kimi / Claude），一次性生成**全书选角设定**与**各章前情提要**，粘贴至下方即可实现全局接管。")
 
                 with gr.Row():
@@ -185,6 +229,7 @@ with gr.Blocks(theme=theme, title="CineCast Pro 3.0") as ui:
                             label="在此粘贴外脑返回的 Master JSON",
                             placeholder='{\n  "characters": {...},\n  "recaps": {...}\n}',
                             lines=10,
+                            value=last_state.get("master_json", ""),
                         )
                     with gr.Column(scale=1):
                         gr.Markdown("#### 专属音色注入")

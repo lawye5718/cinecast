@@ -103,8 +103,8 @@ class MLXRenderEngine:
             # 清洗所有内部换行和异常空白
             render_text = re.sub(r'\s+', ' ', render_text).strip()
             # 强制防卡死长度截断
-            if len(render_text) > 80:
-                render_text = render_text[:80] + "。"
+            if len(render_text) > self.max_chars:
+                render_text = render_text[:self.max_chars] + "。"
             
             if not re.search(r'[。！？；.!?;]$', render_text):
                 render_text += "。"
