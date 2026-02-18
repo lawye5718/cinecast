@@ -218,7 +218,8 @@ class MLXRenderEngine:
                     "ref_audio": voice_cfg["audio"],
                     "ref_text": voice_cfg["text"],
                 }
-                # 如果 voice_cfg 包含 speaker 字段 (CustomVoice 内置角色)
+                # 如果 voice_cfg 包含 speaker 字段 (CustomVoice 内置角色,
+                # 如 "Male_01", "Female_03" 等 Qwen3-TTS 预设角色 ID)
                 if "speaker" in voice_cfg:
                     generate_kwargs["speaker"] = voice_cfg["speaker"]
                 results = list(self.model.generate(**generate_kwargs))

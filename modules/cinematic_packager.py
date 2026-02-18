@@ -37,7 +37,7 @@ class CinematicPackager:
         self.target_duration_ms = target_duration_min * 60 * 1000
         self.min_tail_ms = 10 * 60 * 1000         # 10分钟尾部阈值
         self.sample_rate = 24000                  # Qwen3-TTS 1.7B 高保真采样率
-        self.crossfade_ms = 18                    # 交叉淡化补偿 (15-20ms 范围)
+        self.crossfade_ms = 18                    # 交叉淡化补偿 (15-20ms 范围，18ms 为 1.7B 情感波动最佳平衡点)
         
         self.buffer = AudioSegment.empty()
         self.file_index = 1
