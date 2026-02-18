@@ -65,6 +65,10 @@ class CineCastProducer:
             "assets_dir": "./assets",
             "output_dir": "./output/Audiobooks",
             "model_path": "../qwentts/models/Qwen3-TTS-MLX-0.6B",  # 相对于cinecast目录
+            "model_path_base": None,     # 1.7B Base (克隆用)
+            "model_path_design": None,   # 1.7B VoiceDesign (设计用)
+            "model_path_custom": None,   # 1.7B CustomVoice (内置角色用)
+            "model_path_fallback": None, # 0.6B 回退路径
             "ambient_theme": "iceland_wind",  # 环境音主题
             "target_duration_min": 30,  # 目标时长（分钟）
             "min_tail_min": 10,  # 最小尾部时长（分钟）
@@ -98,7 +102,17 @@ class CineCastProducer:
             if not os.path.isabs(model_path):
                 model_path = os.path.join(project_root.parent, model_path)
             
-            self.engine = MLXRenderEngine(model_path)
+            # 构建引擎配置（支持 1.7B Model Pool）
+            engine_config = {}
+            for key in ("model_path_base", "model_path_design",
+                        "model_path_custom", "model_path_fallback"):
+                val = self.config.get(key)
+                if val and not os.path.isabs(val):
+                    val = os.path.join(project_root.parent, val)
+                if val:
+                    engine_config[key] = val
+
+            self.engine = MLXRenderEngine(model_path, config=engine_config)
             logger.info("✅ MLX渲染引擎初始化完成")
             
             # 4. 初始化混音打包器
@@ -539,7 +553,16 @@ class CineCastProducer:
     def _render_script_chunks(self, micro_script: list):
         """渲染指定的微切片列表为干音 WAV 文件（供试听模式直接调用）"""
         from modules.mlx_tts_engine import MLXRenderEngine, group_indices_by_voice_type
-        engine = MLXRenderEngine(self.config["model_path"])
+
+        # 构建引擎配置（支持 1.7B Model Pool）
+        engine_config = {}
+        for key in ("model_path_base", "model_path_design",
+                    "model_path_custom", "model_path_fallback"):
+            val = self.config.get(key)
+            if val:
+                engine_config[key] = val
+
+        engine = MLXRenderEngine(self.config["model_path"], config=engine_config)
 
         voice_groups = group_indices_by_voice_type(micro_script)
         for voice_key, indices in voice_groups.items():
@@ -582,7 +605,22 @@ class CineCastProducer:
         are rendered consecutively to minimise MLX embedding switches.
         """
         logger.info("\n" + "="*50 + "\n🎙️ [阶段二] 录音期 (MLX TTS)\n" + "="*50)
-        engine = MLXRenderEngine(self.config["model_path"])
+
+        # 构建引擎配置（支持 1.7B Model Pool）
+        engine_config = {}
+        for key in ("model_path_base", "model_path_design",
+                    "model_path_custom", "model_path_fallback"):
+            val = self.config.get(key)
+            if val:
+                engine_config[key] = val
+
+        engine = MLXRenderEngine(self.config["model_path"], config=engine_config)
+
+        # 🔥 预热：在渲染开始前预加载模型，利用 M4 统一内存带宽优势
+        warmup_modes = ["preset"]
+        if engine_config.get("model_path_base"):
+            warmup_modes.append("clone")
+        engine.warmup(warmup_modes)
         
         # 全局冷启动标记，引擎刚初始化时必定是冷启动
         is_cold_start = True
@@ -651,7 +689,7 @@ class CineCastProducer:
                         del engine
                         gc.collect()
                         logger.info("✨ 内存已清空，正在重新加载 MLX TTS 引擎...")
-                        engine = MLXRenderEngine(self.config["model_path"])
+                        engine = MLXRenderEngine(self.config["model_path"], config=engine_config)
                         logger.info("✅ 引擎热重启完成，恢复生产！")
                         # 重启后的下一个片段又将面临 JIT 编译，重置为冷启动状态
                         is_cold_start = True
