@@ -451,7 +451,8 @@ class LLMScriptDirector:
             raise RuntimeError("❌ 剧本解析结果为空，请检查输入文本和大模型服务是否正常。")
 
         # 🌟 内容完整性守门员：检测 LLM 是否严重删节内容
-        self.verify_integrity(text, full_script)
+        if not self.verify_integrity(text, full_script):
+            logger.warning("⚠️ 内容完整性校验未通过，请检查大模型输出质量。")
             
         return full_script
     

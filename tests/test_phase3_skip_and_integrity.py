@@ -101,12 +101,13 @@ class TestChunkSizeReduced:
         director._prev_tail_entries = []
 
         # Create text with paragraphs that collectively exceed 800 but not 1500
-        para = "这是一段中文测试文本。" * 20  # ~200 chars per repetition
+        para = "这是一段中文测试文本。" * 20  # ~200 chars per paragraph
         text = "\n".join([para, para, para, para, para])  # ~1000 chars total
 
         chunks = director._chunk_text_for_llm(text)
+        max_para_len = len(para)
         for chunk in chunks:
-            assert len(chunk) <= 800 + 200  # allow one paragraph overshoot
+            assert len(chunk) <= 800 + max_para_len  # allow one paragraph overshoot
 
 
 # ---------------------------------------------------------------------------
@@ -153,7 +154,7 @@ class TestVerifyIntegrity:
     def test_fails_when_content_severely_lost(self, director):
         """Should return False when <90% content is preserved."""
         original = "这是一段完整的测试文本" * 10  # 100 chars
-        script = [{"content": "这是"}]  # only 2 chars => 2%
+        script = [{"content": "这是"}]  # only 2 chars => ~2%
         assert director.verify_integrity(original, script) is False
 
     def test_passes_with_empty_input(self, director):
@@ -185,7 +186,7 @@ class TestVerifyIntegrity:
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
         assert "def verify_integrity" in source
-        assert "self.verify_integrity(text, full_script)" in source
+        assert "if not self.verify_integrity(text, full_script):" in source
 
 
 # ---------------------------------------------------------------------------
