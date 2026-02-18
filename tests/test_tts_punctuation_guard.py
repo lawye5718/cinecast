@@ -33,6 +33,17 @@ def _needs_punctuation_guard(text: str) -> bool:
     return not _CLOSING_PUNCT_RE.search(stripped)
 
 
+def _apply_text_cleaning(text: str) -> str:
+    """Mirror the full aggressive text cleaning logic in render_dry_chunk."""
+    render_text = text.strip()
+    render_text = re.sub(r'[…]+', '。', render_text)
+    render_text = re.sub(r'[—]+', '，', render_text)
+    render_text = re.sub(r'\.{3,}', '。', render_text)
+    if not _CLOSING_PUNCT_RE.search(render_text):
+        render_text += "。"
+    return render_text
+
+
 # ---------------------------------------------------------------------------
 # Tests: Punctuation guard behaviour
 # ---------------------------------------------------------------------------
@@ -104,6 +115,62 @@ class TestPunctuationGuard:
         if not _CLOSING_PUNCT_RE.search(render_text):
             render_text += "。"
         assert render_text == "夜幕降临了。"
+
+
+# ---------------------------------------------------------------------------
+# Tests: Aggressive text cleaning (ellipsis / em-dash replacement)
+# ---------------------------------------------------------------------------
+
+class TestAggressiveTextCleaning:
+    """Verify that ellipsis and em-dash characters are replaced to prevent
+    autoregressive TTS from getting stuck in loops."""
+
+    def test_chinese_ellipsis_replaced(self):
+        """Chinese ellipsis … should be replaced with 。"""
+        assert _apply_text_cleaning("他沉默了…") == "他沉默了。"
+
+    def test_multiple_chinese_ellipsis_replaced(self):
+        """Multiple consecutive … should be collapsed into a single 。"""
+        assert _apply_text_cleaning("他沉默了……") == "他沉默了。"
+
+    def test_em_dash_replaced(self):
+        """Em-dash — should be replaced with ，"""
+        assert _apply_text_cleaning("他说—好的") == "他说，好的。"
+
+    def test_multiple_em_dash_replaced(self):
+        """Multiple consecutive em-dashes should be collapsed into a single ，"""
+        assert _apply_text_cleaning("他说——好的") == "他说，好的。"
+
+    def test_triple_dot_replaced(self):
+        """Three or more ASCII dots should be replaced with 。"""
+        assert _apply_text_cleaning("他走了...") == "他走了。"
+        assert _apply_text_cleaning("他走了....") == "他走了。"
+
+    def test_double_dot_not_replaced(self):
+        """Only two dots should NOT be replaced (not triple)."""
+        result = _apply_text_cleaning("他走了..")
+        assert ".." in result
+
+    def test_ellipsis_at_end_no_extra_period(self):
+        """Ellipsis replaced with 。 should not get an extra 。"""
+        result = _apply_text_cleaning("沉默…")
+        assert result == "沉默。"
+        assert not result.endswith("。。")
+
+    def test_em_dash_at_end_gets_period(self):
+        """Em-dash at end replaced with ， still needs closing punctuation."""
+        result = _apply_text_cleaning("他说—")
+        assert result == "他说，。"
+
+    def test_clean_text_unchanged(self):
+        """Text without problematic chars is unchanged (except guard)."""
+        assert _apply_text_cleaning("这是正常文本。") == "这是正常文本。"
+
+    def test_combined_cleaning(self):
+        """Text with both ellipsis and em-dash gets fully cleaned."""
+        result = _apply_text_cleaning("他说——沉默了…")
+        assert "—" not in result
+        assert "…" not in result
 
 
 # ---------------------------------------------------------------------------
@@ -184,6 +251,29 @@ class TestSourceCodeGuard:
         assert "import re" in source, "re module not imported in mlx_tts_engine.py"
         assert r"[。！？；.!?;]$" in source, "Punctuation guard regex not found"
         assert 'render_text += "。"' in source, "Punctuation append not found"
+
+    def test_aggressive_cleaning_in_source(self):
+        """The aggressive ellipsis/em-dash cleaning must exist in mlx_tts_engine.py."""
+        source_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "modules", "mlx_tts_engine.py",
+        )
+        with open(source_path, "r", encoding="utf-8") as f:
+            source = f.read()
+        assert r"[…]+" in source, "Ellipsis cleaning regex not found"
+        assert r"[—]+" in source, "Em-dash cleaning regex not found"
+        assert r"\.{3,}" in source, "Triple-dot cleaning regex not found"
+
+    def test_gc_collect_in_source(self):
+        """gc.collect() must be called in the finally block."""
+        source_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "modules", "mlx_tts_engine.py",
+        )
+        with open(source_path, "r", encoding="utf-8") as f:
+            source = f.read()
+        assert "import gc" in source, "gc module not imported in mlx_tts_engine.py"
+        assert "gc.collect()" in source, "gc.collect() not found in mlx_tts_engine.py"
 
     def test_render_text_used_in_generate(self):
         """render_text (not raw content) must be passed to model.generate."""
