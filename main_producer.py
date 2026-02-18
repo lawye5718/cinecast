@@ -6,10 +6,12 @@ CineCast 主控程序
 """
 
 import argparse
+import gc
 import os
 import sys
 import json
 import logging
+import time
 import requests
 from bs4 import BeautifulSoup
 import ebooklib
@@ -35,6 +37,9 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+# 渲染超时阈值（秒）。单句渲染超过此值视为大模型幻觉/内存碎片化，触发引擎热重启。
+ENGINE_RESTART_THRESHOLD_SECONDS = 20.0
 
 class CineCastProducer:
     def __init__(self, config=None):
@@ -552,7 +557,35 @@ class CineCastProducer:
                 for idx in indices:
                     item = micro_script[idx]
                     save_path = os.path.join(self.cache_dir, f"{item['chunk_id']}.wav")
-                    if engine.render_dry_chunk(item["content"], group_voice_cfg, save_path):
+
+                    start_time = time.time()
+
+                    try:
+                        success = engine.render_dry_chunk(item["content"], group_voice_cfg, save_path)
+                    except Exception as e:
+                        logger.error(f"渲染异常: {e}")
+                        success = False
+
+                    elapsed_time = time.time() - start_time
+
+                    if elapsed_time > ENGINE_RESTART_THRESHOLD_SECONDS:
+                        logger.warning(
+                            f"🚨 严重警告: 切片 {item.get('chunk_id')} 渲染耗时 "
+                            f"{elapsed_time:.1f} 秒！检测到断崖式降速！"
+                        )
+                        logger.info("🔄 正在触发引擎自愈重置协议...")
+                        del engine
+                        try:
+                            import mlx.core as mx
+                            mx.clear_cache()
+                        except ImportError:
+                            pass
+                        gc.collect()
+                        logger.info("✨ 内存已清空，正在重新加载 MLX TTS 引擎...")
+                        engine = MLXRenderEngine(self.config["model_path"])
+                        logger.info("✅ 引擎热重启完成，恢复生产！")
+
+                    if success:
                         rendered_chunks += 1
                     
                     if rendered_chunks > 0 and rendered_chunks % 50 == 0:
