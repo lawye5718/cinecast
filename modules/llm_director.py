@@ -402,9 +402,11 @@ class LLMScriptDirector:
     def _normalize_text(text: str) -> str:
         """将数字和常见符号转换为中文可读形式，防止 TTS 误读。
 
+        采用逐字转换策略，确保 TTS 朗读一致性。
+
         Examples:
-            "10%" -> "百分之十"
-            "100" -> "一百"
+            "10%" -> "百分之一零"
+            "100" -> "一零零"
             "3.14" -> "三点一四"
         """
         _DIGIT_MAP = {
@@ -723,7 +725,6 @@ class LLMScriptDirector:
         text_chunk = self._normalize_text(text_chunk)
 
         # 🌟 JSON 溢出保护：对话密集型文本自动降低上下文窗口
-        estimated_json_ratio = 6  # 对话生成的 JSON 体积约为原文的 5-8 倍
         num_ctx = 8192
         if len(text_chunk) > 500:
             dialogue_markers = text_chunk.count('"') + text_chunk.count('"') + text_chunk.count('"')

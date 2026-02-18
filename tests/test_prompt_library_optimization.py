@@ -280,7 +280,7 @@ class TestJsonOverflowProtection:
         """Mock an Ollama call with dialogue-heavy text to verify overflow protection."""
         director = LLMScriptDirector()
         # Create text > 500 chars with many quote marks
-        dialogue_text = '"你好吗？"她说。' * 50  # lots of dialogue markers
+        dialogue_text = '"你好吗？"她说。"我很好。"他回答。' * 50  # lots of dialogue markers, > 500 chars
 
         fake_resp = mock.MagicMock()
         fake_resp.status_code = 200
@@ -305,4 +305,4 @@ class TestJsonOverflowProtection:
         assert len(captured_payloads) == 1
         payload_num_ctx = captured_payloads[0]["options"]["num_ctx"]
         # With heavy dialogue, should be reduced from 8192
-        assert payload_num_ctx <= 8192
+        assert payload_num_ctx < 8192
