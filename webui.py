@@ -32,7 +32,12 @@ def load_workspace():
 def save_workspace(book_file, mode, master_json):
     """每次触发任务时，保存当前状态"""
     # 获取文件的绝对路径 (Gradio 的 file_obj 可能是路径字符串或具有 name 属性的对象)
-    file_path = book_file.name if hasattr(book_file, "name") else book_file
+    if book_file is None:
+        file_path = None
+    elif hasattr(book_file, "name"):
+        file_path = book_file.name
+    else:
+        file_path = book_file
     state = {
         "book_file": file_path,
         "mode": mode,
