@@ -85,16 +85,26 @@ class MLXRenderEngine:
             return True # 🌟 断点续传核心：已存在则直接跳过！
             
         try:
-            # 🌟 核心修复与优化：防止自回归TTS短文本复读与不停止幻觉
             render_text = content.strip()
-            # 将省略号、破折号替换为普通的逗号或句号，防止模型卡死
-            render_text = re.sub(r'[…]+', '。', render_text)
-            render_text = re.sub(r'[—]+', '，', render_text)
-            render_text = re.sub(r'\.{3,}', '。', render_text)
             
-            # 如果结尾没有标准的中文或英文闭合标点，强制补全句号
+            # 🌟 终极暴力清洗：消灭一切导致复读的特殊符号
+            render_text = re.sub(r'[…]+', '。', render_text)       # 中文省略号
+            render_text = re.sub(r'\.{3,}', '。', render_text)     # 英文省略号
+            render_text = re.sub(r'[—]+', '，', render_text)       # 中文破折号
+            render_text = re.sub(r'[-]{2,}', '，', render_text)    # 英文破折号
+            render_text = re.sub(r'[~～]+', '。', render_text)     # 波浪号
+            
             if not re.search(r'[。！？；.!?;]$', render_text):
                 render_text += "。"
+
+            # 🌟 绝杀防御：检查清理后是否只剩下标点符号（无实际文字）
+            pure_text = re.sub(r'[。，！？；、""''（）《》,.!?;:\'\"()\-\s]', '', render_text)
+            if not pure_text:
+                logger.warning(f"⚠️ 切片无有效文字，跳过大模型渲染，生成 0.5s 空白音频: {save_path}")
+                # 强行生成 0.5 秒的静音，避免后续混音时找不到文件报错
+                audio_data = np.zeros(int(self.sample_rate * 0.5), dtype=np.float32)
+                sf.write(save_path, audio_data, self.sample_rate, format='WAV')
+                return True
 
             logger.debug(f"🎵 渲染干音: {render_text[:50]}... -> {save_path}")
             
