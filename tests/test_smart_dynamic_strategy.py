@@ -161,12 +161,25 @@ class TestGlobalAdaptiveLogic:
         assert "global_max_length = 800" in source
 
     def test_sliding_window_size_is_5(self):
-        """The sliding window for reduction tracking should be 5."""
+        """The sliding window for reduction tracking should be capped at 5."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "main_producer.py",
         )
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
+        # Window is trimmed after append (> 5 triggers pop)
+        # and checked at exactly 5 elements for the threshold
         assert "len(recent_needed_reduction) > 5" in source
         assert "len(recent_needed_reduction) == 5" in source
+        assert "sum(recent_needed_reduction) >= 3" in source
+
+    def test_sliding_window_never_exceeds_5(self):
+        """Simulate the sliding window logic to verify it never exceeds 5 elements."""
+        recent = []
+        for i in range(10):
+            recent.append(True)
+            if len(recent) > 5:
+                recent.pop(0)
+            assert len(recent) <= 5
+        assert len(recent) == 5
