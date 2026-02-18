@@ -101,12 +101,14 @@ def detect_audio_glitches_pro(
         return []
 
     win_length = int(window_size_sec * sr)
+    # Minimum of 2 samples needed for np.diff calculation
     if win_length < 2:
         win_length = 2
 
     glitch_times_raw: List[float] = []
 
     # 使用滑动窗口计算局部阈值，防止长音频动态范围过大导致的漏检
+    # 50% overlap 保证相邻窗口之间不会有盲区
     step = max(1, win_length // 2)
     for i in range(0, len(y) - 1, step):
         chunk = y[i : i + win_length]

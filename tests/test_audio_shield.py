@@ -161,7 +161,7 @@ class TestAnalyzer:
         assert detect_glitches_from_array(np.array([0.0]), 22050) == []
 
     def test_sensitivity_affects_results(self):
-        """Higher sensitivity value (lower threshold) should detect more glitches."""
+        """Higher sensitivity value means lower threshold, detecting more glitches."""
         y, sr, _ = _make_signal_with_spike()
         g_low = detect_glitches_from_array(y, sr, sensitivity=0.1)
         g_high = detect_glitches_from_array(y, sr, sensitivity=1.0)
