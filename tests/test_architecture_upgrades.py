@@ -594,7 +594,7 @@ class TestMicroChunkFallback:
         # Monkey-patch parse_text_to_script to return a single element with no
         # Chinese punctuation (pure English / no separable marks).
         long_content = "A" * 180  # 180 chars, no Chinese punctuation
-        director.parse_text_to_script = lambda text: [
+        director.parse_text_to_script = lambda text, **kwargs: [
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": long_content}
         ]
@@ -608,7 +608,7 @@ class TestMicroChunkFallback:
     def test_empty_content_units_skipped(self):
         """Script units with empty content should be skipped without errors."""
         director = LLMScriptDirector()
-        director.parse_text_to_script = lambda text: [
+        director.parse_text_to_script = lambda text, **kwargs: [
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": ""},
             {"type": "narration", "speaker": "narrator", "gender": "male",
@@ -624,7 +624,7 @@ class TestMicroChunkFallback:
         director = LLMScriptDirector()
         # Content of special symbols without Chinese punctuation
         special_content = "★☆◆◇■□▲△○●" * 10  # 100 special chars
-        director.parse_text_to_script = lambda text: [
+        director.parse_text_to_script = lambda text, **kwargs: [
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": special_content}
         ]
