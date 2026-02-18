@@ -42,7 +42,7 @@
         }
     },
     "audio_processing": {
-        "target_sample_rate": 22050,
+        "target_sample_rate": 24000,
         "target_channels": 1,
         "normalization_enabled": true,
         "supported_formats": [
@@ -57,7 +57,8 @@
             "paragraph_end_ms": 1000,
             "sentence_end_ms": 600,
             "clause_end_ms": 250
-        }
+        },
+        "crossfade_ms": 18
     },
     "usage_notes": {
         "transitions": "过渡音效在章节切换时播放，建议使用短小精悍的音效",
@@ -96,5 +97,12 @@
             "format": "wav",
             "description": "Per-speaker WAV stems + labels.txt in ZIP archive for DAW import"
         }
+    },
+    "model_config": {
+        "model_path_base": "models/Qwen3-TTS-12Hz-1.7B-Base-4bit",
+        "model_path_design": "models/Qwen3-TTS-12Hz-1.7B-VoiceDesign-4bit",
+        "model_path_custom": "models/Qwen3-TTS-12Hz-1.7B-CustomVoice-4bit",
+        "model_path_fallback": "models/Qwen3-TTS-MLX-0.6B",
+        "description": "Qwen3-TTS 1.7B 4-bit MLX models. Download from mlx-community on Hugging Face."
     }
 }

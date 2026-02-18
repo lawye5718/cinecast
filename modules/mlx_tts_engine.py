@@ -49,27 +49,96 @@ def group_indices_by_voice_type(
     return dict(groups)
 
 class MLXRenderEngine:
-    def __init__(self, model_path="./models/Qwen3-TTS-MLX-0.6B"):
+    def __init__(self, model_path="./models/Qwen3-TTS-MLX-0.6B", config=None):
         """
-        初始化MLX纯净干音渲染引擎
+        初始化MLX纯净干音渲染引擎 (支持 Qwen3-TTS 1.7B Model Pool)
         
         Args:
-            model_path: Qwen3-TTS-MLX模型路径
+            model_path: 默认模型路径 (兼容旧版单模型模式)
+            config: 可选配置字典，支持多模型路径：
+                - model_path_base: 1.7B Base (克隆用)
+                - model_path_design: 1.7B VoiceDesign (设计用)
+                - model_path_custom: 1.7B CustomVoice (内置角色用)
+                - model_path_fallback: 0.6B 回退路径
         """
         logger.info("🚀 启动 MLX 纯净干音渲染引擎...")
+        self.config = config or {}
+        self.current_mode = None
+        self.model = None
+        self._fallback_path = self.config.get(
+            "model_path_fallback", model_path
+        )
+        self._model_paths = {
+            "clone": self.config.get("model_path_base"),
+            "design": self.config.get("model_path_design"),
+            "preset": self.config.get("model_path_custom"),
+        }
         try:
-            self.model = load_model(model_path)
-            self.sample_rate = 22050
+            # 默认加载：如果配置了 preset 路径则用 preset，否则用传入的 model_path
+            default_path = self._model_paths.get("preset") or model_path
+            self._do_load(default_path, mode="preset")
+            self.sample_rate = 24000  # Qwen3-TTS 1.7B 高保真采样率
             self.max_chars = 60  # 微切片安全长度上限
             logger.info("✅ MLX渲染引擎初始化成功")
         except Exception as e:
-            logger.error(f"❌ MLX渲染引擎初始化失败: {e}")
-            raise
-    
+            logger.warning(f"⚠️ 首选模型加载失败 ({e})，尝试回退到 0.6B...")
+            try:
+                self._do_load(self._fallback_path, mode="preset")
+                self.sample_rate = 22050  # 0.6B 模型使用旧采样率
+                self.max_chars = 60
+                logger.info("✅ MLX渲染引擎初始化成功 (回退到 0.6B)")
+            except Exception as e2:
+                logger.error(f"❌ MLX渲染引擎初始化失败: {e2}")
+                raise
+
+    def _do_load(self, path, mode="preset"):
+        """实际加载模型到内存"""
+        if self.model is not None:
+            del self.model
+            mx.clear_cache()
+        self.model = load_model(path)
+        self.current_mode = mode
+        logger.info(f"✅ 已加载模型 [{mode}]: {path}")
+
+    def _load_mode(self, mode):
+        """根据任务类型切换模型 (Model Pool 模式)"""
+        if mode == self.current_mode:
+            return
+        target_path = self._model_paths.get(mode)
+        if not target_path:
+            # 没有配置对应模式的路径，保持当前模型
+            logger.debug(f"⏭️ 未配置 [{mode}] 模型路径，保持当前模型")
+            return
+        try:
+            mx.clear_cache()
+            self._do_load(target_path, mode=mode)
+        except Exception as e:
+            logger.warning(f"⚠️ 切换到 [{mode}] 模型失败 ({e})，保持当前模型")
+
+    def warmup(self, modes=None):
+        """预热指定模式的模型，验证路径可用性
+
+        Args:
+            modes: 要预热的模式列表，如 ["preset", "clone"]。
+                   默认预热 preset 模式。
+        """
+        if modes is None:
+            modes = ["preset"]
+        for mode in modes:
+            path = self._model_paths.get(mode)
+            if path:
+                logger.info(f"🔥 预热模型 [{mode}]: {path}")
+                try:
+                    self._do_load(path, mode=mode)
+                except Exception as e:
+                    logger.warning(f"⚠️ 预热 [{mode}] 失败: {e}")
+
     def destroy(self):
         """显式清理 MLX 模型资源，释放显存"""
-        if hasattr(self, 'model'):
+        if hasattr(self, 'model') and self.model is not None:
             del self.model
+            self.model = None
+        self.current_mode = None
         mx.clear_cache()
         logger.info("🧹 MLX 渲染引擎资源已显式释放")
     
@@ -78,9 +147,14 @@ class MLXRenderEngine:
         只负责将文本变成 WAV 文件，绝不维护状态
         🌟 断点续传核心：已存在则直接跳过！
         
+        支持三种 voice_cfg 模式 (通过 "mode" 字段区分)：
+          - preset (默认): 传统参考音频克隆 {"mode": "preset", "audio": "...", "text": "..."}
+          - clone: 用户上传音频克隆 {"mode": "clone", "ref_audio": "...", "ref_text": "..."}
+          - design: 文字驱动设计 {"mode": "design", "instruct": "Deep male voice..."}
+        
         Args:
             content: 要渲染的文本内容
-            voice_cfg: 音色配置
+            voice_cfg: 音色配置 (支持 preset/clone/design 三种模式)
             save_path: 保存路径
             emotion: 情感标签（预留参数，当前版本暂不使用）
         """
@@ -120,12 +194,35 @@ class MLXRenderEngine:
 
             logger.debug(f"🎵 渲染干音: {render_text[:50]}... -> {save_path}")
             
-            # MLX 极速推理 (传入处理后的 render_text)
-            results = list(self.model.generate(
-                text=render_text,
-                ref_audio=voice_cfg["audio"],
-                ref_text=voice_cfg["text"]
-            ))
+            # 🌟 根据 voice_cfg 中的 mode 字段选择渲染策略
+            mode = voice_cfg.get("mode", "preset")
+            self._load_mode(mode)
+
+            if mode == "clone":
+                # 克隆模式：使用用户上传的参考音频
+                results = list(self.model.generate(
+                    text=render_text,
+                    ref_audio=voice_cfg["ref_audio"],
+                    ref_text=voice_cfg.get("ref_text", "")
+                ))
+            elif mode == "design":
+                # 设计模式：使用文字描述驱动音色
+                results = list(self.model.generate(
+                    text=render_text,
+                    instruct=voice_cfg["instruct"]
+                ))
+            else:
+                # 传统 Preset 模式 (兼容旧版)
+                generate_kwargs = {
+                    "text": render_text,
+                    "ref_audio": voice_cfg["audio"],
+                    "ref_text": voice_cfg["text"],
+                }
+                # 如果 voice_cfg 包含 speaker 字段 (CustomVoice 内置角色,
+                # 如 "Male_01", "Female_03" 等 Qwen3-TTS 预设角色 ID)
+                if "speaker" in voice_cfg:
+                    generate_kwargs["speaker"] = voice_cfg["speaker"]
+                results = list(self.model.generate(**generate_kwargs))
             
             audio_array = results[0].audio
             mx.eval(audio_array) # 强制执行
@@ -160,8 +257,9 @@ if __name__ == "__main__":
     try:
         engine = MLXRenderEngine()
         
-        # 测试音色配置
+        # 测试音色配置 (传统 preset 模式)
         test_voice_cfg = {
+            "mode": "preset",
             "audio": "reference_for_production.wav",
             "text": "测试参考文本",
             "speed": 1.0

@@ -16,13 +16,14 @@ logger = logging.getLogger(__name__)
 class AssetManager:
     def __init__(self, asset_dir="./assets"):
         self.asset_dir = asset_dir
-        self.target_sr = 22050  # Qwen-TTS 标准采样率
+        self.target_sr = 24000  # Qwen3-TTS 1.7B 高保真采样率
         self._initialize_default_voices()
         self._load_voice_config()
         self.role_voice_map = {}  # 记忆已分配角色的音色
+        self._scan_clone_voices()  # 扫描克隆音色目录
         
     def _normalize_audio(self, audio: AudioSegment) -> AudioSegment:
-        """🌟 核心防御：将外部音频归一化为 22050Hz 单声道，杜绝混音时的内存爆炸"""
+        """🌟 核心防御：将外部音频归一化为目标采样率单声道，杜绝混音时的内存爆炸"""
         return audio.set_frame_rate(self.target_sr).set_channels(1)
     
     def _initialize_default_voices(self):
@@ -148,6 +149,78 @@ class AssetManager:
             logger.info("✅ 已从 audio_assets_config.json 加载音色配置")
         except Exception as e:
             logger.warning(f"⚠️ 加载 audio_assets_config.json 失败，使用默认配置: {e}")
+
+    def _scan_clone_voices(self):
+        """扫描 Assets/Clones/ 目录，自动注册克隆音色到 role_voice_map"""
+        clones_dir = os.path.join(self.asset_dir, "Clones")
+        if not os.path.exists(clones_dir):
+            return
+        for file in os.listdir(clones_dir):
+            if file.lower().endswith(('.wav', '.mp3', '.flac')):
+                name = os.path.splitext(file)[0]
+                clone_path = os.path.join(clones_dir, file)
+                self.role_voice_map[name] = {
+                    "mode": "clone",
+                    "ref_audio": clone_path,
+                    "ref_text": "",
+                    "speed": 1.0
+                }
+                logger.info(f"✅ 发现克隆音色: {name} -> {clone_path}")
+
+    def build_voice_profile(self, speaker_name, description=None, ref_audio=None, ref_text=None, speaker_id=None):
+        """构建 VoiceProfile，支持克隆/设计/预设三种模式。
+
+        优先级：
+        1. ref_audio 提供 → clone 模式
+        2. description 提供 → design 模式
+        3. speaker_id 提供 → preset 内置角色模式
+        4. 都没有 → 使用默认 preset 分配
+
+        Args:
+            speaker_name: 角色名称
+            description: 角色声音描述 (用于 VoiceDesign 模式)
+            ref_audio: 参考音频路径 (用于 Voice Clone 模式)
+            ref_text: 参考音频对应文本
+            speaker_id: 内置角色ID (用于 CustomVoice 模式)
+
+        Returns:
+            dict: VoiceProfile 配置字典
+        """
+        if ref_audio and os.path.exists(ref_audio):
+            profile = {
+                "mode": "clone",
+                "ref_audio": ref_audio,
+                "ref_text": ref_text or "",
+                "speed": 1.0
+            }
+            self.role_voice_map[speaker_name] = profile
+            logger.info(f"✅ 角色 [{speaker_name}] 绑定克隆音色: {ref_audio}")
+            return profile
+
+        if description:
+            profile = {
+                "mode": "design",
+                "instruct": description,
+                "speed": 1.0
+            }
+            self.role_voice_map[speaker_name] = profile
+            logger.info(f"✅ 角色 [{speaker_name}] 绑定设计音色: {description[:50]}")
+            return profile
+
+        if speaker_id:
+            profile = {
+                "mode": "preset",
+                "speaker": speaker_id,
+                "audio": self.voices["narrator"]["audio"],
+                "text": self.voices["narrator"]["text"],
+                "speed": 1.0
+            }
+            self.role_voice_map[speaker_name] = profile
+            logger.info(f"✅ 角色 [{speaker_name}] 绑定内置角色: {speaker_id}")
+            return profile
+
+        # 回退：使用默认 get_voice_for_role 分配
+        return self.get_voice_for_role("dialogue", speaker_name)
     
     def get_voice_for_role(self, role_type, speaker_name=None, gender="male"):
         """
