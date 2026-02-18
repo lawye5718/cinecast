@@ -93,6 +93,12 @@ class TestMLXEngineModelPool:
         source = self._read_source()
         assert "def _do_load(self, path" in source
 
+    def test_do_load_gc_cleanup(self):
+        """_do_load should set self.model = None and call gc.collect() before mx.clear_cache()."""
+        source = self._read_source()
+        assert "self.model = None" in source
+        assert "gc.collect()" in source
+
 
 # ---------------------------------------------------------------------------
 # AssetManager VoiceProfile tests
