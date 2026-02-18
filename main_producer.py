@@ -160,7 +160,7 @@ class CineCastProducer:
             soup = BeautifulSoup(item.get_content(), 'html.parser')
             text = soup.get_text(separator='\n')
             clean_text = '\n'.join([line.strip() for line in text.split('\n') if line.strip()])
-            if len(clean_text) > 100: # 过滤极短废页
+            if len(clean_text) > 20: # 过滤极短废页（降低阈值以保留简短章节）
                 title = f"Chapter_{idx:03d}"
                 chapters[title] = clean_text
         return chapters

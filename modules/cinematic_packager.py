@@ -193,6 +193,15 @@ class CinematicPackager:
             logger.warning("缓冲区为空，跳过导出")
             return
         
+        # 🌟 断点续传：如果分卷文件已存在，跳过压制
+        file_name = f"Audiobook_Part_{self.file_index:03d}.mp3"
+        save_path = os.path.join(self.output_dir, file_name)
+        if os.path.exists(save_path):
+            logger.info(f"⏭️  检测到分卷已存在，跳过压制: {file_name}")
+            self.buffer = AudioSegment.empty()
+            self.file_index += 1
+            return
+        
         try:
             final_audio = self.buffer
             
@@ -209,10 +218,6 @@ class CinematicPackager:
             # 2. 尾部淡出，防止突兀结束
             fade_out_ms = min(self.FADE_OUT_MS, len(final_audio))
             final_audio = final_audio.fade_out(fade_out_ms)
-            
-            # 3. 导出文件
-            file_name = f"Audiobook_Part_{self.file_index:03d}.mp3"
-            save_path = os.path.join(self.output_dir, file_name)
             
             logger.info(f"📦 正在压制: {file_name} ({len(final_audio)/1000/60:.1f}分钟)")
             
