@@ -95,6 +95,8 @@ class MLXRenderEngine:
         """实际加载模型到内存"""
         if self.model is not None:
             del self.model
+            self.model = None
+            gc.collect()
             mx.clear_cache()
         self.model = load_model(path)
         self.current_mode = mode
