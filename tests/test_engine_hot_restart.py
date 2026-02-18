@@ -209,7 +209,8 @@ class TestEngineHotRestart:
             ]
             # Pre-create cache files for first two items
             for i in range(2):
-                open(os.path.join(tmpdir, f"cached_{i}.wav"), "w").close()
+                with open(os.path.join(tmpdir, f"cached_{i}.wav"), "w"):
+                    pass
 
             engine, rendered, restarts, is_cold = _run_render_loop(
                 lambda: FakeEngine("model"), items, cache_dir=tmpdir
@@ -230,7 +231,8 @@ class TestEngineHotRestart:
                 {"chunk_id": "new_1", "content": "line 1"},
             ]
             # Pre-create cache file for first item
-            open(os.path.join(tmpdir, "cached_0.wav"), "w").close()
+            with open(os.path.join(tmpdir, "cached_0.wav"), "w"):
+                pass
 
             engine, rendered, restarts, is_cold = _run_render_loop(
                 lambda: FakeEngine("model"), items, cache_dir=tmpdir
