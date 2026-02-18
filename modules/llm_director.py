@@ -146,6 +146,7 @@ class LLMScriptDirector:
         # Context sliding window state
         self._prev_characters: List[str] = []
         self._prev_tail_entries: List[Dict] = []
+        self._local_session_cast: Dict[str, str] = {}  # 🌟 局部会话角色音色表（跨 chunk 音色一致性）
         
         # 测试Ollama连接
         self._test_ollama_connection()
@@ -397,6 +398,55 @@ class LLMScriptDirector:
         elif chunk_text.endswith(('，', '、', ',', '：', ':')): return 250
         else: return 100
 
+    @staticmethod
+    def _normalize_text(text: str) -> str:
+        """将数字和常见符号转换为中文可读形式，防止 TTS 误读。
+
+        采用逐字转换策略，确保 TTS 朗读一致性。
+
+        Examples:
+            "10%" -> "百分之一零"
+            "100" -> "一零零"
+            "3.14" -> "三点一四"
+        """
+        _DIGIT_MAP = {
+            '0': '零', '1': '一', '2': '二', '3': '三', '4': '四',
+            '5': '五', '6': '六', '7': '七', '8': '八', '9': '九',
+        }
+
+        def _digits_to_chinese(m: re.Match) -> str:
+            """Convert a matched digit string to simple Chinese reading."""
+            s = m.group(0)
+            return ''.join(_DIGIT_MAP.get(c, c) for c in s)
+
+        # 百分号：10% -> 百分之十, 12.5% -> 百分之一二点五
+        def _percent_repl(m: re.Match) -> str:
+            num_str = m.group(1)
+            if '.' in num_str:
+                int_part, dec_part = num_str.split('.', 1)
+                cn_int = ''.join(_DIGIT_MAP.get(c, c) for c in int_part)
+                cn_dec = ''.join(_DIGIT_MAP.get(c, c) for c in dec_part)
+                return f'百分之{cn_int}点{cn_dec}'
+            cn = ''.join(_DIGIT_MAP.get(c, c) for c in num_str)
+            return f'百分之{cn}'
+
+        text = re.sub(r'(\d+(?:\.\d+)?)%', _percent_repl, text)
+
+        # 小数：3.14 -> 三点一四
+        def _decimal_repl(m: re.Match) -> str:
+            integer_part = m.group(1)
+            decimal_part = m.group(2)
+            cn_int = ''.join(_DIGIT_MAP.get(c, c) for c in integer_part)
+            cn_dec = ''.join(_DIGIT_MAP.get(c, c) for c in decimal_part)
+            return f'{cn_int}点{cn_dec}'
+
+        text = re.sub(r'(\d+)\.(\d+)', _decimal_repl, text)
+
+        # 纯整数序列：连续数字 -> 逐字转换
+        text = re.sub(r'\d+', _digits_to_chinese, text)
+
+        return text
+
     def parse_text_to_script(self, text: str, max_length: int = 800) -> List[Dict]:
         """阶段一：宏观剧本解析（保持原有逻辑）
         
@@ -444,6 +494,14 @@ class LLMScriptDirector:
                 if speakers:
                     self._prev_characters = list(speakers)
                 self._prev_tail_entries = chunk_script[-3:]
+
+                # 🌟 音色一致性防护：记录角色的音色描述到局部会话角色表
+                for e in chunk_script:
+                    speaker = e.get("speaker")
+                    emotion = e.get("emotion", "")
+                    if speaker and speaker != "narrator" and emotion:
+                        if speaker not in self._local_session_cast:
+                            self._local_session_cast[speaker] = emotion
             
             full_script.extend(chunk_script)
         
@@ -581,8 +639,15 @@ class LLMScriptDirector:
         - "type": 仅限 "title"(章节名), "subtitle"(小标题), "narration"(旁白), "dialogue"(对白)。
         - "speaker": 对白填具体的角色名（需根据上下文推断并保持全书统一）；旁白和标题统一填 "narrator"。
         - "gender": 仅限 "male"、"female" 或 "unknown"。对白请推测性别；旁白固定为 "male"。
-        - "emotion": 情感标签（如"平静"、"激动"、"沧桑/叹息"、"愤怒"、"悲伤"等），用于未来语音合成的情感控制。
+        - "emotion": 情感+声学双描述标签，例如："Angry, high pitch" 或 "Sad, low volume, shaky voice"。严禁只写单一情感词如"生气"，必须附加声学特征描述，这将直接决定 Qwen3-TTS 的表现力。
         - "content": 纯净的文本内容。如果 type 是 "dialogue"，必须去掉最外层的引号（如""或""）。
+
+        【五、 标点与语气词保留原则（TTS Prosody）】
+        - 在 content 字段中，对于需要长停顿的转折处，请保留或加重标点符号（如使用三个句号 ... 表示犹豫）。
+        - 严禁删除原文中的语气词"嗯、啊、哦、这"等，它们是 Qwen3-TTS 表现真实感的核心。
+
+        【六、 输出顺序纪律（Anti-Truncation）】
+        - 请先在心中确定当前片段涉及的角色清单及其音色基调，然后再输出 JSON 数组。
 
         【输出格式示例（One-Shot）】
         [
@@ -631,6 +696,42 @@ class LLMScriptDirector:
         - 如果角色不在名单中，请在该角色的 emotion 字段中额外生成一个 10 词以内的英文音色描述（如：A deep, husky voice），以便 TTS 引擎进行音色设计。
         """
 
+        # 🌟 Qwen3-TTS 音色映射指南注入
+        system_prompt += """
+
+        【角色音色建模指南（Voice Design Reference）】
+        当遇到新角色时，请参考以下映射逻辑生成 emotion 描述：
+        - 知识分子/冷静者: "Clear, mid-range voice, steady pacing, intellectual."
+        - 市侩/油滑小人物: "Nasal, fast-paced, bright tone, sarcastic."
+        - 忧郁/伤感者: "Breathier, soft voice, melancholic, slow."
+        - 威严长者: "Resonant, deep baritone, gravelly texture, authoritative."
+        - 纯真少女: "Bright, high-pitched, energetic, clear enunciation."
+        """
+
+        # 🌟 音色一致性防护：注入上一 chunk 中已确定的音色描述
+        if self._local_session_cast:
+            cast_desc_parts = []
+            for name, desc in self._local_session_cast.items():
+                cast_desc_parts.append(f'"{name}": "{desc}"')
+            cast_desc_listing = ", ".join(cast_desc_parts)
+            system_prompt += f"""
+
+        【角色音色锁定（Voice Lock）】
+        以下角色在前文中已确定音色，请严格复用，禁止更改：
+        {cast_desc_listing}
+        """
+
+        # 🌟 文本预处理：数字/符号规范化
+        text_chunk = self._normalize_text(text_chunk)
+
+        # 🌟 JSON 溢出保护：对话密集型文本自动降低上下文窗口
+        num_ctx = 8192
+        if len(text_chunk) > 500:
+            dialogue_markers = text_chunk.count('"') + text_chunk.count('"') + text_chunk.count('"')
+            if dialogue_markers > 10:
+                num_ctx = max(4096, num_ctx // 2)
+                logger.info(f"🔧 检测到对话密集型文本({dialogue_markers}个引号)，num_ctx 降至 {num_ctx}")
+
         user_content = "请严格按照规范，将以下文本拆解为纯净的 JSON 剧本（绝不改写原意）：\n\n"
         if context:
             user_content += f"【上文参考（仅供角色一致性参考，不要翻译此段）】\n{context}\n\n"
@@ -646,7 +747,7 @@ class LLMScriptDirector:
             "stream": False,
             "keep_alive": "10m",
             "options": {
-                "num_ctx": 8192,
+                "num_ctx": num_ctx,
                 "temperature": 0.0,
                 "top_p": 0.1
             }
@@ -769,6 +870,20 @@ class LLMScriptDirector:
             # 确保 emotion 字段存在
             if 'emotion' not in fixed_element:
                 fixed_element['emotion'] = '平静'
+
+            # 🌟 音色冲突检测：female 角色不应使用 baritone/bass 描述
+            gender = fixed_element.get('gender', 'unknown')
+            emotion = fixed_element.get('emotion', '')
+            if gender == 'female' and isinstance(emotion, str):
+                emotion_lower = emotion.lower()
+                if any(kw in emotion_lower for kw in ('baritone', 'bass', 'deep baritone')):
+                    logger.warning(
+                        f"⚠️ 音色冲突：女性角色 '{fixed_element.get('speaker')}' "
+                        f"的 emotion 包含男性音色描述 '{emotion}'，已自动修正"
+                    )
+                    fixed_element['emotion'] = re.sub(
+                        r'\b(baritone|bass)\b', 'alto', emotion, flags=re.IGNORECASE
+                    )
             
             validated_script.append(fixed_element)
             
