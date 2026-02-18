@@ -96,8 +96,17 @@ class TestMLXEngineModelPool:
     def test_do_load_gc_cleanup(self):
         """_do_load should set self.model = None and call gc.collect() before mx.clear_cache()."""
         source = self._read_source()
-        assert "self.model = None" in source
-        assert "gc.collect()" in source
+        # Extract the _do_load method body to verify correct ordering
+        do_load_start = source.index("def _do_load(self, path")
+        do_load_body = source[do_load_start:source.index("\n    def ", do_load_start + 1)]
+        assert "self.model = None" in do_load_body
+        assert "gc.collect()" in do_load_body
+        # Verify ordering: del → None → gc.collect → clear_cache
+        idx_del = do_load_body.index("del self.model")
+        idx_none = do_load_body.index("self.model = None")
+        idx_gc = do_load_body.index("gc.collect()")
+        idx_cache = do_load_body.index("mx.clear_cache()")
+        assert idx_del < idx_none < idx_gc < idx_cache
 
 
 # ---------------------------------------------------------------------------
