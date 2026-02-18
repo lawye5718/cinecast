@@ -52,7 +52,7 @@ def _apply_text_cleaning(text: str) -> str:
 def _is_pure_punctuation(text: str) -> bool:
     """Return True if cleaned text contains no real characters (only punctuation)."""
     cleaned = _apply_text_cleaning(text)
-    pure_text = re.sub(r'[。，！？；、\u201c\u201d\u2018\u2019（）《》,.!?;:\'\"()\-\s]', '', cleaned)
+    pure_text = re.sub(r'[。，！？；、\u201c\u201d\u2018\u2019（）《》,.!?;:\'\"()\s-]', '', cleaned)
     return not pure_text
 
 
