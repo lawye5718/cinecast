@@ -37,10 +37,13 @@ def _apply_text_cleaning(text: str) -> str:
     """Mirror the full aggressive text cleaning logic in render_dry_chunk."""
     render_text = text.strip()
     render_text = re.sub(r'[…]+', '。', render_text)
-    render_text = re.sub(r'\.{3,}', '。', render_text)
+    render_text = re.sub(r'\.{2,}', '。', render_text)
     render_text = re.sub(r'[—]+', '，', render_text)
     render_text = re.sub(r'[-]{2,}', '，', render_text)
     render_text = re.sub(r'[~～]+', '。', render_text)
+    render_text = re.sub(r'\s+', ' ', render_text).strip()
+    if len(render_text) > 80:
+        render_text = render_text[:80] + "。"
     if not _CLOSING_PUNCT_RE.search(render_text):
         render_text += "。"
     return render_text
@@ -49,7 +52,7 @@ def _apply_text_cleaning(text: str) -> str:
 def _is_pure_punctuation(text: str) -> bool:
     """Return True if cleaned text contains no real characters (only punctuation)."""
     cleaned = _apply_text_cleaning(text)
-    pure_text = re.sub(r'[。，！？；、""''（）《》,.!?;:\'\"()\-\s]', '', cleaned)
+    pure_text = re.sub(r'[。，！？；、\u201c\u201d\u2018\u2019（）《》,.!?;:\'\"()\-\s]', '', cleaned)
     return not pure_text
 
 
@@ -155,10 +158,10 @@ class TestAggressiveTextCleaning:
         assert _apply_text_cleaning("他走了...") == "他走了。"
         assert _apply_text_cleaning("他走了....") == "他走了。"
 
-    def test_double_dot_not_replaced(self):
-        """Only two dots should NOT be replaced (not triple)."""
+    def test_double_dot_replaced(self):
+        """Two dots should now be replaced with 。 (enhanced defense)."""
         result = _apply_text_cleaning("他走了..")
-        assert ".." in result
+        assert ".." not in result
 
     def test_ellipsis_at_end_no_extra_period(self):
         """Ellipsis replaced with 。 should not get an extra 。"""
@@ -348,7 +351,7 @@ class TestSourceCodeGuard:
             source = f.read()
         assert r"[…]+" in source, "Ellipsis cleaning regex not found"
         assert r"[—]+" in source, "Em-dash cleaning regex not found"
-        assert r"\.{3,}" in source, "Triple-dot cleaning regex not found"
+        assert r"\.{2,}" in source, "Double-dot cleaning regex not found"
         assert r"[-]{2,}" in source, "English double-dash cleaning regex not found"
         assert r"[~～]+" in source, "Tilde cleaning regex not found"
 

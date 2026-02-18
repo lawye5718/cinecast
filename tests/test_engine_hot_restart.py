@@ -47,6 +47,9 @@ class FakeEngine:
         self.calls.append(content)
         return True
 
+    def destroy(self):
+        pass
+
 
 class SlowEngine(FakeEngine):
     """Engine whose render_dry_chunk sleeps to simulate slowness."""
@@ -105,6 +108,10 @@ def _run_render_loop(engine_factory, items, cold_threshold=120.0, warm_threshold
         timeout_threshold = cold_threshold if is_cold_start else warm_threshold
 
         if elapsed_time > timeout_threshold:
+            # Clean up dirty audio file produced by timeout render
+            if os.path.exists(save_path):
+                os.remove(save_path)
+            engine.destroy()
             del engine
             gc.collect()
             engine = engine_factory()

@@ -102,7 +102,8 @@ class CineCastProducer:
             logger.info("✅ MLX渲染引擎初始化完成")
             
             # 4. 初始化混音打包器
-            self.packager = CinematicPackager(self.config["output_dir"])
+            target_min = self.config.get("target_duration_min", 30)
+            self.packager = CinematicPackager(self.config["output_dir"], target_duration_min=target_min)
             logger.info("✅ 混音打包器初始化完成")
             
             logger.info("🎉 所有组件初始化完成！")
@@ -501,16 +502,13 @@ class CineCastProducer:
                 save_path = os.path.join(self.cache_dir, f"{item['chunk_id']}.wav")
                 engine.render_dry_chunk(item["content"], group_voice_cfg, save_path)
 
+        engine.destroy()
         del engine
-        try:
-            import mlx.core as mx
-            mx.clear_cache()
-        except ImportError:
-            pass
 
     def _mix_script_chunks(self, micro_script: list):
         """将指定的微切片列表混音压制为 MP3（供试听模式直接调用）"""
-        packager = CinematicPackager(self.config["output_dir"])
+        target_min = self.config.get("target_duration_min", 30)
+        packager = CinematicPackager(self.config["output_dir"], target_duration_min=target_min)
 
         if self.config.get("pure_narrator_mode", False):
             ambient_bgm = None
@@ -590,13 +588,13 @@ class CineCastProducer:
                             f"🚨 严重警告: 切片 {item.get('chunk_id')} 渲染耗时 "
                             f"{elapsed_time:.1f} 秒！(当前阈值: {timeout_threshold}s)"
                         )
+                        # 🔥 销毁超时产生的脏音频，防止污染混音
+                        if os.path.exists(save_path):
+                            os.remove(save_path)
+                            logger.info(f"🗑️ 已销毁超时产生的脏音频: {save_path}")
                         logger.info("🔄 正在触发引擎自愈重置协议...")
+                        engine.destroy()
                         del engine
-                        try:
-                            import mlx.core as mx
-                            mx.clear_cache()
-                        except ImportError:
-                            pass
                         gc.collect()
                         logger.info("✨ 内存已清空，正在重新加载 MLX TTS 引擎...")
                         engine = MLXRenderEngine(self.config["model_path"])
@@ -611,12 +609,8 @@ class CineCastProducer:
                         logger.info(f"   🎵 进度: {rendered_chunks}/{total_chunks} 片段已渲染")
         
         # 释放 MLX 模型显存
+        engine.destroy()
         del engine
-        try:
-            import mlx.core as mx
-            mx.clear_cache()
-        except ImportError:
-            pass
         logger.info(f"✅ 阶段二完成 ({rendered_chunks}/{total_chunks} 片段)，MLX 已从内存中安全撤离！")
         
     # ==========================================
@@ -635,7 +629,8 @@ class CineCastProducer:
             logger.warning("⚠️ 未发现有效音频片段，请检查剧本解析阶段（阶段一）和干音渲染阶段（阶段二）是否成功。跳过混音。")
             return
 
-        packager = CinematicPackager(self.config["output_dir"])
+        target_min = self.config.get("target_duration_min", 30)
+        packager = CinematicPackager(self.config["output_dir"], target_duration_min=target_min)
 
         # 🌟 核心拦截：纯净模式下，强行将音效设为 None
         if self.config.get("pure_narrator_mode", False):

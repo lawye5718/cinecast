@@ -180,7 +180,8 @@ class AssetManager:
                 logger.info(f"✅ 角色 [{speaker_name}] 已绑定专属音色: {custom_voice_path}")
             else:
                 # 🌟 修复：除非明确是 female，否则未知角色一律默认用男声池
-                pool = self.voices["female_pool"] if gender == "female" else self.voices["male_pool"]
+                is_female = str(gender).lower() in ["female", "f", "女", "女性"]
+                pool = self.voices["female_pool"] if is_female else self.voices["male_pool"]
                 if not pool:
                     self.role_voice_map[speaker_name] = self.voices["narrator"]
                 else:
