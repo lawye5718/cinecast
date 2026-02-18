@@ -38,8 +38,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# 渲染超时阈值（秒）。单句渲染超过此值视为大模型幻觉/内存碎片化，触发引擎热重启。
-ENGINE_RESTART_THRESHOLD_SECONDS = 20.0
+# 渲染超时阈值（秒）。
+# 冷启动阈值：引擎刚初始化时，MLX 需要 JIT 编译 Metal 着色器，首次推理耗时较长。
+ENGINE_COLD_START_THRESHOLD_SECONDS = 120.0
+# 热运行阈值：引擎热身完成后，正常渲染超过此值视为大模型幻觉/内存碎片化，触发引擎热重启。
+ENGINE_WARM_THRESHOLD_SECONDS = 45.0
 
 class CineCastProducer:
     def __init__(self, config=None):
@@ -530,6 +533,9 @@ class CineCastProducer:
         logger.info("\n" + "="*50 + "\n🎙️ [阶段二] 录音期 (MLX TTS)\n" + "="*50)
         engine = MLXRenderEngine(self.config["model_path"])
         
+        # 全局冷启动标记，引擎刚初始化时必定是冷启动
+        is_cold_start = True
+        
         script_files = sorted([f for f in os.listdir(self.script_dir)
                                if f.endswith('_micro.json') and not f.startswith('_preview_')])
         total_chunks = 0
@@ -557,6 +563,13 @@ class CineCastProducer:
                 for idx in indices:
                     item = micro_script[idx]
                     save_path = os.path.join(self.cache_dir, f"{item['chunk_id']}.wav")
+                    
+                    # 断点续传：缓存命中直接跳过，不参与看门狗计时
+                    if os.path.exists(save_path):
+                        rendered_chunks += 1
+                        if rendered_chunks > 0 and rendered_chunks % 50 == 0:
+                            logger.info(f"   🎵 进度: {rendered_chunks}/{total_chunks} 片段已渲染(跳过)")
+                        continue
 
                     start_time = time.time()
 
@@ -567,11 +580,15 @@ class CineCastProducer:
                         success = False
 
                     elapsed_time = time.time() - start_time
+                    rendered_chunks += 1
 
-                    if elapsed_time > ENGINE_RESTART_THRESHOLD_SECONDS:
+                    # 动态看门狗阈值（冷启动120秒，热运行45秒）
+                    timeout_threshold = ENGINE_COLD_START_THRESHOLD_SECONDS if is_cold_start else ENGINE_WARM_THRESHOLD_SECONDS
+
+                    if elapsed_time > timeout_threshold:
                         logger.warning(
                             f"🚨 严重警告: 切片 {item.get('chunk_id')} 渲染耗时 "
-                            f"{elapsed_time:.1f} 秒！检测到断崖式降速！"
+                            f"{elapsed_time:.1f} 秒！(当前阈值: {timeout_threshold}s)"
                         )
                         logger.info("🔄 正在触发引擎自愈重置协议...")
                         del engine
@@ -584,9 +601,11 @@ class CineCastProducer:
                         logger.info("✨ 内存已清空，正在重新加载 MLX TTS 引擎...")
                         engine = MLXRenderEngine(self.config["model_path"])
                         logger.info("✅ 引擎热重启完成，恢复生产！")
-
-                    if success:
-                        rendered_chunks += 1
+                        # 重启后的下一个片段又将面临 JIT 编译，重置为冷启动状态
+                        is_cold_start = True
+                    else:
+                        # 渲染在阈值内平稳度过，引擎热身完毕，切换为严苛状态
+                        is_cold_start = False
                     
                     if rendered_chunks > 0 and rendered_chunks % 50 == 0:
                         logger.info(f"   🎵 进度: {rendered_chunks}/{total_chunks} 片段已渲染")
