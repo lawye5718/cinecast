@@ -27,3 +27,8 @@ gradio>=5.23.0
 # 日志和监控
 tqdm>=4.65.0
 psutil>=5.9.0
+
+# Audio Shield 模块
+librosa>=0.10.0
+PyQt6>=6.5.0
+pyqtgraph>=0.13.0
