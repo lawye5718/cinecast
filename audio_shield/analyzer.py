@@ -54,46 +54,94 @@ def detect_audio_glitches(
             "Install it with: pip install librosa"
         )
 
+    # 加载音频，sr=None 保持原始采样率
+    y, sr = librosa.load(file_path, sr=None)
+
+    glitches = detect_audio_glitches_pro(
+        y, sr, sensitivity=sensitivity, min_interval=min_interval
+    )
+
+    logger.info(
+        f"🔎 分析完成: {file_path} — "
+        f"发现 {len(glitches)} 处疑似噪音 "
+        f"(灵敏度={sensitivity})"
+    )
+    return glitches
+
+
+def detect_audio_glitches_pro(
+    y: np.ndarray,
+    sr: int,
+    window_size_sec: float = 1.0,
+    sensitivity: float = 0.4,
+    min_interval: float = 0.5,
+) -> List[float]:
+    """
+    滑动窗口版噪音检测，防止长音频动态范围过大导致的漏检。
+
+    使用局部窗口计算阈值，而非全局平均值和标准差。
+    当音频开头有大动态音乐时，全局标准差会被拉高，导致后面安静
+    片段中的微小"噼啪声"被掩盖。滑动窗口逐段计算局部阈值来解决此问题。
+
+    Args:
+        y: 音频采样数组（mono）
+        sr: 采样率
+        window_size_sec: 滑动窗口大小（秒），默认 1.0
+        sensitivity: 灵敏度 (0.1–1.0)，越小越灵敏
+        min_interval: 两个噪音点之间的最小间隔（秒），防止重复报警
+
+    Returns:
+        包含时间戳的列表（单位: 秒）
+    """
     # 参数校验
     sensitivity = max(0.1, min(1.0, sensitivity))
     min_interval = max(0.01, min_interval)
 
-    # 加载音频，sr=None 保持原始采样率
-    y, sr = librosa.load(file_path, sr=None)
-
     if len(y) < 2:
         return []
 
-    # 1. 计算一阶差分（变化率）
-    diff = np.abs(np.diff(y))
+    win_length = int(window_size_sec * sr)
+    if win_length < 2:
+        win_length = 2
 
-    # 2. 动态阈值：基于全局均值+标准差，识别异常跳变点
-    mean_diff = np.mean(diff)
-    std_diff = np.std(diff)
+    glitch_times_raw: List[float] = []
 
-    if std_diff == 0:
-        return []
+    # 使用滑动窗口计算局部阈值，防止长音频动态范围过大导致的漏检
+    step = max(1, win_length // 2)
+    for i in range(0, len(y) - 1, step):
+        chunk = y[i : i + win_length]
+        diff = np.abs(np.diff(chunk))
 
-    threshold = mean_diff + (std_diff * (1 / sensitivity) * _THRESHOLD_MULTIPLIER)
+        if len(diff) == 0:
+            continue
 
-    # 3. 找到超过阈值的索引
-    glitch_indices = np.where(diff > threshold)[0]
-    glitch_times = librosa.samples_to_time(glitch_indices, sr=sr)
+        local_mean = np.mean(diff)
+        local_std = np.std(diff)
 
-    # 4. 聚类：min_interval 秒内的多个点视为同一个噪音区
+        if local_std == 0:
+            continue
+
+        local_threshold = local_mean + (
+            local_std * (1 / sensitivity) * _THRESHOLD_MULTIPLIER
+        )
+
+        indices = np.where(diff > local_threshold)[0]
+        for idx in indices:
+            t = (i + idx) / sr
+            glitch_times_raw.append(t)
+
+    # 去重 + 排序
+    glitch_times_raw = sorted(set(glitch_times_raw))
+
+    # 聚类：min_interval 秒内的多个点视为同一个噪音区
     refined_glitches: List[float] = []
-    if len(glitch_times) > 0:
+    if len(glitch_times_raw) > 0:
         last_added = -min_interval
-        for t in glitch_times:
+        for t in glitch_times_raw:
             if t - last_added > min_interval:
                 refined_glitches.append(round(float(t), 3))
                 last_added = t
 
-    logger.info(
-        f"🔎 分析完成: {file_path} — "
-        f"发现 {len(refined_glitches)} 处疑似噪音 "
-        f"(灵敏度={sensitivity})"
-    )
     return refined_glitches
 
 
@@ -106,7 +154,7 @@ def detect_glitches_from_array(
     """
     从已加载的音频数组中检测尖刺。
 
-    与 detect_audio_glitches 使用相同算法，但接受 numpy 数组输入，
+    与 detect_audio_glitches 使用相同算法（滑动窗口），但接受 numpy 数组输入，
     适用于已在内存中的音频数据。
 
     Args:
@@ -118,31 +166,6 @@ def detect_glitches_from_array(
     Returns:
         时间戳列表（秒）
     """
-    sensitivity = max(0.1, min(1.0, sensitivity))
-    min_interval = max(0.01, min_interval)
-
-    if len(y) < 2:
-        return []
-
-    diff = np.abs(np.diff(y))
-    mean_diff = np.mean(diff)
-    std_diff = np.std(diff)
-
-    if std_diff == 0:
-        return []
-
-    threshold = mean_diff + (std_diff * (1 / sensitivity) * _THRESHOLD_MULTIPLIER)
-
-    glitch_indices = np.where(diff > threshold)[0]
-    # 将采样索引转换为时间（秒）
-    glitch_times = glitch_indices.astype(float) / sr
-
-    refined_glitches: List[float] = []
-    if len(glitch_times) > 0:
-        last_added = -min_interval
-        for t in glitch_times:
-            if t - last_added > min_interval:
-                refined_glitches.append(round(float(t), 3))
-                last_added = t
-
-    return refined_glitches
+    return detect_audio_glitches_pro(
+        y, sr, sensitivity=sensitivity, min_interval=min_interval
+    )

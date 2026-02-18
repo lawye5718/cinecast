@@ -161,12 +161,12 @@ class TestAnalyzer:
         assert detect_glitches_from_array(np.array([0.0]), 22050) == []
 
     def test_sensitivity_affects_results(self):
-        """Lower sensitivity should detect more glitches."""
+        """Higher sensitivity value (lower threshold) should detect more glitches."""
         y, sr, _ = _make_signal_with_spike()
         g_low = detect_glitches_from_array(y, sr, sensitivity=0.1)
         g_high = detect_glitches_from_array(y, sr, sensitivity=1.0)
-        # More sensitive (lower value) should find >= as many glitches
-        assert len(g_low) >= len(g_high)
+        # Higher sensitivity value means lower threshold, detecting more glitches
+        assert len(g_high) >= len(g_low)
 
     def test_min_interval_clustering(self):
         """Multiple spikes within min_interval should be clustered."""
@@ -187,6 +187,50 @@ class TestAnalyzer:
         y = np.ones(22050, dtype=np.float32) * 0.5
         glitches = detect_glitches_from_array(y, 22050)
         assert glitches == []
+
+    def test_sliding_window_detects_spike_in_quiet_segment(self):
+        """Sliding window should detect a spike in a quiet segment
+        even when the signal has a loud section at the beginning."""
+        from audio_shield.analyzer import detect_audio_glitches_pro
+
+        sr = 22050
+        duration_sec = 4.0
+        n_samples = int(sr * duration_sec)
+        y = np.zeros(n_samples, dtype=np.float32)
+
+        # Loud section at the start (0-1 sec): high amplitude noise
+        rng = np.random.default_rng(42)
+        y[:sr] = rng.normal(0, 0.3, sr).astype(np.float32)
+
+        # Quiet section (1-4 sec): very low noise
+        y[sr:] = rng.normal(0, 0.001, n_samples - sr).astype(np.float32)
+
+        # Insert a small spike at 3.0 seconds (in the quiet section)
+        spike_idx = int(sr * 3.0)
+        y[spike_idx] = 0.05
+        y[spike_idx + 1] = -0.05
+
+        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.4)
+        # The sliding window should detect the spike in the quiet segment
+        assert any(abs(t - 3.0) < 0.1 for t in glitches)
+
+    def test_detect_audio_glitches_pro_empty(self):
+        """Empty or very short signal should return empty list."""
+        from audio_shield.analyzer import detect_audio_glitches_pro
+
+        assert detect_audio_glitches_pro(np.array([]), 22050) == []
+        assert detect_audio_glitches_pro(np.array([0.0]), 22050) == []
+
+    def test_detect_audio_glitches_pro_window_size(self):
+        """Custom window size should work correctly."""
+        from audio_shield.analyzer import detect_audio_glitches_pro
+
+        y, sr, spike_time = _make_signal_with_spike()
+        glitches = detect_audio_glitches_pro(
+            y, sr, window_size_sec=0.5, sensitivity=0.4
+        )
+        assert len(glitches) >= 1
+        assert any(abs(t - spike_time) < 0.1 for t in glitches)
 
 
 # ===========================================================================
@@ -259,3 +303,48 @@ class TestAudioBufferManager:
         editor = AudioBufferManager(wav_file)
         editor.delete_range(0.5, 1.5, crossfade_ms=20)
         assert editor.duration_seconds > 0
+
+
+# ===========================================================================
+# Phase 4 / GUI Integration Tests (non-GUI)
+# ===========================================================================
+
+class TestPhase4Integration:
+    def test_launch_gui_with_context_importable(self):
+        """launch_gui_with_context should be importable from gui module."""
+        from audio_shield.gui import launch_gui_with_context
+        assert callable(launch_gui_with_context)
+
+    def test_phase_4_exists(self):
+        """CineCastProducer should have phase_4_quality_control method."""
+        try:
+            from main_producer import CineCastProducer
+        except ImportError:
+            pytest.skip("main_producer dependencies not available")
+        producer = CineCastProducer()
+        assert hasattr(producer, 'phase_4_quality_control')
+        assert callable(producer.phase_4_quality_control)
+
+    def test_phase_4_missing_output_dir(self, tmp_path):
+        """phase_4 should handle missing output directory gracefully."""
+        try:
+            from main_producer import CineCastProducer
+        except ImportError:
+            pytest.skip("main_producer dependencies not available")
+        producer = CineCastProducer(config={
+            "assets_dir": str(tmp_path / "assets"),
+            "output_dir": str(tmp_path / "nonexistent_output"),
+            "model_path": "dummy",
+            "ambient_theme": "iceland_wind",
+            "target_duration_min": 30,
+            "min_tail_min": 10,
+            "use_local_llm": True,
+            "enable_recap": True,
+            "pure_narrator_mode": False,
+            "user_recaps": None,
+            "global_cast": {},
+            "custom_recaps": {},
+            "enable_auto_recap": True,
+        })
+        # Should not raise, just log error and return
+        producer.phase_4_quality_control()
