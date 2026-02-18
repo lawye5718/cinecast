@@ -105,7 +105,7 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
     # Time tolerance (seconds) when navigating between glitch points
     GLITCH_NAV_TOLERANCE_SEC = 0.1
 
-    def __init__(self):
+    def __init__(self, target_dir: Optional[str] = None, sensitivity: float = 0.4):
         _check_qt()
         super().__init__()
         self.setWindowTitle("CineCast Audio Shield — 音频盾")
@@ -117,9 +117,13 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         self._current_glitches: List[float] = []
         self._selection_start: Optional[float] = None
         self._selection_end: Optional[float] = None
+        self._sensitivity = sensitivity
 
         self._build_ui()
         self._connect_signals()
+
+        if target_dir:
+            self._auto_load_and_scan(target_dir)
 
     # ------------------------------------------------------------------ UI
     def _build_ui(self):
@@ -218,6 +222,17 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
             self.btn_scan.setEnabled(True)
             self.statusBar().showMessage(f"已扫描 {len(self.scanner.files)} 个文件")
 
+    def _auto_load_and_scan(self, directory: str):
+        """主程序整合专用的自动加载逻辑"""
+        self.scanner = AudioScanner(directory)
+        self.scanner.scan()
+        self._refresh_file_list()
+        self.btn_scan.setEnabled(True)
+        self.statusBar().showMessage(f"已扫描 {len(self.scanner.files)} 个文件")
+        # 延时 500ms 触发扫描，确保 UI 已完全加载
+        from PyQt6.QtCore import QTimer
+        QTimer.singleShot(500, self._on_start_scan)
+
     def _on_start_scan(self):
         if not self.scanner or not self.scanner.files:
             return
@@ -297,6 +312,14 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
             self.editor.save_result(path, file_format=fmt)
             self.statusBar().showMessage(f"已保存: {path}")
 
+            # 标记当前文件为已解决，刷新列表并自动跳转下一个问题文件
+            if self.scanner:
+                self.scanner.update_status(
+                    self._current_file.file_path, FileStatus.PASSED
+                )
+                self._refresh_file_list()
+                self._select_next_problematic_file()
+
     def _on_prev_glitch(self):
         self._jump_to_glitch(-1)
 
@@ -327,6 +350,15 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
             return
         for finfo in self.scanner.files:
             self.file_list.addItem(repr(finfo))
+
+    def _select_next_problematic_file(self):
+        """自动在列表中寻找下一个需要修复的文件"""
+        for i in range(self.file_list.count()):
+            item = self.file_list.item(i)
+            if "⚠️" in item.text():
+                self.file_list.setCurrentRow(i)
+                return
+        QMessageBox.information(self, "完成", "所有音频已质检完毕！")
 
     def _load_waveform(self, file_path: str):
         """加载音频文件并绘制波形"""
@@ -408,3 +440,19 @@ def launch_gui():
     window = AudioShieldWindow()
     window.show()
     sys.exit(app.exec())
+
+
+def launch_gui_with_context(target_dir: str, sensitivity: float = 0.4):
+    """启动 Audio Shield GUI 并自动加载指定目录进行扫描。
+
+    此函数由 main_producer.py 的 phase_4 调用，实现混音后自动质检。
+
+    Args:
+        target_dir: 要扫描的音频输出目录
+        sensitivity: 噪音检测灵敏度 (0.1–1.0)
+    """
+    _check_qt()
+    app = QApplication.instance() or QApplication(sys.argv)
+    window = AudioShieldWindow(target_dir=target_dir, sensitivity=sensitivity)
+    window.show()
+    app.exec()
