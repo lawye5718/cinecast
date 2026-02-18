@@ -263,6 +263,11 @@ class CineCastProducer:
         prev_chapter_content = None  # 用于存储上一章内容
         failed_chapters = []
 
+        # 🌟 智能动态策略：全局 max_length 及降级历史追踪
+        global_max_length = 800
+        MIN_MAX_LENGTH = 400
+        recent_needed_reduction = []  # 最近5次请求是否需要降级的记录
+
         # 🌟 解析用户提供的前情提要（如果有）
         user_recaps = {}
         user_recap_text = self.config.get("user_recaps")
@@ -291,8 +296,55 @@ class CineCastProducer:
                     logger.info(f"⚡ 启用纯净旁白模式解析: {chapter_name}")
                     micro_script = director.generate_pure_narrator_script(content, chapter_prefix=chapter_name)
                 else:
-                    # 🌟 修复：传入 chapter_name 作为 ID 前缀，避免文件名冲突
-                    micro_script = director.parse_and_micro_chunk(content, chapter_prefix=chapter_name)
+                    # 🌟 智能动态策略：字数对齐检查 + 自动降低 max_length 重试
+                    chapter_max_length = global_max_length
+                    needed_reduction = False
+                    while True:
+                        micro_script = director.parse_and_micro_chunk(
+                            content, chapter_prefix=chapter_name,
+                            max_length=chapter_max_length
+                        )
+                        # 字数对齐检查：解析后字数是否达到原文的 90%
+                        if micro_script:
+                            parsed_len = sum(len(item.get("content", "")) for item in micro_script)
+                            original_len = len(content.strip())
+                            if original_len > 0 and parsed_len < original_len * 0.9:
+                                new_max = int(chapter_max_length * 0.8)
+                                if new_max >= MIN_MAX_LENGTH:
+                                    logger.warning(
+                                        f"⚠️ 字数对齐未通过 ({parsed_len}/{original_len}={parsed_len/original_len:.1%})，"
+                                        f"降低 max_length {chapter_max_length}->{new_max} 并重试: {chapter_name}"
+                                    )
+                                    chapter_max_length = new_max
+                                    needed_reduction = True
+                                    continue
+                                else:
+                                    logger.warning(
+                                        f"⚠️ max_length 已降至下限({chapter_max_length})仍未通过字数对齐，"
+                                        f"使用当前结果: {chapter_name}"
+                                    )
+                        break
+
+                    # 🌟 记录本次是否需要降级，维护滑动窗口
+                    recent_needed_reduction.append(needed_reduction)
+                    if len(recent_needed_reduction) > 5:
+                        recent_needed_reduction.pop(0)
+
+                    # 🌟 全局自适应：连续5次请求中有3次需要降级，则全局降低20%
+                    if (len(recent_needed_reduction) == 5
+                            and sum(recent_needed_reduction) >= 3):
+                        new_global = int(global_max_length * 0.8)
+                        if new_global >= MIN_MAX_LENGTH:
+                            logger.warning(
+                                f"⚠️ 近5次请求中{sum(recent_needed_reduction)}次需要降级，"
+                                f"全局 max_length {global_max_length}->{new_global}"
+                            )
+                            global_max_length = new_global
+                        else:
+                            logger.warning(
+                                f"⚠️ 全局 max_length 已达下限({global_max_length})，不再降低"
+                            )
+                        recent_needed_reduction.clear()
                 
                 # 验证生成的剧本数据结构
                 if not micro_script:

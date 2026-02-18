@@ -323,15 +323,16 @@ class LLMScriptDirector:
 
         return micro_script
 
-    def parse_and_micro_chunk(self, text: str, chapter_prefix: str = "chunk") -> List[Dict]:
+    def parse_and_micro_chunk(self, text: str, chapter_prefix: str = "chunk", max_length: int = 800) -> List[Dict]:
         """宏观剧本解析 -> 自动展开为微切片剧本
         
         Args:
             text: 待处理的章节文本
             chapter_prefix: 章节名称前缀，用于避免文件名冲突
+            max_length: LLM 单次处理的最大字符数上限，默认800
         """
         # 第一步：生成宏观剧本
-        macro_script = self.parse_text_to_script(text)
+        macro_script = self.parse_text_to_script(text, max_length=max_length)
         micro_script = []
         chunk_id = 1
         
@@ -396,15 +397,19 @@ class LLMScriptDirector:
         elif chunk_text.endswith(('，', '、', ',', '：', ':')): return 250
         else: return 100
 
-    def parse_text_to_script(self, text: str) -> List[Dict]:
+    def parse_text_to_script(self, text: str, max_length: int = 800) -> List[Dict]:
         """阶段一：宏观剧本解析（保持原有逻辑）
         
         Implements a context sliding window: each chunk receives the previous
         chunk's cast list and last three entries as context so that character
         names and speaking styles stay consistent across slices.
+
+        Args:
+            text: 待处理的章节文本
+            max_length: LLM 单次处理的最大字符数上限，默认800
         """
         # 🌟 修复截断漏洞：按段落切分长章节
-        text_chunks = self._chunk_text_for_llm(text)
+        text_chunks = self._chunk_text_for_llm(text, max_length=max_length)
         full_script = []
         
         for i, chunk in enumerate(text_chunks):
@@ -554,6 +559,7 @@ class LLMScriptDirector:
         - 严禁自行添加原文中不存在的台词或动作描写！
         - 严禁在 content 中保留归属标签（如"他说"、"她叫道"），归属信息只能出现在 speaker 字段！
         - 严禁总结全文，必须从第一句话开始逐句拆解。严禁输出章节名称作为唯一内容！
+        - 禁止总结！禁止概括！禁止压缩！每一句原文都必须原封不动地出现在输出中！
         - 严禁漏掉任何一个自然段！如果发现内容缺失，系统将判定任务失败并重试！
 
         【二、 字符净化原则】
