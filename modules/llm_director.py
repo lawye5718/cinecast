@@ -188,7 +188,7 @@ class LLMScriptDirector:
             logger.warning(f"检查Ollama模型时出错: {e}")
             return False
     
-    def _chunk_text_for_llm(self, text: str, max_length: int = 1500) -> List[str]:
+    def _chunk_text_for_llm(self, text: str, max_length: int = 800) -> List[str]:
         """🌟 防止章节过长，按段落切分为安全大小给 LLM 处理"""
         paragraphs = text.split('\n')
         chunks, current_chunk = [], ""
@@ -202,6 +202,34 @@ class LLMScriptDirector:
         if current_chunk:
             chunks.append(current_chunk)
         return chunks
+
+    def verify_integrity(self, original_text: str, script_list: List[Dict]) -> bool:
+        """🌟 内容完整性校验：检测 LLM 解析是否严重丢失内容
+
+        对比原文总字数与剧本 content 总字数，如果丢失超过 10% 则报错。
+
+        Args:
+            original_text: 原始输入文本
+            script_list: LLM 解析后的剧本列表
+
+        Returns:
+            True 表示内容完整性达标，False 表示内容丢失严重
+        """
+        if not original_text or not script_list:
+            return True
+        content_text = "".join([item.get("content", "") for item in script_list])
+        original_len = len(original_text.strip())
+        if original_len == 0:
+            return True
+        ratio = len(content_text) / original_len
+        if ratio < 0.9:
+            logger.error(
+                f"🚨 内容丢失严重！原文{original_len}字，"
+                f"解析后仅{len(content_text)}字 (保留率{ratio:.1%})"
+            )
+            return False
+        logger.info(f"✅ 内容完整性校验通过 (保留率{ratio:.1%})")
+        return True
     
     def generate_pure_narrator_script(self, text: str, chapter_prefix: str = "chunk") -> List[Dict]:
         """
@@ -421,6 +449,9 @@ class LLMScriptDirector:
         # 如果解析结果为空，直接报错退出
         if not full_script or len(full_script) == 0:
             raise RuntimeError("❌ 剧本解析结果为空，请检查输入文本和大模型服务是否正常。")
+
+        # 🌟 内容完整性守门员：检测 LLM 是否严重删节内容
+        self.verify_integrity(text, full_script)
             
         return full_script
     
@@ -522,6 +553,7 @@ class LLMScriptDirector:
         - 严禁自行添加原文中不存在的台词或动作描写！
         - 严禁在 content 中保留归属标签（如"他说"、"她叫道"），归属信息只能出现在 speaker 字段！
         - 严禁总结全文，必须从第一句话开始逐句拆解。严禁输出章节名称作为唯一内容！
+        - 严禁漏掉任何一个自然段！如果发现内容缺失，系统将判定任务失败并重试！
 
         【二、 字符净化原则】
         - 剔除所有不可发音的特殊符号（如 Emoji表情、Markdown标记 * _ ~ #、制表符 \t、不可见控制字符）。
