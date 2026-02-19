@@ -42,12 +42,27 @@ class TestVoiceArchetypeMapping:
         assert "角色音色建模指南" in source
 
     def test_archetype_keywords_present(self):
-        """Archetype descriptions should cover key character types."""
+        """Archetype descriptions should cover key character types via ARCHETYPE_VOICE_MAP."""
+        voice_map = LLMScriptDirector.ARCHETYPE_VOICE_MAP
+        all_keys = " ".join(voice_map.keys())
+        all_vals = " ".join(voice_map.values()).lower()
+        assert "知识分子" in all_keys or "intellectual" in all_vals
+        assert "威严长者" in all_keys or "authoritative" in all_vals
+        assert "纯真少女" in all_keys or "energetic" in all_vals
+
+    def test_archetype_voice_map_is_dict(self):
+        """ARCHETYPE_VOICE_MAP should be a non-empty dict with string keys and values."""
+        voice_map = LLMScriptDirector.ARCHETYPE_VOICE_MAP
+        assert isinstance(voice_map, dict)
+        assert len(voice_map) >= 5
+        for k, v in voice_map.items():
+            assert isinstance(k, str) and isinstance(v, str)
+
+    def test_archetype_voice_map_used_in_prompt(self):
+        """_request_ollama should reference ARCHETYPE_VOICE_MAP for dynamic generation."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "知识分子" in source or "intellectual" in source.lower()
-        assert "威严长者" in source or "authoritative" in source.lower()
-        assert "纯真少女" in source or "energetic" in source.lower()
+        assert "ARCHETYPE_VOICE_MAP" in source
 
 
 # ---------------------------------------------------------------------------

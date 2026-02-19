@@ -135,6 +135,16 @@ def merge_consecutive_narrators(script: List[Dict], max_chars: int = 800) -> Lis
     return merged
 
 class LLMScriptDirector:
+    # 🌟 文学原型音色映射表（Literary Archetype Voice Mapping Table）
+    # 供 Qwen3-TTS 音色建模参考，将常见文学角色原型映射到英文音色描述
+    ARCHETYPE_VOICE_MAP = {
+        "知识分子/冷静者": "Clear, mid-range voice, steady pacing, intellectual.",
+        "市侩/油滑小人物": "Nasal, fast-paced, bright tone, sarcastic.",
+        "忧郁/伤感者": "Breathier, soft voice, melancholic, slow.",
+        "威严长者": "Resonant, deep baritone, gravelly texture, authoritative.",
+        "纯真少女": "Bright, high-pitched, energetic, clear enunciation.",
+    }
+
     def __init__(self, ollama_url="http://127.0.0.1:11434", use_local_mlx_lm=False, global_cast=None):
         self.api_url = f"{ollama_url}/api/chat"
         self.model_name = "qwen14b-pro"
@@ -696,16 +706,15 @@ class LLMScriptDirector:
         - 如果角色不在名单中，请在该角色的 emotion 字段中额外生成一个 10 词以内的英文音色描述（如：A deep, husky voice），以便 TTS 引擎进行音色设计。
         """
 
-        # 🌟 Qwen3-TTS 音色映射指南注入
-        system_prompt += """
+        # 🌟 Qwen3-TTS 音色映射指南注入（从 ARCHETYPE_VOICE_MAP 动态生成）
+        archetype_lines = "\n".join(
+            f"        - {k}: \"{v}\"" for k, v in self.ARCHETYPE_VOICE_MAP.items()
+        )
+        system_prompt += f"""
 
         【角色音色建模指南（Voice Design Reference）】
         当遇到新角色时，请参考以下映射逻辑生成 emotion 描述：
-        - 知识分子/冷静者: "Clear, mid-range voice, steady pacing, intellectual."
-        - 市侩/油滑小人物: "Nasal, fast-paced, bright tone, sarcastic."
-        - 忧郁/伤感者: "Breathier, soft voice, melancholic, slow."
-        - 威严长者: "Resonant, deep baritone, gravelly texture, authoritative."
-        - 纯真少女: "Bright, high-pitched, energetic, clear enunciation."
+{archetype_lines}
         """
 
         # 🌟 音色一致性防护：注入上一 chunk 中已确定的音色描述
