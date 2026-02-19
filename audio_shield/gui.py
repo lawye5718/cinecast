@@ -104,6 +104,8 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
     MAX_WAVEFORM_POINTS = 50000
     # Time tolerance (seconds) when navigating between glitch points
     GLITCH_NAV_TOLERANCE_SEC = 0.1
+    # Delay (ms) before auto-jumping to the next glitch point
+    AUTO_JUMP_DELAY_MS = 300
 
     def __init__(self, target_dir: Optional[str] = None, sensitivity: float = 0.4):
         _check_qt()
@@ -271,7 +273,7 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
             if finfo.status == FileStatus.NEEDS_FIX:
                 self.file_list.setCurrentRow(i)
                 from PyQt6.QtCore import QTimer
-                QTimer.singleShot(300, lambda: self._jump_to_glitch(1))
+                QTimer.singleShot(self.AUTO_JUMP_DELAY_MS, lambda: self._jump_to_glitch(1))
                 return
 
         QMessageBox.information(self, "完成", "所有音频表现完美，未发现异常！")
@@ -298,8 +300,11 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
 
         # 更新当前文件的噪音列表：移除已被处理的时间点并调整后续偏移
         duration_removed = end - start
-        self._current_glitches = [t for t in self._current_glitches if t < start or t > end]
-        self._current_glitches = [(t - duration_removed if t > end else t) for t in self._current_glitches]
+        self._current_glitches = [
+            (t - duration_removed if t > end else t)
+            for t in self._current_glitches
+            if t < start or t > end
+        ]
 
         self._draw_waveform_from_editor()
         self._selection_start = None
@@ -309,7 +314,7 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         # 自动跳转到下一个疑似问题处
         if self._current_glitches:
             from PyQt6.QtCore import QTimer
-            QTimer.singleShot(200, lambda: self._jump_to_glitch(1))
+            QTimer.singleShot(self.AUTO_JUMP_DELAY_MS, lambda: self._jump_to_glitch(1))
         else:
             self.statusBar().showMessage("当前文件已处理完毕，请点击保存")
 

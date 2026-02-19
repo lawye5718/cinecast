@@ -16,6 +16,12 @@ logger = logging.getLogger(__name__)
 # the first-order difference must exceed to be classified as a glitch.
 _THRESHOLD_MULTIPLIER = 5
 
+# Maximum number of glitch points before auto-retry with reduced sensitivity.
+_MAX_GLITCHES_THRESHOLD = 50
+
+# Upper bound on sensitivity during auto-retry to prevent infinite recursion.
+_MAX_SENSITIVITY_CEILING = 5.0
+
 # ---------------------------------------------------------------------------
 # 尝试导入 librosa；CI 等轻量环境可能没有安装
 # ---------------------------------------------------------------------------
@@ -144,9 +150,8 @@ def detect_audio_glitches_pro(
                 refined_glitches.append(round(float(t), 3))
                 last_added = t
 
-    # 过滤：如果报警点超过 50 个，可能为底噪而非爆音，自动调高阈值重试
-    # sensitivity 上限为 5.0 以防止无限递归
-    if len(refined_glitches) > 50 and sensitivity * 1.5 <= 5.0:
+    # 过滤：如果报警点超过阈值，可能为底噪而非爆音，自动调高阈值重试
+    if len(refined_glitches) > _MAX_GLITCHES_THRESHOLD and sensitivity * 1.5 <= _MAX_SENSITIVITY_CEILING:
         logger.warning(
             "检测到过多疑似点 (%d)，可能为底噪，自动调高阈值重试...",
             len(refined_glitches),
