@@ -29,6 +29,14 @@ _MIN_ABS_ENERGY = 0.02
 # RMS multiplier: a diff spike must exceed local_rms * this factor to qualify.
 _RMS_SPIKE_FACTOR = 2
 
+# Default minimum duration (seconds): only continuous noise regions spanning
+# at least this long are reported as "problem noise".
+_DEFAULT_MIN_DURATION = 3.0
+
+# Gap threshold (seconds): if consecutive raw glitch points are further apart
+# than this value, they belong to separate noise regions.
+_NOISE_GAP_SEC = 1.0
+
 # ---------------------------------------------------------------------------
 # 尝试导入 librosa；CI 等轻量环境可能没有安装
 # ---------------------------------------------------------------------------
@@ -39,10 +47,51 @@ except ImportError:
     _HAS_LIBROSA = False
 
 
+def _filter_by_duration(
+    glitch_times: List[float],
+    min_duration: float,
+    noise_gap: float = _NOISE_GAP_SEC,
+) -> List[float]:
+    """
+    将噪音时间戳按时间邻近性分组为连续噪音区域，仅保留持续时间
+    不少于 *min_duration* 秒的区域中的所有时间戳。
+
+    两个相邻时间戳之间的间隔不超过 *noise_gap* 秒即视为同一区域。
+
+    Args:
+        glitch_times: 已排序的时间戳列表（秒）
+        min_duration: 最小持续时间（秒）
+        noise_gap: 判定连续性的最大间隔（秒）
+
+    Returns:
+        仅包含满足最小持续时间的噪音区域中的时间戳列表
+    """
+    if not glitch_times or min_duration <= 0:
+        return glitch_times
+
+    # 按间隔分组为连续区域
+    regions: List[List[float]] = [[glitch_times[0]]]
+    for t in glitch_times[1:]:
+        if t - regions[-1][-1] <= noise_gap:
+            regions[-1].append(t)
+        else:
+            regions.append([t])
+
+    # 仅保留持续时间 >= min_duration 的区域
+    result: List[float] = []
+    for region in regions:
+        duration = region[-1] - region[0]
+        if duration >= min_duration:
+            result.extend(region)
+
+    return result
+
+
 def detect_audio_glitches(
     file_path: str,
     sensitivity: float = 0.4,
     min_interval: float = 0.5,
+    min_duration: float = _DEFAULT_MIN_DURATION,
 ) -> List[float]:
     """
     检测 AI 生成音频中的尖刺/噼啪声。
@@ -54,6 +103,8 @@ def detect_audio_glitches(
         file_path: 音频文件路径
         sensitivity: 灵敏度 (0.1–1.0)，越小越灵敏
         min_interval: 两个噪音点之间的最小间隔（秒），防止重复报警
+        min_duration: 最小持续时间（秒），只有连续噪音持续超过此时长
+            才判定为问题噪音，默认 3.0
 
     Returns:
         包含时间戳的列表（单位: 秒）
@@ -71,7 +122,8 @@ def detect_audio_glitches(
     y, sr = librosa.load(file_path, sr=None)
 
     glitches = detect_audio_glitches_pro(
-        y, sr, sensitivity=sensitivity, min_interval=min_interval
+        y, sr, sensitivity=sensitivity, min_interval=min_interval,
+        min_duration=min_duration,
     )
 
     logger.info(
@@ -88,6 +140,7 @@ def detect_audio_glitches_pro(
     window_size_sec: float = 1.0,
     sensitivity: float = 0.4,
     min_interval: float = 0.5,
+    min_duration: float = _DEFAULT_MIN_DURATION,
 ) -> List[float]:
     """
     滑动窗口版噪音检测，防止长音频动态范围过大导致的漏检。
@@ -102,6 +155,8 @@ def detect_audio_glitches_pro(
         window_size_sec: 滑动窗口大小（秒），默认 1.0
         sensitivity: 灵敏度 (0.1–1.0)，越小越灵敏
         min_interval: 两个噪音点之间的最小间隔（秒），防止重复报警
+        min_duration: 最小持续时间（秒），只有连续噪音持续超过此时长
+            才判定为问题噪音，默认 3.0
 
     Returns:
         包含时间戳的列表（单位: 秒）
@@ -166,6 +221,10 @@ def detect_audio_glitches_pro(
                 refined_glitches.append(round(float(t), 3))
                 last_added = t
 
+    # 持续时间过滤：只保留连续 >= min_duration 秒的噪音区域
+    if min_duration > 0 and refined_glitches:
+        refined_glitches = _filter_by_duration(refined_glitches, min_duration)
+
     # 过滤：如果报警点超过阈值，可能为底噪而非爆音，自动调高阈值重试
     if len(refined_glitches) > _MAX_GLITCHES_THRESHOLD and sensitivity * 1.5 <= _MAX_SENSITIVITY_CEILING:
         logger.warning(
@@ -177,6 +236,7 @@ def detect_audio_glitches_pro(
             window_size_sec=window_size_sec,
             sensitivity=sensitivity * 1.5,
             min_interval=min_interval,
+            min_duration=min_duration,
         )
 
     return refined_glitches
@@ -187,6 +247,7 @@ def detect_glitches_from_array(
     sr: int,
     sensitivity: float = 0.4,
     min_interval: float = 0.5,
+    min_duration: float = _DEFAULT_MIN_DURATION,
 ) -> List[float]:
     """
     从已加载的音频数组中检测尖刺。
@@ -199,10 +260,13 @@ def detect_glitches_from_array(
         sr: 采样率
         sensitivity: 灵敏度 (0.1–1.0)
         min_interval: 最小间隔（秒）
+        min_duration: 最小持续时间（秒），只有连续噪音持续超过此时长
+            才判定为问题噪音，默认 3.0
 
     Returns:
         时间戳列表（秒）
     """
     return detect_audio_glitches_pro(
-        y, sr, sensitivity=sensitivity, min_interval=min_interval
+        y, sr, sensitivity=sensitivity, min_interval=min_interval,
+        min_duration=min_duration,
     )
