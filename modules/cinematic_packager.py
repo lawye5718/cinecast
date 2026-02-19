@@ -95,8 +95,10 @@ class CinematicPackager:
         output_path = os.path.join(self.output_dir, output_filename)
         if os.path.exists(output_path):
             logger.info(f"⏭️  检测到分卷已完全覆盖当前剧本，直接跳过混音计算: {output_filename}")
-            # 快进 file_index 跳过所有已存在的分卷
-            while os.path.exists(os.path.join(self.output_dir, f"Audiobook_Part_{self.file_index:03d}.mp3")):
+            # 快进 file_index 跳过所有已存在的分卷（单次目录扫描）
+            existing = {f for f in os.listdir(self.output_dir)
+                        if f.startswith("Audiobook_Part_") and f.endswith(".mp3")}
+            while f"Audiobook_Part_{self.file_index:03d}.mp3" in existing:
                 self.file_index += 1
             return
 

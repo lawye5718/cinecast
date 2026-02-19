@@ -9,7 +9,6 @@ CineCast Web UI
 import os
 import json
 import shutil
-import threading
 import gradio as gr
 from main_producer import CineCastProducer
 
@@ -62,8 +61,8 @@ def get_logs():
             with open(LOG_FILE, "r", encoding="utf-8") as f:
                 lines = f.readlines()
                 return "".join(lines[-50:])
-        except Exception:
-            pass
+        except Exception as e:
+            return f"⚠️ 日志读取失败: {e}"
     return "等待日志输出..."
 
 
@@ -329,7 +328,7 @@ with gr.Blocks(theme=theme, title="CineCast Pro 3.0") as ui:
             gr.Markdown("### 🎵 审听室")
             audio_player = gr.Audio(label="审听室播放器", interactive=False)
             status_box = gr.Textbox(
-                label="制片状态", lines=3, interactive=False
+                label="制片状态", lines=8, interactive=False
             )
             log_viewer = gr.Textbox(
                 label="📋 实时制片日志", lines=15, interactive=False

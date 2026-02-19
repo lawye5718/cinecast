@@ -233,7 +233,3 @@ class TestWebuiTimerAndQC:
     def test_qc_integrated_in_full_production(self, webui_source):
         """run_headless_qc should be called after phase_3."""
         assert "run_headless_qc(" in webui_source
-
-    def test_threading_imported(self, webui_source):
-        """threading should be imported for potential async execution."""
-        assert "import threading" in webui_source
