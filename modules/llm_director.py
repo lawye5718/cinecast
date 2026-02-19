@@ -828,12 +828,13 @@ class LLMScriptDirector:
         text_chunk = self._normalize_text(text_chunk)
 
         # 🌟 防幻觉加固：将 ASCII 双引号替换为中文双引号，避免与 JSON 结构冲突
+        # 先处理成对的 ASCII 引号，再将剩余的散引号统一替换以消除 JSON 解析干扰
         text_chunk = re.sub(
             r'"([^"]*)"',
             lambda m: '\u201c' + m.group(1) + '\u201d',
             text_chunk,
         )
-        text_chunk = text_chunk.replace('"', '\u201c')
+        text_chunk = text_chunk.replace('"', '\u2018')
 
         # 🌟 模型状态监控与 Debug 提示
         input_len = len(text_chunk)
@@ -851,7 +852,7 @@ class LLMScriptDirector:
         # 🌟 防幻觉加固：结构化 User Prompt，使用更强硬语气并加入行数计数暗示
         user_content = "【最高警告：禁止删减！禁止总结！】\n"
         user_content += '你现在的身份是一个\u201c复读机转换器\u201d。\n'
-        user_content += "你的唯一目标是将下文拆解成 JSON 数组。如果原文有10句话，你的数组就必须有10个元素。\n\n"
+        user_content += "你的唯一目标是将下文拆解成 JSON 数组。原文有多少句话，数组就必须有多少个元素。\n\n"
 
         if context:
             user_content += f"【上文参考（仅供推断谁在说话，绝对不要解析此段）】\n{context}\n\n"
