@@ -390,8 +390,7 @@ class TestAnalyzer:
         # Region 2: [5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0] — span = 3.0s (kept)
         times = [1.0, 1.5, 2.0, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0]
         result = _filter_by_duration(times, min_duration=3.0)
-        assert all(t >= 5.0 for t in result), "Only the long region should be kept"
-        assert len(result) == 7
+        assert result == [5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0]
 
     def test_filter_by_duration_empty(self):
         """_filter_by_duration with empty input should return empty."""
