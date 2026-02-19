@@ -90,6 +90,18 @@ class CinematicPackager:
         Uses dynamic pauses: CROSS_SPEAKER_PAUSE_MS between different speakers,
         SAME_SPEAKER_PAUSE_MS for consecutive lines by the same speaker.
         """
+        # 🌟 前置全量跳过：如果当前分卷已存在，直接跳过整个剧本的混音计算
+        output_filename = f"Audiobook_Part_{self.file_index:03d}.mp3"
+        output_path = os.path.join(self.output_dir, output_filename)
+        if os.path.exists(output_path):
+            logger.info(f"⏭️  检测到分卷已完全覆盖当前剧本，直接跳过混音计算: {output_filename}")
+            # 快进 file_index 跳过所有已存在的分卷（单次目录扫描）
+            existing = {f for f in os.listdir(self.output_dir)
+                        if f.startswith("Audiobook_Part_") and f.endswith(".mp3")}
+            while f"Audiobook_Part_{self.file_index:03d}.mp3" in existing:
+                self.file_index += 1
+            return
+
         logger.info("🎛️ 启动后期混音台 (Pydub)...")
         
         prev_speaker = None

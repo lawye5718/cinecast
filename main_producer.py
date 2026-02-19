@@ -788,6 +788,23 @@ class CineCastProducer:
             logger.warning("⚠️ 未发现有效音频片段，请检查剧本解析阶段（阶段一）和干音渲染阶段（阶段二）是否成功。跳过混音。")
             return
 
+        # 🌟 全量跳过：如果分卷已全部存在且剧本无更新，直接跳过整个混音阶段
+        output_dir = self.config["output_dir"]
+        existing_volumes = sorted([f for f in os.listdir(output_dir)
+                                   if f.startswith("Audiobook_Part_") and f.endswith(".mp3")])
+        script_files = sorted([f for f in os.listdir(self.script_dir)
+                               if f.endswith('_micro.json') and not f.startswith('_preview_')])
+        if existing_volumes and script_files:
+            latest_volume_mtime = max(
+                os.path.getmtime(os.path.join(output_dir, f)) for f in existing_volumes
+            )
+            latest_script_mtime = max(
+                os.path.getmtime(os.path.join(self.script_dir, f)) for f in script_files
+            )
+            if latest_volume_mtime >= latest_script_mtime:
+                logger.info(f"⏭️ 检测到 {len(existing_volumes)} 个分卷已存在且剧本无更新，跳过整个混音阶段")
+                return
+
         target_min = self.config.get("target_duration_min", 30)
         packager = CinematicPackager(self.config["output_dir"], target_duration_min=target_min)
 
@@ -800,8 +817,6 @@ class CineCastProducer:
             ambient_bgm = self.assets.get_ambient_sound(self.config["ambient_theme"])
             chime_sound = self.assets.get_transition_chime()
         
-        script_files = sorted([f for f in os.listdir(self.script_dir)
-                               if f.endswith('_micro.json') and not f.startswith('_preview_')])
         for file in script_files:
             with open(os.path.join(self.script_dir, file), 'r', encoding='utf-8') as f:
                 micro_script = json.load(f)
