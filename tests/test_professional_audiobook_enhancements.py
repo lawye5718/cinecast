@@ -312,18 +312,18 @@ class TestEmotionDefaultFallback:
 # ---------------------------------------------------------------------------
 
 class TestEmotionFormatInPrompt:
-    def test_emotion_format_dual_tag(self):
-        """The system prompt should instruct dual emotion+acoustic description."""
+    def test_emotion_constrained_to_emotion_set(self):
+        """The system prompt should constrain emotions to EMOTION_SET keywords."""
         import inspect
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "情感与音色双重标签" in source
+        assert "EMOTION_SET" in source
+        assert "仅限从以下词汇中选择" in source or "emotion 规定" in source
 
-    def test_emotion_format_includes_pitch_pacing_texture(self):
-        """The system prompt should mention pitch, pacing, and texture."""
+    def test_emotion_set_contains_core_emotions(self):
+        """EMOTION_SET should contain core Qwen3-TTS emotion keywords."""
         import inspect
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "Pitch" in source
-        assert "Pacing" in source
-        assert "Texture" in source
+        for emotion in ["平静", "愤怒", "悲伤", "喜悦", "恐惧", "惊讶", "沧桑", "柔和", "激动"]:
+            assert emotion in source
