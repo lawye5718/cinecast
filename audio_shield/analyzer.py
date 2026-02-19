@@ -94,7 +94,7 @@ def detect_audio_glitches_pro(
         包含时间戳的列表（单位: 秒）
     """
     # 参数校验
-    sensitivity = max(0.1, min(1.0, sensitivity))
+    sensitivity = max(0.1, sensitivity)
     min_interval = max(0.01, min_interval)
 
     if len(y) < 2:
@@ -143,6 +143,20 @@ def detect_audio_glitches_pro(
             if t - last_added > min_interval:
                 refined_glitches.append(round(float(t), 3))
                 last_added = t
+
+    # 过滤：如果报警点超过 50 个，可能为底噪而非爆音，自动调高阈值重试
+    # sensitivity 上限为 5.0 以防止无限递归
+    if len(refined_glitches) > 50 and sensitivity * 1.5 <= 5.0:
+        logger.warning(
+            "检测到过多疑似点 (%d)，可能为底噪，自动调高阈值重试...",
+            len(refined_glitches),
+        )
+        return detect_audio_glitches_pro(
+            y, sr,
+            window_size_sec=window_size_sec,
+            sensitivity=sensitivity * 1.5,
+            min_interval=min_interval,
+        )
 
     return refined_glitches
 

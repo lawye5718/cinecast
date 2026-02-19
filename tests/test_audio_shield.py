@@ -232,6 +232,49 @@ class TestAnalyzer:
         assert len(glitches) >= 1
         assert any(abs(t - spike_time) < 0.1 for t in glitches)
 
+    def test_excessive_glitches_auto_retry(self):
+        """When >50 glitches are detected, auto-retry with reduced sensitivity."""
+        from audio_shield.analyzer import detect_audio_glitches_pro
+
+        sr = 22050
+        duration_sec = 60.0
+        n_samples = int(sr * duration_sec)
+        rng = np.random.default_rng(123)
+        # Noisy background with moderate-level spikes that can be filtered
+        y = rng.normal(0, 0.01, n_samples).astype(np.float32)
+        # Insert >50 distinct moderate spikes spaced >0.5s apart
+        for i in range(60):
+            idx = int(sr * (0.5 + i * 0.9))
+            if idx + 1 < n_samples:
+                y[idx] = 0.15
+                y[idx + 1] = -0.15
+
+        # With very high sensitivity (low value) many glitches would be found
+        # The auto-retry should kick in and reduce the count
+        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.2)
+        # Retries terminate without recursion error and return a result
+        assert isinstance(glitches, list)
+
+    def test_excessive_glitches_no_infinite_recursion(self):
+        """Auto-retry should be bounded; extremely noisy signal should not
+        cause infinite recursion."""
+        from audio_shield.analyzer import detect_audio_glitches_pro
+
+        sr = 22050
+        n_samples = int(sr * 60)
+        rng = np.random.default_rng(99)
+        y = rng.normal(0, 0.001, n_samples).astype(np.float32)
+        # Insert 100 very strong spikes that can't be filtered out
+        for i in range(100):
+            idx = int(sr * (0.3 + i * 0.55))
+            if idx + 1 < n_samples:
+                y[idx] = 0.95
+                y[idx + 1] = -0.95
+
+        # Should not raise RecursionError
+        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.2)
+        assert isinstance(glitches, list)
+
 
 # ===========================================================================
 # Editor Tests
@@ -348,3 +391,40 @@ class TestPhase4Integration:
         })
         # Should not raise, just log error and return
         producer.phase_4_quality_control()
+
+    def test_phase_4_accepts_target_dir(self):
+        """phase_4_quality_control should accept optional target_dir parameter."""
+        try:
+            from main_producer import CineCastProducer
+        except ImportError:
+            pytest.skip("main_producer dependencies not available")
+
+        import inspect
+        sig = inspect.signature(CineCastProducer.phase_4_quality_control)
+        assert "target_dir" in sig.parameters
+        # target_dir should default to None
+        assert sig.parameters["target_dir"].default is None
+
+    def test_phase_4_with_custom_target_dir(self, tmp_path):
+        """phase_4 should use target_dir instead of output_dir when provided."""
+        try:
+            from main_producer import CineCastProducer
+        except ImportError:
+            pytest.skip("main_producer dependencies not available")
+        producer = CineCastProducer(config={
+            "assets_dir": str(tmp_path / "assets"),
+            "output_dir": str(tmp_path / "output"),
+            "model_path": "dummy",
+            "ambient_theme": "iceland_wind",
+            "target_duration_min": 30,
+            "min_tail_min": 10,
+            "use_local_llm": True,
+            "enable_recap": True,
+            "pure_narrator_mode": False,
+            "user_recaps": None,
+            "global_cast": {},
+            "custom_recaps": {},
+            "enable_auto_recap": True,
+        })
+        # nonexistent target_dir should log error and return without raising
+        producer.phase_4_quality_control(target_dir=str(tmp_path / "nonexistent"))
