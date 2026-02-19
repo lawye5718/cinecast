@@ -44,11 +44,11 @@ class TestVoiceArchetypeMapping:
     def test_archetype_keywords_present(self):
         """Archetype descriptions should cover key character types via ARCHETYPE_VOICE_MAP."""
         voice_map = LLMScriptDirector.ARCHETYPE_VOICE_MAP
-        all_keys = " ".join(voice_map.keys())
-        all_vals = " ".join(voice_map.values()).lower()
-        assert "知识分子" in all_keys or "intellectual" in all_vals
-        assert "威严长者" in all_keys or "authoritative" in all_vals
-        assert "纯真少女" in all_keys or "energetic" in all_vals
+        keys = list(voice_map.keys())
+        vals = [v.lower() for v in voice_map.values()]
+        assert any("知识分子" in k for k in keys) or any("intellectual" in v for v in vals)
+        assert any("威严长者" in k for k in keys) or any("authoritative" in v for v in vals)
+        assert any("纯真少女" in k for k in keys) or any("energetic" in v for v in vals)
 
     def test_archetype_voice_map_is_dict(self):
         """ARCHETYPE_VOICE_MAP should be a non-empty dict with string keys and values."""
