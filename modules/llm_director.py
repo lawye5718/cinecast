@@ -197,14 +197,15 @@ class LLMScriptDirector:
                 continue
             emotion = item.get("emotion", "")
             gender = item.get("gender", "unknown")
-            # 提取括号内的英文描述
-            if "(" in emotion and ")" in emotion and speaker not in self.cast_profiles:
-                desc = emotion.split("(")[1].split(")")[0]
-                self.cast_profiles[speaker] = {
-                    "gender": gender,
-                    "voice_instruction": desc,
-                }
-                updated = True
+            # 提取括号内的英文描述（使用正则匹配更可靠）
+            if speaker not in self.cast_profiles:
+                m = re.search(r'\(([^)]+)\)', emotion)
+                if m:
+                    self.cast_profiles[speaker] = {
+                        "gender": gender,
+                        "voice_instruction": m.group(1),
+                    }
+                    updated = True
 
         if updated:
             os.makedirs(os.path.dirname(self.cast_db_path) or ".", exist_ok=True)
@@ -604,7 +605,7 @@ class LLMScriptDirector:
         # 🌟 内容完整性守门员：检测 LLM 是否严重删节内容
         if not self.verify_integrity(text, full_script):
             logger.warning("⚠️ 内容完整性校验未通过，请检查大模型输出质量。")
-            logger.error("❌ 内容完整性低。建议降低 llm_director.py 中的 max_length 参数后重试。")
+            logger.error("❌ 内容完整性低。建议降低 parse_and_micro_chunk() 的 max_length 参数后重试。")
             
         return full_script
     

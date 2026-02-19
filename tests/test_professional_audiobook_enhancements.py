@@ -267,7 +267,7 @@ class TestEmotionDefaultFallback:
              "gender": "male", "emotion": ""},
         ]
         result = director._validate_script_elements(elements)
-        assert "intellectual" in result[0]["emotion"].lower() or "Clear" in result[0]["emotion"]
+        assert "Clear" in result[0]["emotion"]
 
     def test_empty_emotion_gets_default_for_female(self):
         director = LLMScriptDirector()
@@ -276,7 +276,7 @@ class TestEmotionDefaultFallback:
              "gender": "female", "emotion": ""},
         ]
         result = director._validate_script_elements(elements)
-        assert "melancholic" in result[0]["emotion"].lower() or "Breathier" in result[0]["emotion"]
+        assert "Breathier" in result[0]["emotion"]
 
     def test_narrator_emotion_not_modified(self):
         director = LLMScriptDirector()
