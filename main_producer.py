@@ -247,6 +247,20 @@ class CineCastProducer:
 
         return False
 
+    @staticmethod
+    def _find_recap_insert_index(micro_script: list) -> int:
+        """Find the insertion index for recap entries.
+
+        Scans the script for the first ``narration`` or ``dialogue`` entry and
+        returns its index so that title / subtitle entries at the chapter
+        beginning are preserved intact.  Falls back to index 0 when the script
+        is empty or contains only header-type entries.
+        """
+        for i, entry in enumerate(micro_script):
+            if entry.get("type") in ("narration", "dialogue"):
+                return i
+        return 0
+
     # ==========================================
     # 🎬 阶段一：剧本化与微切片 (Script & Micro-chunking)
     # ==========================================
@@ -310,8 +324,13 @@ class CineCastProducer:
             chapters = {first_chap_key: first_chap_content}
             logger.info(f"🎧 试听防卡死：已切断全书遍历，仅处理首章前1000字")
 
+        # 🌟 项目级角色库物理隔离：根据输入文件名动态生成 cast_db_path
+        project_name = os.path.splitext(os.path.basename(input_source))[0]
+        cast_db_path = os.path.join("workspace", f"{project_name}_cast.json")
+
         director = LLMScriptDirector(
-            global_cast=self.config.get("global_cast", {})
+            global_cast=self.config.get("global_cast", {}),
+            cast_db_path=cast_db_path,
         )
         prev_chapter_content = None  # 用于存储上一章内容
         failed_chapters = []
@@ -455,8 +474,8 @@ class CineCastProducer:
                             "content": recap_text,
                             "pause_ms": 1500
                         }
-                        # 安全插入法
-                        insert_idx = 1 if len(micro_script) > 1 else 0
+                        # 安全插入法：扫描第一个 narration/dialogue 位置，保持标题结构完整
+                        insert_idx = self._find_recap_insert_index(micro_script)
                         micro_script.insert(insert_idx, intro_unit)
                         micro_script.insert(insert_idx + 1, recap_unit)
                         recap_injected = True
@@ -480,8 +499,8 @@ class CineCastProducer:
                         "content": borrowed_recap,
                         "pause_ms": 1500
                     }
-                    # 🌟 安全插入法：动态索引，防止极短剧本的数组越界隐患
-                    insert_idx = 1 if len(micro_script) > 1 else 0
+                    # 🌟 安全插入法：扫描第一个 narration/dialogue 位置，保持标题结构完整
+                    insert_idx = self._find_recap_insert_index(micro_script)
                     micro_script.insert(insert_idx, intro_unit)
                     micro_script.insert(insert_idx + 1, recap_unit)
                 

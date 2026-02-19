@@ -63,32 +63,50 @@ def repair_json_array(raw: str) -> Optional[List[Dict]]:
     return salvage_json_entries(raw)
 
 
+def _extract_fields_from_object(obj_text: str) -> Optional[Dict]:
+    """Extract known fields from a single JSON object text in any order.
+
+    Uses individual per-field regexes so that field ordering does not matter.
+    Returns a dict with defaults for missing fields, or ``None`` if neither
+    ``speaker`` nor ``content`` could be found.
+    """
+    field_re = re.compile(r'"(\w+)"\s*:\s*"([^"]*)"')
+    fields: Dict[str, str] = {}
+    for m in field_re.finditer(obj_text):
+        fields[m.group(1)] = m.group(2)
+
+    # Map known aliases
+    speaker = fields.get("speaker", "")
+    content = fields.get("content", "")
+    if not speaker and not content:
+        return None
+
+    return {
+        "type": fields.get("type", "narration") or "narration",
+        "speaker": speaker or "narrator",
+        "gender": fields.get("gender", "unknown") or "unknown",
+        "emotion": fields.get("emotion") or fields.get("instruct") or "平静",
+        "content": content or "",
+    }
+
+
 def salvage_json_entries(raw: str) -> Optional[List[Dict]]:
     """Use regex to extract valid script entries from broken JSON text.
 
     Each entry is expected to have at least ``speaker`` and ``content`` fields.
+    Uses order-independent field extraction so that reordered or extra-spaced
+    LLM output can still be recovered.
     """
-    pattern = re.compile(
-        r'\{\s*'
-        r'"(?:type)"\s*:\s*"([^"]*)"\s*,\s*'
-        r'"(?:speaker)"\s*:\s*"([^"]*)"\s*,\s*'
-        r'"(?:gender)"\s*:\s*"([^"]*)"\s*,\s*'
-        r'"(?:emotion|instruct)"\s*:\s*"([^"]*)"\s*,\s*'
-        r'"(?:content)"\s*:\s*"([^"]*)"',
-        re.DOTALL,
-    )
+    # Find all brace-delimited object candidates
+    obj_pattern = re.compile(r'\{[^{}]+\}', re.DOTALL)
     entries = []
-    for m in pattern.finditer(raw):
-        entries.append({
-            "type": m.group(1) or "narration",
-            "speaker": m.group(2) or "narrator",
-            "gender": m.group(3) or "unknown",
-            "emotion": m.group(4) or "平静",
-            "content": m.group(5) or "",
-        })
+    for m in obj_pattern.finditer(raw):
+        entry = _extract_fields_from_object(m.group(0))
+        if entry and entry.get("content"):
+            entries.append(entry)
 
     if not entries:
-        # Looser pattern: just find speaker + content
+        # Looser pattern: just find speaker + content anywhere
         loose = re.compile(
             r'"speaker"\s*:\s*"([^"]*)"\s*[,}].*?"content"\s*:\s*"([^"]*)"',
             re.DOTALL,
@@ -544,6 +562,17 @@ class LLMScriptDirector:
             text: 待处理的章节文本
             max_length: LLM 单次处理的最大字符数上限，默认800
         """
+        # 🌟 对话密集型文本检测：维持 num_ctx 以保留上下文（判断"谁在说话"），
+        # 改为减小 text_chunk 长度来避免 JSON 溢出。
+        dialogue_markers = text.count('"') + text.count('\u201c') + text.count('\u201d')
+        if len(text) > 500 and dialogue_markers > 10:
+            reduced = max(400, max_length // 2)
+            logger.info(
+                f"🔧 检测到对话密集型文本({dialogue_markers}个引号)，"
+                f"text_chunk 长度 {max_length}->{reduced}（维持 num_ctx 以保留说话人上下文）"
+            )
+            max_length = reduced
+
         # 🌟 修复截断漏洞：按段落切分长章节
         text_chunks = self._chunk_text_for_llm(text, max_length=max_length)
         full_script = []
@@ -828,13 +857,9 @@ class LLMScriptDirector:
         else:
             logger.info(f"🚀 模型: {self.model_name} | 正在解析片段，长度: {input_len}")
 
-        # 🌟 JSON 溢出保护：对话密集型文本自动降低上下文窗口
+        # 🌟 JSON 溢出保护：对话密集型文本维持 num_ctx 以保留上下文（判断"谁在说话"），
+        # 改为记录对话密集标志，在 parse_text_to_script 层减小 text_chunk 长度。
         num_ctx = 8192
-        if len(text_chunk) > 500:
-            dialogue_markers = text_chunk.count('"') + text_chunk.count('"') + text_chunk.count('"')
-            if dialogue_markers > 10:
-                num_ctx = max(4096, num_ctx // 2)
-                logger.info(f"🔧 检测到对话密集型文本({dialogue_markers}个引号)，num_ctx 降至 {num_ctx}")
 
         user_content = "请严格按照规范，将以下文本拆解为纯净的 JSON 剧本（绝不改写原意）：\n\n"
         if context:
