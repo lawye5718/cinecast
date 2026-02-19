@@ -114,6 +114,8 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
     GLITCH_NAV_TOLERANCE_SEC = 0.1
     # Delay (ms) before auto-jumping to the next glitch point
     AUTO_JUMP_DELAY_MS = 300
+    # Needle offset (seconds) before glitch point when jumping
+    NEEDLE_PRE_GLITCH_SEC = 0.5
 
     def __init__(self, target_dir: Optional[str] = None, sensitivity: float = 0.4):
         _check_qt()
@@ -499,7 +501,7 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
             target = candidates[-1] if candidates else self._current_glitches[-1]
 
         # 将唱针定位在噪音点前 500ms
-        needle_pos = max(0, target - 0.5)
+        needle_pos = max(0, target - self.NEEDLE_PRE_GLITCH_SEC)
         if self._needle is not None:
             self._needle.setValue(needle_pos)
 
