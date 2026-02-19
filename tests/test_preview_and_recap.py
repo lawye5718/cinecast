@@ -25,6 +25,29 @@ from modules.llm_director import LLMScriptDirector
 
 
 # ---------------------------------------------------------------------------
+# Helper: standalone _cn_to_int (mirrors CineCastProducer._cn_to_int)
+# ---------------------------------------------------------------------------
+
+def _cn_to_int(cn_str):
+    """Standalone copy for environments where mlx is unavailable."""
+    cn_num = {'零': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9,
+              '十': 10, '百': 100, '千': 1000, '两': 2}
+    if cn_str.isdigit():
+        return int(cn_str)
+    result, temp = 0, 0
+    for char in cn_str:
+        if char in cn_num:
+            val = cn_num[char]
+            if val >= 10:
+                if temp == 0: temp = 1
+                result += temp * val
+                temp = 0
+            else:
+                temp = val
+    return result + temp
+
+
+# ---------------------------------------------------------------------------
 # Helper: standalone parse_user_recaps (mirrors CineCastProducer.parse_user_recaps)
 # ---------------------------------------------------------------------------
 
@@ -34,15 +57,16 @@ def parse_user_recaps(raw_text):
         return {}
     recaps = {}
     pattern = re.compile(
-        r'(?:第\s*(\d+)\s*章|Chapter[_ ]?(\d+))\s*[：:]\s*(.+?)(?=\n\s*(?:第\s*\d+\s*章|Chapter[_ ]?\d+)|$)',
+        r'(?:第\s*([0-9零一二三四五六七八九十百千两]+)\s*[章回]|Chapter[_ ]?(\d+))\s*[：:]\s*(.+?)(?=\n\s*(?:第\s*[0-9零一二三四五六七八九十百千两]+\s*[章回]|Chapter[_ ]?\d+)|$)',
         re.DOTALL | re.IGNORECASE
     )
     matches = pattern.findall(raw_text)
     if matches:
         for m in matches:
-            chapter_num = int(m[0] or m[1])
+            num_str = m[0] or m[1]
+            chapter_num = _cn_to_int(num_str)
             recap_text = m[2].strip()
-            if recap_text:
+            if recap_text and chapter_num > 0:
                 recaps[chapter_num] = recap_text
     else:
         lines = [line.strip() for line in raw_text.strip().split('\n') if line.strip()]
@@ -70,6 +94,72 @@ class TestParseUserRecapsChinese:
         text = "第2章:用英文冒号"
         result = parse_user_recaps(text)
         assert result == {2: "用英文冒号"}
+
+    def test_chinese_hui_format(self):
+        """'回' should be recognized the same as '章'"""
+        text = "第1回：武松打虎\n第2回：林冲上山"
+        result = parse_user_recaps(text)
+        assert result == {1: "武松打虎", 2: "林冲上山"}
+
+    def test_chinese_numeral_chapter(self):
+        """Chinese numerals like 第一章 should be parsed correctly"""
+        text = "第一章：暴风雨来临\n第二章：黑夜降临"
+        result = parse_user_recaps(text)
+        assert result == {1: "暴风雨来临", 2: "黑夜降临"}
+
+    def test_chinese_numeral_hui(self):
+        """Chinese numerals with '回' (e.g. 第一百二十回)"""
+        text = "第一百二十回：大结局"
+        result = parse_user_recaps(text)
+        assert result == {120: "大结局"}
+
+    def test_chinese_numeral_complex(self):
+        """Various Chinese numeral forms"""
+        text = "第十章：中场\n第二十一章：变故"
+        result = parse_user_recaps(text)
+        assert result == {10: "中场", 21: "变故"}
+
+
+# ---------------------------------------------------------------------------
+# Test: _cn_to_int — Chinese numeral conversion
+# ---------------------------------------------------------------------------
+
+class TestCnToInt:
+    def test_arabic_digits(self):
+        assert _cn_to_int("123") == 123
+
+    def test_single_digit(self):
+        assert _cn_to_int("五") == 5
+
+    def test_ten(self):
+        assert _cn_to_int("十") == 10
+
+    def test_teens(self):
+        assert _cn_to_int("十二") == 12
+
+    def test_tens(self):
+        assert _cn_to_int("二十") == 20
+
+    def test_tens_with_units(self):
+        assert _cn_to_int("二十一") == 21
+
+    def test_hundred(self):
+        assert _cn_to_int("一百") == 100
+
+    def test_hundred_and_twenty(self):
+        assert _cn_to_int("一百二十") == 120
+
+    def test_hundred_and_twenty_with_units(self):
+        assert _cn_to_int("一百二十回") == 120  # '回' is not in cn_num, ignored
+
+    def test_complex_number(self):
+        assert _cn_to_int("三百四十五") == 345
+
+    def test_liang(self):
+        assert _cn_to_int("两百") == 200
+
+    def test_zero(self):
+        assert _cn_to_int("零") == 0
 
 
 # ---------------------------------------------------------------------------

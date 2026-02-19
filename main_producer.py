@@ -128,12 +128,32 @@ class CineCastProducer:
             raise
     
     @staticmethod
+    def _cn_to_int(cn_str: str) -> int:
+        """辅助方法：将中文数字（一到九十九百千）转换为阿拉伯数字"""
+        cn_num = {'零': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9,
+                  '十': 10, '百': 100, '千': 1000, '两': 2}
+        if cn_str.isdigit():
+            return int(cn_str)
+        result, temp = 0, 0
+        for char in cn_str:
+            if char in cn_num:
+                val = cn_num[char]
+                if val >= 10:
+                    if temp == 0: temp = 1
+                    result += temp * val
+                    temp = 0
+                else:
+                    temp = val
+        return result + temp
+
+    @staticmethod
     def parse_user_recaps(raw_text: str) -> dict:
-        """解析用户提供的前情提要文本，返回 {章节序号: 摘要文本} 字典。
+        """增强版解析：支持'章'、'回'，支持中文数字（如第一百二十回）
 
         支持的格式（每章之间用空行或章节标记分隔）：
             第1章：摘要内容...
             第2章：摘要内容...
+            第一百二十回：摘要内容...
         或：
             Chapter 1: recap text...
             Chapter 2: recap text...
@@ -145,18 +165,20 @@ class CineCastProducer:
             return {}
 
         recaps = {}
-        # 尝试匹配 "第N章" 或 "Chapter_NNN" 或 "Chapter N" 格式
+        # 兼容: 第1章, 第一章, 第120回, 第一百二十回, Chapter 1
         pattern = re.compile(
-            r'(?:第\s*(\d+)\s*章|Chapter[_ ]?(\d+))\s*[：:]\s*(.+?)(?=\n\s*(?:第\s*\d+\s*章|Chapter[_ ]?\d+)|$)',
+            r'(?:第\s*([0-9零一二三四五六七八九十百千两]+)\s*[章回]|Chapter[_ ]?(\d+))\s*[：:]\s*(.+?)(?=\n\s*(?:第\s*[0-9零一二三四五六七八九十百千两]+\s*[章回]|Chapter[_ ]?\d+)|$)',
             re.DOTALL | re.IGNORECASE
         )
         matches = pattern.findall(raw_text)
 
         if matches:
             for m in matches:
-                chapter_num = int(m[0] or m[1])
+                # m[0] 是中文/阿拉伯数字(章/回), m[1] 是 Chapter 格式的数字
+                num_str = m[0] or m[1]
+                chapter_num = CineCastProducer._cn_to_int(num_str)
                 recap_text = m[2].strip()
-                if recap_text:
+                if recap_text and chapter_num > 0:
                     recaps[chapter_num] = recap_text
         else:
             # 回退：按非空行分割，第 N 行对应第 N+1 章（因为第1章没有前情提要）
@@ -351,10 +373,18 @@ class CineCastProducer:
         # 🌟 获取外脑提供的前情提要字典 (按章节名索引, 如 "Chapter_002")
         custom_recaps = self.config.get("custom_recaps", {})
 
-        chapter_index = 0  # 章节计数器，循环体内先自增，因此第一章为1
+        story_chapter_index = 0  # 🌟 正文章节计数器，只对正文累加，确保与用户提供的第N章精确对齐
         prev_chapter_name = None  # 🌟 用于小说集边界检测
         for chapter_name, content in chapters.items():
-            chapter_index += 1
+
+            # 🌟 先判定是否为正文（用于正文计数器累加）
+            is_main_text = True
+            if len(content) < 500 or any(keyword in content[:200] for keyword in ["版权", "目录", "出版", "ISBN", "序言", "致谢"]):
+                is_main_text = False
+
+            # 🌟 只有正文才累加计数器，确保与外部传入的第N章精确对齐！
+            if is_main_text:
+                story_chapter_index += 1
 
             # 🌟 小说集 (Novella Collection) 故事边界检测与上下文重置
             if self._is_new_story_start(chapter_name, content, prev_chapter_name):
@@ -441,16 +471,13 @@ class CineCastProducer:
                     if chapter_name in custom_recaps:
                         recap_text = custom_recaps[chapter_name]
                         logger.info(f"📋 强制使用外脑提供的前情提要: {chapter_name}")
-                    elif chapter_index in user_recaps:
-                        recap_text = user_recaps[chapter_index]
-                        logger.info(f"📋 强制使用用户提供的前情提要: {chapter_name}")
+                    elif story_chapter_index in user_recaps:
+                        recap_text = user_recaps[story_chapter_index]
+                        logger.info(f"📋 强制使用用户提供的前情提要 (匹配正文第 {story_chapter_index} 章): {chapter_name}")
                     
                     # 🌟 2. 如果用户没提供，再去判断是否是正文，以及是否需要大模型自动生成
                     elif self.config.get("enable_recap", True):
-                        is_main_text = True
-                        # 过滤版权页、目录、致谢等非正文章节
-                        if len(content) < 500 or any(keyword in content[:200] for keyword in ["版权", "目录", "出版", "ISBN", "序言", "致谢"]):
-                            is_main_text = False
+                        if not is_main_text:
                             logger.info(f"⏭️ 判定 {chapter_name} 为非正文/短章节，跳过生成前情摘要。")
 
                         if is_main_text and self.config.get("enable_auto_recap", True) and prev_chapter_content is not None:
