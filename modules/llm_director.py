@@ -861,10 +861,11 @@ class LLMScriptDirector:
         # 改为记录对话密集标志，在 parse_text_to_script 层减小 text_chunk 长度。
         num_ctx = 8192
 
-        user_content = "请严格按照规范，将以下文本拆解为纯净的 JSON 剧本（绝不改写原意）：\n\n"
+        user_content = "【任务目标】：将以下原文逐字逐句拆解为合法的 JSON 剧本数组。\n"
+        user_content += "【最高警告】：禁止总结！禁止概括！必须 100% 逐字保留原文的所有对白和旁白！\n\n"
         if context:
             user_content += f"【上文参考（仅供角色一致性参考，不要翻译此段）】\n{context}\n\n"
-        user_content += text_chunk
+        user_content += f"【待处理原文（严格拆解，不可省略任何一句话）】：\n{text_chunk}"
 
         payload = {
             "model": self.model_name,
