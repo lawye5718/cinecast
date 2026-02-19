@@ -825,12 +825,16 @@ class CineCastProducer:
         
         logger.info("🎉 三段式架构全流程完成！全书压制完毕，请前往 output 目录查收。")
 
-    def phase_4_quality_control(self):
-        """阶段四：质检期 (Audio Shield) - 自动扫描并处理爆音"""
+    def phase_4_quality_control(self, target_dir=None):
+        """阶段四：质检期 (Audio Shield) - 自动扫描并处理爆音
+
+        Args:
+            target_dir: 要扫描的目录。默认为 output_dir。
+        """
         logger.info("\n" + "="*50 + "\n🔍 [阶段四] 质检期 (Audio Shield)\n" + "="*50)
 
         # 检查是否有输出文件
-        output_dir = self.config["output_dir"]
+        output_dir = target_dir or self.config["output_dir"]
         if not os.path.exists(output_dir):
             logger.error("❌ 未发现输出目录，质检中止。")
             return
@@ -877,9 +881,16 @@ def main():
         # 严格的三段式串行处理，彻底切断内存重叠
         if producer.phase_1_generate_scripts(input_source):
             producer.phase_2_render_dry_audio()
+
+            # 🛡️ 新增：阶段二后质检（干音质检）
+            logger.info("🛡️ 进入干音缓存质检阶段...")
+            producer.phase_4_quality_control(target_dir=producer.cache_dir)
+
             producer.phase_3_cinematic_mix()
-            # 混音完成后自动进入质检
-            producer.phase_4_quality_control()
+
+            # 🛡️ 新增：阶段三后质检（成品发布质检）
+            logger.info("🛡️ 进入成品发布质检阶段...")
+            producer.phase_4_quality_control(target_dir=producer.config["output_dir"])
     except Exception as e:
         logger.error(f"💥 三段式架构执行失败: {e}")
 

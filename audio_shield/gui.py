@@ -104,6 +104,8 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
     MAX_WAVEFORM_POINTS = 50000
     # Time tolerance (seconds) when navigating between glitch points
     GLITCH_NAV_TOLERANCE_SEC = 0.1
+    # Delay (ms) before auto-jumping to the next glitch point
+    AUTO_JUMP_DELAY_MS = 300
 
     def __init__(self, target_dir: Optional[str] = None, sensitivity: float = 0.4):
         _check_qt()
@@ -265,6 +267,17 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         needs_fix = len(self.scanner.get_needs_fix_files())
         self.statusBar().showMessage(f"分析完成！{needs_fix} 个文件需要修复")
 
+        # 自动选中第一个 NEEDS_FIX 的文件并跳转到其第一个噪音点
+        for i in range(self.file_list.count()):
+            finfo = self.scanner.files[i]
+            if finfo.status == FileStatus.NEEDS_FIX:
+                self.file_list.setCurrentRow(i)
+                from PyQt6.QtCore import QTimer
+                QTimer.singleShot(self.AUTO_JUMP_DELAY_MS, lambda: self._jump_to_glitch(1))
+                return
+
+        QMessageBox.information(self, "完成", "所有音频表现完美，未发现异常！")
+
     def _on_file_selected(self, row: int):
         if row < 0 or not self.scanner:
             return
@@ -284,10 +297,26 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         start = min(self._selection_start, self._selection_end)
         end = max(self._selection_start, self._selection_end)
         self.editor.delete_range(start, end)
+
+        # 更新当前文件的噪音列表：移除已被处理的时间点并调整后续偏移
+        duration_removed = end - start
+        self._current_glitches = [
+            (t - duration_removed if t > end else t)
+            for t in self._current_glitches
+            if t < start or t > end
+        ]
+
         self._draw_waveform_from_editor()
         self._selection_start = None
         self._selection_end = None
         self.statusBar().showMessage(f"已删除 [{start:.3f}s - {end:.3f}s]")
+
+        # 自动跳转到下一个疑似问题处
+        if self._current_glitches:
+            from PyQt6.QtCore import QTimer
+            QTimer.singleShot(self.AUTO_JUMP_DELAY_MS, lambda: self._jump_to_glitch(1))
+        else:
+            self.statusBar().showMessage("当前文件已处理完毕，请点击保存")
 
     def _on_undo(self):
         if self.editor.undo():
