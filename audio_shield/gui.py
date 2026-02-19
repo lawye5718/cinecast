@@ -22,8 +22,9 @@ logger = logging.getLogger(__name__)
 # 延迟导入：仅在实际运行 GUI 时才需要 PyQt6 / pyqtgraph
 # ---------------------------------------------------------------------------
 _QT_AVAILABLE = False
+_QT_MULTIMEDIA_AVAILABLE = False
 try:
-    from PyQt6.QtCore import Qt, QThread, pyqtSignal, QUrl
+    from PyQt6.QtCore import Qt, QThread, pyqtSignal, QUrl, QTimer
     from PyQt6.QtWidgets import (
         QApplication,
         QMainWindow,
@@ -41,10 +42,17 @@ try:
         QStatusBar,
         QProgressBar,
     )
+    from PyQt6.QtGui import QShortcut, QKeySequence
 
     import pyqtgraph as pg  # type: ignore
 
     _QT_AVAILABLE = True
+
+    try:
+        from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
+        _QT_MULTIMEDIA_AVAILABLE = True
+    except ImportError:
+        pass
 except ImportError:
     pass
 
@@ -106,6 +114,8 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
     GLITCH_NAV_TOLERANCE_SEC = 0.1
     # Delay (ms) before auto-jumping to the next glitch point
     AUTO_JUMP_DELAY_MS = 300
+    # Needle offset (seconds) before glitch point when jumping
+    NEEDLE_PRE_GLITCH_SEC = 0.5
 
     def __init__(self, target_dir: Optional[str] = None, sensitivity: float = 0.4):
         _check_qt()
@@ -121,6 +131,19 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         self._selection_end: Optional[float] = None
         self._sensitivity = sensitivity
 
+        # --- 播放器 ---
+        self._player: Optional[object] = None
+        self._audio_output: Optional[object] = None
+        self._needle: Optional[object] = None  # InfiniteLine playback head
+        self._needle_timer: Optional[object] = None
+        if _QT_MULTIMEDIA_AVAILABLE:
+            self._audio_output = QAudioOutput()
+            self._player = QMediaPlayer()
+            self._player.setAudioOutput(self._audio_output)
+            self._needle_timer = QTimer(self)
+            self._needle_timer.setInterval(50)  # 50ms refresh
+            self._needle_timer.timeout.connect(self._update_needle_position)
+
         self._build_ui()
         self._connect_signals()
 
@@ -131,7 +154,16 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
     def _build_ui(self):
         central = QWidget()
         self.setCentralWidget(central)
-        main_layout = QHBoxLayout(central)
+        main_layout = QVBoxLayout(central)
+
+        # ---- 顶部仪表盘：全局进度 ----
+        self.overall_progress = QProgressBar()
+        self.overall_progress.setValue(0)
+        self.overall_progress.setFormat("总进度: %p% (已完成 0/0)")
+        main_layout.addWidget(self.overall_progress)
+
+        content_layout = QHBoxLayout()
+        main_layout.addLayout(content_layout)
 
         # ---- 左侧：文件列表 ----
         left = QVBoxLayout()
@@ -195,7 +227,7 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         splitter.addWidget(right_widget)
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 3)
-        main_layout.addWidget(splitter)
+        content_layout.addWidget(splitter)
 
         self.statusBar().showMessage("就绪")
 
@@ -210,6 +242,11 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         self.btn_save.clicked.connect(self._on_save)
         self.btn_prev_glitch.clicked.connect(self._on_prev_glitch)
         self.btn_next_glitch.clicked.connect(self._on_next_glitch)
+        self.btn_play.clicked.connect(self._on_play_pause)
+
+        # Space 快捷键播放/暂停
+        shortcut = QShortcut(QKeySequence(Qt.Key.Key_Space), self)
+        shortcut.activated.connect(self._on_play_pause)
 
         # 波形拖动选择
         self.waveform_plot.scene().sigMouseClicked.connect(self._on_waveform_click)
@@ -229,10 +266,10 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         self.scanner = AudioScanner(directory)
         self.scanner.scan()
         self._refresh_file_list()
+        self._update_dashboard()
         self.btn_scan.setEnabled(True)
         self.statusBar().showMessage(f"已扫描 {len(self.scanner.files)} 个文件")
         # 延时 500ms 触发扫描，确保 UI 已完全加载
-        from PyQt6.QtCore import QTimer
         QTimer.singleShot(500, self._on_start_scan)
 
     def _on_start_scan(self):
@@ -260,23 +297,17 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         else:
             self.scanner.update_status(file_path, FileStatus.PASSED)
         self._refresh_file_list()
+        self._update_dashboard()
 
     def _on_analysis_complete(self):
         self.progress_bar.setVisible(False)
         self.btn_scan.setEnabled(True)
         needs_fix = len(self.scanner.get_needs_fix_files())
         self.statusBar().showMessage(f"分析完成！{needs_fix} 个文件需要修复")
+        self._update_dashboard()
 
         # 自动选中第一个 NEEDS_FIX 的文件并跳转到其第一个噪音点
-        for i in range(self.file_list.count()):
-            finfo = self.scanner.files[i]
-            if finfo.status == FileStatus.NEEDS_FIX:
-                self.file_list.setCurrentRow(i)
-                from PyQt6.QtCore import QTimer
-                QTimer.singleShot(self.AUTO_JUMP_DELAY_MS, lambda: self._jump_to_glitch(1))
-                return
-
-        QMessageBox.information(self, "完成", "所有音频表现完美，未发现异常！")
+        self._select_next_problematic_file()
 
     def _on_file_selected(self, row: int):
         if row < 0 or not self.scanner:
@@ -313,7 +344,6 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
 
         # 自动跳转到下一个疑似问题处
         if self._current_glitches:
-            from PyQt6.QtCore import QTimer
             QTimer.singleShot(self.AUTO_JUMP_DELAY_MS, lambda: self._jump_to_glitch(1))
         else:
             self.statusBar().showMessage("当前文件已处理完毕，请点击保存")
@@ -347,6 +377,7 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
                     self._current_file.file_path, FileStatus.PASSED
                 )
                 self._refresh_file_list()
+                self._update_dashboard()
                 self._select_next_problematic_file()
 
     def _on_prev_glitch(self):
@@ -356,10 +387,16 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         self._jump_to_glitch(1)
 
     def _on_waveform_click(self, event):
-        """记录波形图上的点击位置用于选择区域"""
+        """记录波形图上的点击位置用于选择区域或定位唱针"""
         pos = event.scenePos()
         mouse_point = self.waveform_plot.plotItem.vb.mapSceneToView(pos)
         time_sec = mouse_point.x()
+
+        # 右键单击：将唱针移动到点击处并同步播放位置
+        if event.button() == Qt.MouseButton.RightButton:
+            self._seek_to(time_sec)
+            return
+
         if self._selection_start is None:
             self._selection_start = time_sec
             self.statusBar().showMessage(f"选择起点: {time_sec:.3f}s — 再次点击设置终点")
@@ -381,13 +418,16 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
             self.file_list.addItem(repr(finfo))
 
     def _select_next_problematic_file(self):
-        """自动在列表中寻找下一个需要修复的文件"""
-        for i in range(self.file_list.count()):
-            item = self.file_list.item(i)
-            if "⚠️" in item.text():
-                self.file_list.setCurrentRow(i)
-                return
-        QMessageBox.information(self, "完成", "所有音频已质检完毕！")
+        """自动在列表中寻找下一个需要修复的文件并跳转到第一个噪音点"""
+        if not self.scanner:
+            return
+        next_files = self.scanner.get_needs_fix_files()
+        if next_files:
+            idx = self.scanner.files.index(next_files[0])
+            self.file_list.setCurrentRow(idx)
+            QTimer.singleShot(self.AUTO_JUMP_DELAY_MS, lambda: self._jump_to_glitch(1))
+        else:
+            QMessageBox.information(self, "完成", "所有待修复音频已处理完毕！")
 
     def _load_waveform(self, file_path: str):
         """加载音频文件并绘制波形"""
@@ -397,6 +437,7 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
     def _draw_waveform_from_editor(self):
         """从 editor 中的当前音频绘制波形"""
         self.waveform_plot.clear()
+        self._needle = None
         audio = self.editor.audio
         if len(audio) == 0:
             return
@@ -427,6 +468,10 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
             line = pg.InfiniteLine(pos=t, angle=90, pen=pg.mkPen("r", width=2))
             self.waveform_plot.addItem(line)
 
+        # 绘制唱针（播放头）
+        self._needle = pg.InfiniteLine(pos=0, angle=90, pen=pg.mkPen("y", width=2))
+        self.waveform_plot.addItem(self._needle)
+
     def _draw_selection(self, start: float, end: float):
         """在波形图上绘制选择区域高亮"""
         region = pg.LinearRegionItem(
@@ -437,7 +482,7 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
         self.waveform_plot.addItem(region)
 
     def _jump_to_glitch(self, direction: int):
-        """跳转到上一个/下一个噪音点"""
+        """跳转到上一个/下一个噪音点，并将唱针停在噪音点前 500ms 处"""
         if not self._current_glitches:
             self.statusBar().showMessage("没有噪音点")
             return
@@ -455,11 +500,64 @@ class AudioShieldWindow(QMainWindow if _QT_AVAILABLE else object):
                          if t < current_center - self.GLITCH_NAV_TOLERANCE_SEC]
             target = candidates[-1] if candidates else self._current_glitches[-1]
 
+        # 将唱针定位在噪音点前 500ms
+        needle_pos = max(0, target - self.NEEDLE_PRE_GLITCH_SEC)
+        if self._needle is not None:
+            self._needle.setValue(needle_pos)
+
+        # 同步播放器位置
+        if self._player is not None:
+            self._player.setPosition(int(needle_pos * 1000))
+
         # 设置视图到噪音点前 1 秒
         pre_listen = max(0, target - 1.0)
         window = 5.0  # 显示 5 秒窗口
         self.waveform_plot.setXRange(pre_listen, pre_listen + window)
         self.statusBar().showMessage(f"跳转到噪音点: {target:.3f}s")
+
+
+    def _on_play_pause(self):
+        """播放/暂停切换"""
+        if self._player is None:
+            self.statusBar().showMessage("播放功能需要 PyQt6.QtMultimedia 模块")
+            return
+        if self._player.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+            self._player.pause()
+            if self._needle_timer:
+                self._needle_timer.stop()
+            self.btn_play.setText("▶ 播放")
+        else:
+            if self._current_file:
+                # 如果尚未设置媒体源或媒体源不同，先设置
+                current_url = QUrl.fromLocalFile(self._current_file.file_path)
+                if self._player.source() != current_url:
+                    self._player.setSource(current_url)
+                self._player.play()
+                if self._needle_timer:
+                    self._needle_timer.start()
+                self.btn_play.setText("⏸ 暂停")
+
+    def _seek_to(self, time_sec: float):
+        """将唱针和播放器定位到指定时间"""
+        if self._needle is not None:
+            self._needle.setValue(max(0, time_sec))
+        if self._player is not None:
+            self._player.setPosition(int(max(0, time_sec) * 1000))
+        self.statusBar().showMessage(f"定位到: {time_sec:.3f}s")
+
+    def _update_needle_position(self):
+        """定时更新唱针位置以同步播放进度"""
+        if self._player is not None and self._needle is not None:
+            pos_ms = self._player.position()
+            self._needle.setValue(pos_ms / 1000.0)
+
+    def _update_dashboard(self):
+        """更新顶部仪表盘进度条"""
+        if not self.scanner:
+            return
+        processed, total, percent = self.scanner.get_progress_stats()
+        self.overall_progress.setValue(percent)
+        self.overall_progress.setFormat(f"总进度: %p% (已完成 {processed}/{total})")
 
 
 def launch_gui():

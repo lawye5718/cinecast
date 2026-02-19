@@ -117,6 +117,38 @@ class TestAudioScanner:
         scanner.update_status(path_a, FileStatus.PASSED)
         assert len(scanner.get_pending_files()) == 1
 
+    def test_get_progress_stats_empty(self, tmp_path):
+        """Empty scanner should return (0, 0, 0)."""
+        scanner = AudioScanner(str(tmp_path))
+        scanner.scan()
+        processed, total, pct = scanner.get_progress_stats()
+        assert (processed, total, pct) == (0, 0, 0)
+
+    def test_get_progress_stats(self, tmp_path):
+        """get_progress_stats should track PASSED and FIXED files."""
+        (tmp_path / "a.mp3").write_bytes(b"fake")
+        (tmp_path / "b.mp3").write_bytes(b"fake")
+        (tmp_path / "c.mp3").write_bytes(b"fake")
+        scanner = AudioScanner(str(tmp_path))
+        scanner.scan()
+
+        processed, total, pct = scanner.get_progress_stats()
+        assert total == 3
+        assert processed == 0
+        assert pct == 0
+
+        path_a = str((tmp_path / "a.mp3").resolve())
+        scanner.update_status(path_a, FileStatus.PASSED)
+        processed, total, pct = scanner.get_progress_stats()
+        assert processed == 1
+        assert pct == 33
+
+        path_b = str((tmp_path / "b.mp3").resolve())
+        scanner.update_status(path_b, FileStatus.FIXED)
+        processed, total, pct = scanner.get_progress_stats()
+        assert processed == 2
+        assert pct == 66
+
 
 class TestAudioFileInfo:
     def test_repr_pending(self, tmp_path):
@@ -274,6 +306,44 @@ class TestAnalyzer:
         # Should not raise RecursionError
         glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.2)
         assert isinstance(glitches, list)
+
+    def test_energy_gate_filters_quiet_noise(self):
+        """Very quiet quantization noise should be filtered by the energy gate."""
+        from audio_shield.analyzer import detect_audio_glitches_pro, _MIN_ABS_ENERGY
+
+        sr = 22050
+        duration_sec = 2.0
+        n_samples = int(sr * duration_sec)
+        rng = np.random.default_rng(7)
+        # All samples well below the energy gate
+        y = rng.normal(0, _MIN_ABS_ENERGY * 0.1, n_samples).astype(np.float32)
+        # Insert a tiny "spike" that is still below the energy gate
+        spike_idx = int(sr * 1.0)
+        y[spike_idx] = _MIN_ABS_ENERGY * 0.5
+        y[spike_idx + 1] = -_MIN_ABS_ENERGY * 0.5
+
+        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.4)
+        assert glitches == [], "Quiet spikes below energy gate should not be reported"
+
+    def test_rms_filter_reduces_false_positives(self):
+        """Spikes that are only slightly above local RMS should be filtered out."""
+        from audio_shield.analyzer import detect_audio_glitches_pro
+
+        sr = 22050
+        duration_sec = 2.0
+        n_samples = int(sr * duration_sec)
+        rng = np.random.default_rng(55)
+        # Background noise with moderate RMS
+        y = rng.normal(0, 0.05, n_samples).astype(np.float32)
+
+        # These glitches should still be detected (strong spike well above RMS)
+        spike_idx = int(sr * 1.0)
+        y[spike_idx] = 0.95
+        y[spike_idx + 1] = -0.90
+
+        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.4)
+        assert any(abs(t - 1.0) < 0.1 for t in glitches), \
+            "Strong spikes above RMS threshold should still be detected"
 
 
 # ===========================================================================

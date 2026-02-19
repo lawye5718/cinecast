@@ -121,3 +121,19 @@ class AudioScanner:
         if idx is not None:
             return self.files[idx]
         return None
+
+    def get_progress_stats(self) -> tuple:
+        """
+        返回处理进度统计。
+
+        Returns:
+            (processed_count, total_count, percentage) 元组，
+            其中 processed_count 包含状态为 PASSED 或 FIXED 的文件数量。
+        """
+        total = len(self.files)
+        processed = sum(
+            1 for f in self.files
+            if f.status in (FileStatus.PASSED, FileStatus.FIXED)
+        )
+        percentage = int((processed / total) * 100) if total > 0 else 0
+        return processed, total, percentage

@@ -22,6 +22,13 @@ _MAX_GLITCHES_THRESHOLD = 50
 # Upper bound on sensitivity during auto-retry to prevent infinite recursion.
 _MAX_SENSITIVITY_CEILING = 5.0
 
+# Absolute energy threshold: chunks whose peak amplitude is below this value
+# are treated as silence/background-noise and skipped entirely.
+_MIN_ABS_ENERGY = 0.02
+
+# RMS multiplier: a diff spike must exceed local_rms * this factor to qualify.
+_RMS_SPIKE_FACTOR = 2
+
 # ---------------------------------------------------------------------------
 # 尝试导入 librosa；CI 等轻量环境可能没有安装
 # ---------------------------------------------------------------------------
@@ -118,6 +125,11 @@ def detect_audio_glitches_pro(
     step = max(1, win_length // 2)
     for i in range(0, len(y) - 1, step):
         chunk = y[i : i + win_length]
+
+        # --- 能量门限：跳过极度安静的片段，避免量化噪声被误判 ---
+        if np.max(np.abs(chunk)) < _MIN_ABS_ENERGY:
+            continue
+
         diff = np.abs(np.diff(chunk))
 
         if len(diff) == 0:
@@ -133,7 +145,11 @@ def detect_audio_glitches_pro(
             local_std * (1 / sensitivity) * _THRESHOLD_MULTIPLIER
         )
 
-        indices = np.where(diff > local_threshold)[0]
+        # --- RMS 校验：diff 必须同时显著高于局部 RMS ---
+        local_rms = np.sqrt(np.mean(chunk**2))
+        rms_floor = local_rms * _RMS_SPIKE_FACTOR
+
+        indices = np.where((diff > local_threshold) & (diff > rms_floor))[0]
         for idx in indices:
             t = (i + idx) / sr
             glitch_times_raw.append(t)
