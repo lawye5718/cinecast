@@ -141,6 +141,7 @@ class TestExtractFieldsFromObject:
         result = _extract_fields_from_object(obj)
         assert result is not None
         assert result["speaker"] == "narrator"
+        assert result["content"] == ""
 
 
 # ---------------------------------------------------------------------------
@@ -182,11 +183,9 @@ class TestCastDBIsolation:
             project_name = os.path.splitext(os.path.basename(input_source))[0]
             return os.path.join("workspace", f"{project_name}_cast.json")
 
-        path = derive_cast_db_path("/books/my_novel/")
-        # basename of trailing slash may be empty; this tests robustness
-        # The actual main_producer code handles this correctly since input_source
-        # won't have trailing slashes in practice
-        assert "workspace" in path
+        path = derive_cast_db_path("/books/my_novel")
+        assert "my_novel" in path
+        assert path.endswith("_cast.json")
 
 
 # ---------------------------------------------------------------------------
