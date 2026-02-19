@@ -62,54 +62,54 @@ class TestVoiceArchetypeMapping:
 # ---------------------------------------------------------------------------
 
 class TestEnhancedEmotionInstructions:
-    """Verify emotion field uses emotion+acoustic dual descriptions."""
+    """Verify emotion field uses constrained EMOTION_SET keywords."""
 
-    def test_emotion_dual_description_instruction(self):
-        """system_prompt should instruct emotion+acoustic dual description."""
+    def test_emotion_constrained_instruction(self):
+        """system_prompt should instruct constrained emotion from EMOTION_SET."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "情感与音色双重标签" in source or "音色描述" in source
+        assert "EMOTION_SET" in source or "emotion 规定" in source
 
-    def test_emotion_examples_present(self):
-        """Example emotion descriptions should be in the prompt."""
+    def test_emotion_set_keywords_present(self):
+        """EMOTION_SET keywords should be present in the prompt."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "High-pitched" in source or "Pitch" in source
+        assert "平静" in source and "愤怒" in source and "激动" in source
 
 
 # ---------------------------------------------------------------------------
 # Punctuation & Interjection Preservation
 # ---------------------------------------------------------------------------
 
-class TestPunctuationPreservation:
-    """Verify instructions to preserve interjections and punctuation."""
+class TestAntiHallucinationPrompt:
+    """Verify anti-hallucination hardening in the prompt."""
 
-    def test_interjection_instruction_in_prompt(self):
-        """system_prompt should instruct preservation of interjections."""
+    def test_anti_hallucination_few_shot_in_prompt(self):
+        """system_prompt should contain few-shot example for sentence-by-sentence decomposition."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "语气词" in source
-        assert "嗯" in source or "啊" in source
+        assert "one_shot_example" in source
+        assert "示例参考" in source
 
-    def test_punctuation_preservation_instruction(self):
-        """system_prompt should mention long pause punctuation like '...'."""
+    def test_anti_hallucination_quote_preprocessing(self):
+        """_request_ollama should preprocess ASCII quotes to avoid JSON conflicts."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "TTS Prosody" in source or "标点" in source
+        assert "双引号" in source or "\\u201c" in source
 
 
 # ---------------------------------------------------------------------------
 # JSON Anti-Truncation Output Order
 # ---------------------------------------------------------------------------
 
-class TestAntiTruncationInstruction:
-    """Verify JSON output ordering instruction to reduce truncation errors."""
+class TestAntiDriftInstruction:
+    """Verify anti-instruction-drift features in the prompt."""
 
-    def test_output_order_instruction_in_prompt(self):
-        """system_prompt should instruct character list before JSON output."""
+    def test_simplified_prompt_uses_data_converter_role(self):
+        """system_prompt should use simplified data converter role instead of director."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "Anti-Truncation" in source or "输出顺序纪律" in source
+        assert "数据格式转换工具" in source
 
 
 # ---------------------------------------------------------------------------
