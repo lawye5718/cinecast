@@ -3,12 +3,13 @@
 CineCast Web UI
 基于 Gradio Blocks API 的现代化图形界面
 支持纯净旁白/智能配音双模式、云端外脑 Master JSON 统一输入、极速试听与全本压制
-包含：工作区断点记忆与自动恢复功能
+包含：工作区断点记忆与自动恢复功能、实时制片日志流式展示、自动质检
 """
 
 import os
 import json
 import shutil
+import threading
 import gradio as gr
 from main_producer import CineCastProducer
 
@@ -48,6 +49,63 @@ def save_workspace(book_file, mode, master_json):
             json.dump(state, f, ensure_ascii=False, indent=2)
     except Exception as e:
         print(f"⚠️ 工作区状态保存失败: {e}")
+
+
+# --- 🌟 新增：实时日志流式读取 ---
+LOG_FILE = "cinecast.log"
+
+
+def get_logs():
+    """读取 cinecast.log 的最后 50 行，供 WebUI 定时轮询展示"""
+    if os.path.exists(LOG_FILE):
+        try:
+            with open(LOG_FILE, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+                return "".join(lines[-50:])
+        except Exception:
+            pass
+    return "等待日志输出..."
+
+
+# --- 🌟 新增：无头质检（Headless QC） ---
+def run_headless_qc(output_dir, sensitivity=0.4):
+    """在无 GUI 环境下自动执行噪音检测，返回文本报告
+
+    Args:
+        output_dir: 要扫描的音频输出目录
+        sensitivity: 噪音检测灵敏度 (0.1–1.0)
+
+    Returns:
+        质检结果的文本摘要
+    """
+    try:
+        from audio_shield.scanner import AudioScanner
+        from audio_shield.analyzer import detect_audio_glitches
+    except ImportError:
+        return "⚠️ 质检模块依赖缺失 (librosa)，跳过自动质检。"
+
+    if not os.path.isdir(output_dir):
+        return "⚠️ 未发现输出目录，跳过质检。"
+
+    scanner = AudioScanner(output_dir)
+    scanner.scan()
+
+    if not scanner.files:
+        return "⚠️ 未发现可质检的音频文件。"
+
+    results = []
+    total = len(scanner.files)
+    for i, finfo in enumerate(scanner.files, 1):
+        try:
+            glitches = detect_audio_glitches(finfo.file_path, sensitivity=sensitivity)
+            status = f"⚠️ {len(glitches)}处异常" if glitches else "✅ 通过"
+            results.append(f"[{i}/{total}] {finfo.filename}: {status}")
+        except Exception as e:
+            results.append(f"[{i}/{total}] {finfo.filename}: ❌ 分析失败 ({e})")
+
+    passed = sum(1 for r in results if "✅" in r)
+    summary = f"🔍 质检完成: {passed}/{total} 个文件通过\n" + "\n".join(results)
+    return summary
 
 # 🌟 终极"云端外脑" Prompt 规范（供用户复制给 Kimi、豆包或 Claude 等长文本大模型）
 BRAIN_PROMPT_TEMPLATE = """\
@@ -186,7 +244,9 @@ def run_cinecast(epub_file, mode_choice,
             if producer.phase_1_generate_scripts(epub_file.name):
                 producer.phase_2_render_dry_audio()
                 producer.phase_3_cinematic_mix()
-                return None, "✅ 全本压制完成！"
+                # 🌟 混音完成后自动进行无头质检
+                qc_report = run_headless_qc(config["output_dir"])
+                return None, "✅ 全本压制完成！\n\n" + qc_report
             return None, "❌ 阶段一（微切片剧本生成）失败，请检查输入文件和服务状态。"
     except Exception as e:
         return None, f"❌ 错误: {str(e)}"
@@ -269,8 +329,14 @@ with gr.Blocks(theme=theme, title="CineCast Pro 3.0") as ui:
             gr.Markdown("### 🎵 审听室")
             audio_player = gr.Audio(label="审听室播放器", interactive=False)
             status_box = gr.Textbox(
-                label="制片日志", lines=15, interactive=False
+                label="制片状态", lines=3, interactive=False
             )
+            log_viewer = gr.Textbox(
+                label="📋 实时制片日志", lines=15, interactive=False
+            )
+            # 🌟 每 2 秒自动轮询日志文件并刷新展示
+            timer = gr.Timer(2)
+            timer.tick(get_logs, outputs=log_viewer)
 
             gr.Markdown("---")
             gr.Markdown(
