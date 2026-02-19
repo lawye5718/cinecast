@@ -454,7 +454,7 @@ class LLMScriptDirector:
             chunks = []
             temp = ""
             for part in raw_sentences:
-                if not part.strip() and not re.match(r'[。！？；.!?;]', part):
+                if not part.strip():
                     continue
                 if re.match(r'^[。！？；.!?;]$', part.strip()):
                     temp += part
