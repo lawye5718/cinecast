@@ -151,17 +151,17 @@ class TestAntiSummarizationPrompt:
         # Must demand flat array output
         assert "平铺的 JSON 数组" in source or "JSON 数组" in source
         # Must forbid dict output
-        assert "严禁输出字典" in source or "不能输出字典" in source
+        assert "严禁最外层使用字典" in source or "严禁输出" in source
 
     def test_prompt_forbids_summarization(self):
-        """The user_content should explicitly forbid summarization."""
+        """The prompt should forbid merging and deletion of content."""
         import inspect
         source = inspect.getsource(LLMScriptDirector._request_ollama)
-        assert "禁止总结" in source
-        assert "禁止概括" in source
+        assert "严禁合并" in source
+        assert "严禁删减" in source
 
     def test_prompt_demands_full_content_preservation(self):
-        """The prompt should demand every sentence be preserved."""
+        """The prompt should demand every sentence be preserved via physical alignment."""
         import inspect
         source = inspect.getsource(LLMScriptDirector._request_ollama)
-        assert "禁止删减" in source or "原封不动" in source
+        assert "物理对齐" in source or "严禁删减" in source

@@ -748,20 +748,15 @@ class LLMScriptDirector:
         # 🌟 防幻觉加固：定义 Qwen3-TTS 官方支持的感情子集，防止模型乱写
         EMOTION_SET = "平静, 愤怒, 悲伤, 喜悦, 恐惧, 惊讶, 沧桑, 柔和, 激动"
 
-        # 🌟 防幻觉加固：极端简化的 System Prompt，强调"搬运"而非"创作"
-        system_prompt = f"""你是一个数据格式转换工具。
-任务：将文本原封不动地转换为 JSON 数组。
-规则：
-1. 严禁总结！严禁概括！原文每一句话都必须对应数组里的一个 {{}} 对象。
-2. 严禁将多句话合并到一个 content 字段中，必须物理拆分。
-3. 严禁漏掉任何一个自然段！如果发现内容缺失，系统将判定任务失败并重试！
-4. 禁止总结！禁止概括！禁止压缩！
-5. speaker 规定：旁白用 "narrator"；对白根据上下文确定人名。
-6. emotion 规定：仅限从以下词汇中选择一个：[{EMOTION_SET}]。
-7. gender 规定：仅限 "male"、"female" 或 "unknown"。旁白固定为 "male"。
-8. type 规定：仅限 "title"(章节名)、"narration"(旁白)、"dialogue"(对白)。
-9. content 规定：如果 type 是 "dialogue"，去掉最外层引号。
-10. 格式：必须输出平铺的 JSON 数组，严禁输出字典结构。
+        # 🌟 防幻觉加固：高精度有声书剧本转换接口 System Prompt
+        system_prompt = f"""你是一个高精度的有声书剧本转换接口。
+任务：将输入文本逐句解析为 JSON 数组格式。
+核心规则：
+1. 物理对齐：原文的每一句、每一段必须对应数组中的一个对象。严禁合并，严禁删减。
+2. 根节点约束：输出结果必须是一个标准的 JSON 数组（即以 `[` 开头）。严禁输出 `{{"data": [...]}}` 这种格式。
+3. 字段要求：每个对象必须包含 type, speaker, gender, emotion, content 字段。
+4. 角色一致性：speaker 必须根据上下文推断。
+5. 情绪约束：仅限 [{EMOTION_SET}]。
 """
 
         # 🌟 防幻觉加固：强化 Few-Shot 锚定，展示逐句拆解的物理长度
@@ -849,13 +844,11 @@ class LLMScriptDirector:
         # 改为记录对话密集标志，在 parse_text_to_script 层减小 text_chunk 长度。
         num_ctx = 8192
 
-        # 🌟 防幻觉加固：结构化 User Prompt，使用更强硬语气并加入行数计数暗示
-        user_content = "【最高警告：禁止删减！禁止总结！】\n"
-        user_content += '你现在的身份是一个\u201c复读机转换器\u201d。\n'
-        user_content += "你的唯一目标是将下文拆解成 JSON 数组。原文有多少句话，数组就必须有多少个元素。\n\n"
+        # 🌟 防幻觉加固：结构化 User Prompt
+        user_content = f"【指令：将以下文本转换为平铺的 JSON 数组，严禁最外层使用字典】\n\n"
 
         if context:
-            user_content += f"【上文参考（仅供推断谁在说话，绝对不要解析此段）】\n{context}\n\n"
+            user_content += f"【上下文参考】\n{context}\n\n"
 
         user_content += f"待处理原文：\n{text_chunk}"
 
@@ -871,7 +864,7 @@ class LLMScriptDirector:
             "keep_alive": "10m",
             "options": {
                 "num_ctx": num_ctx,
-                "temperature": 0.1,
+                "temperature": 0,
                 "top_p": 0.1,
                 "num_predict": 2048
             }

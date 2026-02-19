@@ -46,7 +46,7 @@ class TestEmotionSetConstraint:
     def test_emotion_constraint_instruction_in_prompt(self):
         """The system prompt should instruct emotion selection from EMOTION_SET only."""
         source = inspect.getsource(LLMScriptDirector._request_ollama)
-        assert "仅限从以下词汇中选择" in source
+        assert "情绪约束" in source or "仅限" in source
 
 
 # ---------------------------------------------------------------------------
@@ -57,9 +57,9 @@ class TestSimplifiedSystemPrompt:
     """Verify the system prompt uses simplified data-converter role."""
 
     def test_data_converter_role(self):
-        """System prompt should define the model as a data format converter."""
+        """System prompt should define the model as a high-precision audiobook conversion interface."""
         source = inspect.getsource(LLMScriptDirector._request_ollama)
-        assert "数据格式转换工具" in source
+        assert "高精度的有声书剧本转换接口" in source
 
     def test_no_director_terminology(self):
         """System prompt should not use complex director terminology."""
@@ -67,15 +67,15 @@ class TestSimplifiedSystemPrompt:
         assert "有声书导演" not in source
 
     def test_anti_merge_instruction(self):
-        """System prompt should forbid merging multiple sentences into one content."""
+        """System prompt should forbid merging content via physical alignment rule."""
         source = inspect.getsource(LLMScriptDirector._request_ollama)
-        assert "严禁将多句话合并" in source
+        assert "严禁合并" in source
 
     def test_flat_array_enforcement(self):
         """System prompt should enforce flat JSON array output."""
         source = inspect.getsource(LLMScriptDirector._request_ollama)
-        assert "平铺的 JSON 数组" in source
-        assert "严禁输出字典" in source
+        assert "JSON 数组" in source
+        assert "严禁输出" in source or "严禁最外层使用字典" in source
 
 
 # ---------------------------------------------------------------------------
@@ -111,9 +111,9 @@ class TestModelParameterAdjustments:
     """Verify model parameters are adjusted for anti-hallucination."""
 
     def test_temperature_lowered(self):
-        """Temperature should be set to 0.1 for reduced randomness."""
+        """Temperature should be set to 0 for maximum stability."""
         source = inspect.getsource(LLMScriptDirector._request_ollama)
-        assert '"temperature": 0.1' in source
+        assert '"temperature": 0,' in source
 
     def test_num_predict_set(self):
         """num_predict should be set to 2048 for sufficient output length."""
@@ -144,7 +144,7 @@ class TestModelParameterAdjustments:
 
         assert len(captured_payloads) == 1
         options = captured_payloads[0]["options"]
-        assert options["temperature"] == 0.1
+        assert options["temperature"] == 0
         assert options["top_p"] == 0.1
         assert options["num_predict"] == 2048
         assert options["num_ctx"] == 8192
@@ -201,16 +201,16 @@ class TestForcefulUserPrompt:
     """Verify the user prompt uses forceful anti-hallucination language."""
 
     def test_user_prompt_contains_warning(self):
-        """User prompt should contain explicit warning against deletion."""
+        """User prompt should contain explicit instruction against dict output."""
         source = inspect.getsource(LLMScriptDirector._request_ollama)
-        assert "禁止删减" in source
+        assert "严禁最外层使用字典" in source or "严禁删减" in source
 
-    def test_user_prompt_contains_repeater_role(self):
-        """User prompt should assign 'repeater converter' role."""
+    def test_user_prompt_contains_instruction(self):
+        """User prompt should contain conversion instruction."""
         source = inspect.getsource(LLMScriptDirector._request_ollama)
-        assert "复读机转换器" in source
+        assert "指令" in source or "平铺的 JSON 数组" in source
 
-    def test_user_prompt_contains_count_hint(self):
-        """User prompt should contain line count hint."""
+    def test_user_prompt_contains_alignment_rule(self):
+        """System prompt should contain physical alignment rule."""
         source = inspect.getsource(LLMScriptDirector._request_ollama)
-        assert "多少句话" in source or "多少个元素" in source
+        assert "物理对齐" in source or "逐句解析" in source
