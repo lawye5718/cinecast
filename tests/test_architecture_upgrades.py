@@ -1082,25 +1082,24 @@ class TestMergeRemovedFromPipeline:
 # ---------------------------------------------------------------------------
 
 class TestDynamicRecapInsertionIndex:
-    """Verify that main_producer.py uses 'len(micro_script) > 1' for safe recap insertion."""
+    """Verify that main_producer.py uses _find_recap_insert_index for smart recap insertion."""
 
-    def test_source_uses_gt_1_guard(self):
-        """main_producer.py should use '> 1' not '> 0' for recap insert_idx."""
+    def test_source_uses_find_recap_insert_index(self):
+        """main_producer.py should use _find_recap_insert_index for recap insert_idx."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "main_producer.py",
         )
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
-        assert "len(micro_script) > 1" in source, (
-            "main_producer.py should use 'len(micro_script) > 1' for safe recap insertion"
+        assert "_find_recap_insert_index" in source, (
+            "main_producer.py should use _find_recap_insert_index for smart recap insertion"
         )
-        # Ensure the old pattern is no longer present
-        # Count occurrences of > 0 vs > 1 in insert_idx lines
+        # Ensure the old hardcoded pattern is no longer present
         import re
-        old_pattern_count = len(re.findall(r'insert_idx\s*=\s*1\s+if\s+len\(micro_script\)\s*>\s*0', source))
+        old_pattern_count = len(re.findall(r'insert_idx\s*=\s*1\s+if\s+len\(micro_script\)\s*>\s*[01]', source))
         assert old_pattern_count == 0, (
-            "main_producer.py should not use 'len(micro_script) > 0' for insert_idx anymore"
+            "main_producer.py should not use hardcoded insert_idx anymore"
         )
 
 

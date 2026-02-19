@@ -268,12 +268,12 @@ class TestNormalizeText:
 class TestJsonOverflowProtection:
     """Verify JSON overflow protection for dialogue-heavy text."""
 
-    def test_dialogue_heavy_text_reduces_num_ctx(self):
-        """Dialogue-heavy text >500 chars with many quotes should reduce num_ctx."""
+    def test_dialogue_density_protection_exists(self):
+        """Dialogue-density overflow protection logic should exist in _request_ollama or parse_text_to_script."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
         assert "num_ctx" in source
-        # Verify the overflow protection logic exists
+        # Verify the overflow protection comment/logic exists
         assert "对话密集型" in source or "dialogue_markers" in source
 
     def test_num_ctx_used_in_payload(self):
@@ -311,5 +311,6 @@ class TestJsonOverflowProtection:
 
         assert len(captured_payloads) == 1
         payload_num_ctx = captured_payloads[0]["options"]["num_ctx"]
-        # With heavy dialogue, should be reduced from 8192
-        assert payload_num_ctx < 8192
+        # num_ctx should stay at 8192; dialogue-dense strategy now reduces
+        # text chunk size instead of num_ctx to preserve speaker context.
+        assert payload_num_ctx == 8192
