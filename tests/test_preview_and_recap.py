@@ -150,7 +150,8 @@ class TestCnToInt:
         assert _cn_to_int("一百二十") == 120
 
     def test_hundred_and_twenty_with_units(self):
-        assert _cn_to_int("一百二十回") == 120  # '回' is not in cn_num, ignored
+        # Characters not in cn_num (e.g. '回') are silently ignored
+        assert _cn_to_int("一百二十回") == 120
 
     def test_complex_number(self):
         assert _cn_to_int("三百四十五") == 345
@@ -160,6 +161,10 @@ class TestCnToInt:
 
     def test_zero(self):
         assert _cn_to_int("零") == 0
+
+    def test_unknown_characters_ignored(self):
+        # Non-numeric Chinese characters are silently skipped
+        assert _cn_to_int("第三章") == 3
 
 
 # ---------------------------------------------------------------------------
