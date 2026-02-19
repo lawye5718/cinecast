@@ -35,19 +35,26 @@ class TestVoiceArchetypeMapping:
     """Verify voice archetype mapping guideline is injected into the prompt."""
 
     def test_archetype_guideline_in_source(self):
-        """The _request_ollama method should contain the voice design reference."""
+        """The _request_ollama method should reference archetype prompt injection."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "Voice Design Reference" in source
-        assert "角色音色建模指南" in source
+        assert "_get_archetype_prompt" in source
+        assert "音色映射指南" in source or "VOICE_ARCHETYPES" in source
 
     def test_archetype_keywords_present(self):
         """Archetype descriptions should cover key character types."""
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
-        assert "知识分子" in source or "intellectual" in source.lower()
-        assert "威严长者" in source or "authoritative" in source.lower()
-        assert "纯真少女" in source or "energetic" in source.lower()
+        assert "intellectual" in director.VOICE_ARCHETYPES
+        assert "authoritative" in director.VOICE_ARCHETYPES
+        assert "innocent" in director.VOICE_ARCHETYPES
+
+    def test_get_archetype_prompt_contains_all_keys(self):
+        """_get_archetype_prompt should include all VOICE_ARCHETYPES entries."""
+        director = LLMScriptDirector()
+        prompt = director._get_archetype_prompt()
+        for key, value in director.VOICE_ARCHETYPES.items():
+            assert key in prompt
+            assert value in prompt
 
 
 # ---------------------------------------------------------------------------
@@ -61,13 +68,13 @@ class TestEnhancedEmotionInstructions:
         """system_prompt should instruct emotion+acoustic dual description."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "情感+声学双描述" in source or "emotion+acoustic" in source.lower()
+        assert "情感与音色双重标签" in source or "音色描述" in source
 
     def test_emotion_examples_present(self):
         """Example emotion descriptions should be in the prompt."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "Angry, high pitch" in source or "high pitch" in source
+        assert "High-pitched" in source or "Pitch" in source
 
 
 # ---------------------------------------------------------------------------

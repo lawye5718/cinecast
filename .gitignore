@@ -39,6 +39,9 @@ config.local.json
 .env
 .cinecast_workspace.json
 
+# 工作区（运行时生成的角色音色库等）
+workspace/
+
 # 资产文件（大型二进制文件）
 assets/voices/
 assets/ambient/

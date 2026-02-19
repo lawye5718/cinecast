@@ -135,7 +135,16 @@ def merge_consecutive_narrators(script: List[Dict], max_chars: int = 800) -> Lis
     return merged
 
 class LLMScriptDirector:
-    def __init__(self, ollama_url="http://127.0.0.1:11434", use_local_mlx_lm=False, global_cast=None):
+    # 🌟 高阶角色音色映射表 (Voice Archetype Mapping)
+    VOICE_ARCHETYPES = {
+        "intellectual": "Clear, articulate, mid-range voice, steady pacing, calm and intellectual.",
+        "villain_sly": "Slightly nasal, fast-paced voice, bright tone, with a hint of sarcasm.",
+        "melancholic": "Breathier, soft voice, melancholic undertones, slow and emotional.",
+        "authoritative": "Resonant, deep baritone, slow and authoritative, gravelly texture.",
+        "innocent": "Bright, high-pitched, energetic and innocent, clear enunciation.",
+    }
+
+    def __init__(self, ollama_url="http://127.0.0.1:11434", use_local_mlx_lm=False, global_cast=None, cast_db_path=None):
         self.api_url = f"{ollama_url}/api/chat"
         self.model_name = "qwen14b-pro"
         self.max_chars_per_chunk = 60 # 微切片红线（智能配音模式）
@@ -147,10 +156,86 @@ class LLMScriptDirector:
         self._prev_characters: List[str] = []
         self._prev_tail_entries: List[Dict] = []
         self._local_session_cast: Dict[str, str] = {}  # 🌟 局部会话角色音色表（跨 chunk 音色一致性）
+
+        # 🌟 音色一致性持久化 (Voice Consistency Persistence)
+        self.cast_db_path = cast_db_path or os.path.join("workspace", "cast_profiles.json")
+        self.cast_profiles: Dict[str, Dict] = self._load_cast_profiles()
         
         # 测试Ollama连接
         self._test_ollama_connection()
-    
+
+    # ------------------------------------------------------------------
+    # 🌟 音色一致性持久化 (Voice Consistency Persistence)
+    # ------------------------------------------------------------------
+
+    def _load_cast_profiles(self) -> Dict[str, Dict]:
+        """加载已保存的角色音色库"""
+        if os.path.exists(self.cast_db_path):
+            try:
+                with open(self.cast_db_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, OSError) as e:
+                logger.warning(f"⚠️ 加载角色音色库失败: {e}")
+        return {}
+
+    def _save_cast_profile(self, name: str, gender: str, description: str) -> None:
+        """发现新角色或更新角色时持久化"""
+        if name not in self.cast_profiles:
+            self.cast_profiles[name] = {
+                "gender": gender,
+                "voice_instruction": description,
+            }
+            os.makedirs(os.path.dirname(self.cast_db_path) or ".", exist_ok=True)
+            atomic_json_write(self.cast_db_path, self.cast_profiles)
+
+    def _update_cast_db(self, script_list: List[Dict]) -> None:
+        """解析完一个 chunk 后，提取新角色并持久化"""
+        updated = False
+        for item in script_list:
+            speaker = item.get("speaker")
+            if not speaker or speaker == "narrator":
+                continue
+            emotion = item.get("emotion", "")
+            gender = item.get("gender", "unknown")
+            # 提取括号内的英文描述
+            if "(" in emotion and ")" in emotion and speaker not in self.cast_profiles:
+                desc = emotion.split("(")[1].split(")")[0]
+                self.cast_profiles[speaker] = {
+                    "gender": gender,
+                    "voice_instruction": desc,
+                }
+                updated = True
+
+        if updated:
+            os.makedirs(os.path.dirname(self.cast_db_path) or ".", exist_ok=True)
+            atomic_json_write(self.cast_db_path, self.cast_profiles)
+
+    # ------------------------------------------------------------------
+    # 🌟 高阶角色音色映射表 Prompt 生成
+    # ------------------------------------------------------------------
+
+    def _get_archetype_prompt(self) -> str:
+        """生成注入 System Prompt 的音色映射指南"""
+        guidelines = "\n".join(
+            [f"  - {k}: {v}" for k, v in self.VOICE_ARCHETYPES.items()]
+        )
+        return (
+            "\n【音色设计参考手册】\n"
+            "当为新角色生成 (Acoustic Description) 时，请优先参考以下文学原型描述词：\n"
+            f"{guidelines}\n"
+        )
+
+    # ------------------------------------------------------------------
+    # 🌟 小说集上下文重置 (Novella Collection Context Reset)
+    # ------------------------------------------------------------------
+
+    def reset_context(self) -> None:
+        """强制重置滑动窗口，用于小说集中的新故事"""
+        self._prev_characters = []
+        self._prev_tail_entries = []
+        self._local_session_cast = {}
+        logger.info("♻️ 检测到故事边界，导演引擎已重置上下文。")
+
     def _test_ollama_connection(self):
         """测试Ollama服务连接"""
         try:
@@ -502,6 +587,9 @@ class LLMScriptDirector:
                     if speaker and speaker != "narrator" and emotion:
                         if speaker not in self._local_session_cast:
                             self._local_session_cast[speaker] = emotion
+
+                # 🌟 音色一致性持久化：将新角色音色写入 JSON 角色库
+                self._update_cast_db(chunk_script)
             
             full_script.extend(chunk_script)
         
@@ -516,6 +604,7 @@ class LLMScriptDirector:
         # 🌟 内容完整性守门员：检测 LLM 是否严重删节内容
         if not self.verify_integrity(text, full_script):
             logger.warning("⚠️ 内容完整性校验未通过，请检查大模型输出质量。")
+            logger.error("❌ 内容完整性低。建议降低 llm_director.py 中的 max_length 参数后重试。")
             
         return full_script
     
@@ -639,7 +728,10 @@ class LLMScriptDirector:
         - "type": 仅限 "title"(章节名), "subtitle"(小标题), "narration"(旁白), "dialogue"(对白)。
         - "speaker": 对白填具体的角色名（需根据上下文推断并保持全书统一）；旁白和标题统一填 "narrator"。
         - "gender": 仅限 "male"、"female" 或 "unknown"。对白请推测性别；旁白固定为 "male"。
-        - "emotion": 情感+声学双描述标签，例如："Angry, high pitch" 或 "Sad, low volume, shaky voice"。严禁只写单一情感词如"生气"，必须附加声学特征描述，这将直接决定 Qwen3-TTS 的表现力。
+        - "emotion": 情感与音色双重标签。必须严格遵守格式："[情感] (英文音色描述)"。
+          - 如果角色在【全局选角名单】中，仅输出情感，如："平静" 或 "愤怒"。
+          - 如果角色不在名单中，必须根据性格生成音色描述，如："激动 (High-pitched, energetic male voice)" 或 "哀伤 (Soft, breathy female voice, slow pacing)"。
+          - 英文描述必须包含：音高（Pitch）、语速（Pacing）、音色特征（Texture）。
         - "content": 纯净的文本内容。如果 type 是 "dialogue"，必须去掉最外层的引号（如""或""）。
 
         【五、 标点与语气词保留原则（TTS Prosody）】
@@ -696,16 +788,18 @@ class LLMScriptDirector:
         - 如果角色不在名单中，请在该角色的 emotion 字段中额外生成一个 10 词以内的英文音色描述（如：A deep, husky voice），以便 TTS 引擎进行音色设计。
         """
 
-        # 🌟 Qwen3-TTS 音色映射指南注入
-        system_prompt += """
+        # 🌟 Qwen3-TTS 音色映射指南注入（动态使用 VOICE_ARCHETYPES）
+        system_prompt += self._get_archetype_prompt()
 
-        【角色音色建模指南（Voice Design Reference）】
-        当遇到新角色时，请参考以下映射逻辑生成 emotion 描述：
-        - 知识分子/冷静者: "Clear, mid-range voice, steady pacing, intellectual."
-        - 市侩/油滑小人物: "Nasal, fast-paced, bright tone, sarcastic."
-        - 忧郁/伤感者: "Breathier, soft voice, melancholic, slow."
-        - 威严长者: "Resonant, deep baritone, gravelly texture, authoritative."
-        - 纯真少女: "Bright, high-pitched, energetic, clear enunciation."
+        # 🌟 音色一致性防护：注入持久化角色音色库中的已知角色
+        if self.cast_profiles:
+            known_cast_str = ", ".join(
+                [f"{k}({v.get('gender', 'unknown')})" for k, v in self.cast_profiles.items()]
+            )
+            system_prompt += f"""
+
+        【已知角色音色库（Persistent Cast DB）】
+        以下角色在之前的章节中已确定音色，请严格复用：{known_cast_str}
         """
 
         # 🌟 音色一致性防护：注入上一 chunk 中已确定的音色描述
@@ -723,6 +817,15 @@ class LLMScriptDirector:
 
         # 🌟 文本预处理：数字/符号规范化
         text_chunk = self._normalize_text(text_chunk)
+
+        # 🌟 模型状态监控与 Debug 提示
+        input_len = len(text_chunk)
+        if input_len > 700:
+            logger.warning(
+                f"⚠️ 模型: {self.model_name} | 警告：当前块长度 {input_len} 接近 800 字极限，可能导致 JSON 截断。"
+            )
+        else:
+            logger.info(f"🚀 模型: {self.model_name} | 正在解析片段，长度: {input_len}")
 
         # 🌟 JSON 溢出保护：对话密集型文本自动降低上下文窗口
         num_ctx = 8192
@@ -870,6 +973,23 @@ class LLMScriptDirector:
             # 确保 emotion 字段存在
             if 'emotion' not in fixed_element:
                 fixed_element['emotion'] = '平静'
+
+            # 🌟 音色防护：如果 emotion 为空，且角色不是 narrator，
+            # 根据性别赋予 VOICE_ARCHETYPES 中的默认音色描述，防止 TTS 压制出"机械音"
+            emotion_val = fixed_element.get('emotion', '')
+            speaker_val = fixed_element.get('speaker', 'narrator')
+            if speaker_val != 'narrator' and isinstance(emotion_val, str):
+                stripped_emotion = emotion_val.strip()
+                if not stripped_emotion:
+                    gender_val = fixed_element.get('gender', 'unknown')
+                    if gender_val == 'female':
+                        default_desc = self.VOICE_ARCHETYPES.get("melancholic", "")
+                    else:
+                        default_desc = self.VOICE_ARCHETYPES.get("intellectual", "")
+                    fixed_element['emotion'] = f"平静 ({default_desc})"
+                    logger.warning(
+                        f"⚠️ 角色 '{speaker_val}' 的 emotion 为空，已自动补充默认音色描述"
+                    )
 
             # 🌟 音色冲突检测：female 角色不应使用 baritone/bass 描述
             gender = fixed_element.get('gender', 'unknown')

@@ -8,6 +8,7 @@ CineCast 主控程序
 import argparse
 import gc
 import os
+import re
 import sys
 import json
 import logging
@@ -209,6 +210,44 @@ class CineCastProducer:
             return False
 
     # ==========================================
+    # 🌟 小说集故事边界检测 (Novella Collection Boundary Detection)
+    # ==========================================
+    @staticmethod
+    def _is_new_story_start(chapter_name: str, content: str, prev_chapter_name: str = None) -> bool:
+        """检测当前章节是否是小说集中新故事的起始。
+
+        通过章节标题模式匹配判断：如果章节名暗示"第一章"或"序言"，
+        且不是全书的首个章节，则视为新故事的开始。
+
+        Args:
+            chapter_name: 当前章节名称
+            content: 当前章节内容
+            prev_chapter_name: 上一章节名称（None 表示这是第一个章节）
+
+        Returns:
+            True 表示检测到新故事的开始
+        """
+        if prev_chapter_name is None:
+            return False
+
+        # 检测"第一章"、"第1章"、"Chapter 1"、"序章"、"序言"、"楔子"等新故事标志
+        new_story_patterns = [
+            r'第[一1]章',
+            r'序[章言]',
+            r'楔子',
+            r'(?i)chapter[_ ]?0*1\b',
+            r'(?i)prologue',
+        ]
+        for pattern in new_story_patterns:
+            if re.search(pattern, chapter_name):
+                return True
+            # 也检测内容前100字
+            if re.search(pattern, content[:100]):
+                return True
+
+        return False
+
+    # ==========================================
     # 🎬 阶段一：剧本化与微切片 (Script & Micro-chunking)
     # ==========================================
     def phase_1_generate_scripts(self, input_source, max_chapters=None, is_preview=False):
@@ -294,8 +333,16 @@ class CineCastProducer:
         custom_recaps = self.config.get("custom_recaps", {})
 
         chapter_index = 0  # 章节计数器，循环体内先自增，因此第一章为1
+        prev_chapter_name = None  # 🌟 用于小说集边界检测
         for chapter_name, content in chapters.items():
             chapter_index += 1
+
+            # 🌟 小说集 (Novella Collection) 故事边界检测与上下文重置
+            if self._is_new_story_start(chapter_name, content, prev_chapter_name):
+                director.reset_context()
+                prev_chapter_content = None  # 重置前情提要上下文，防止跨书摘要污染
+
+            prev_chapter_name = chapter_name
             script_path = os.path.join(self.script_dir, f"{chapter_name}_micro.json")
             if os.path.exists(script_path) and not is_preview:
                 logger.info(f"⏭️ 微切片剧本已存在，跳过: {chapter_name}")
