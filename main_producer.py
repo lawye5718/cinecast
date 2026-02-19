@@ -384,7 +384,12 @@ class CineCastProducer:
 
             # 🌟 先判定是否为正文（用于正文计数器累加）
             is_main_text = True
-            if len(content) < 500 or any(keyword in content[:200] for keyword in ["版权", "目录", "出版", "ISBN", "序言", "致谢"]):
+            non_main_keywords = ["版权", "目录", "出版", "ISBN", "序言", "致谢", "前言", "引言", "楔子", "Project Gutenberg"]
+            if len(content) < 500 or any(keyword in content[:200] for keyword in non_main_keywords):
+                is_main_text = False
+
+            # 辅助防御：如果物理文件名是 000 或 001，且开头没有明确的"第一章"标志，强制视为非正文
+            if re.search(r'(?i)chapter_00[01]\b', chapter_name) and not re.search(r'第[一1]章', content[:100]):
                 is_main_text = False
 
             # 🌟 只有正文才累加计数器，确保与外部传入的第N章精确对齐！
@@ -406,9 +411,9 @@ class CineCastProducer:
                 
             logger.info(f"✍️ 正在生成微切片剧本: {chapter_name} (字数: {len(content)})")
             try:
-                # 🌟 核心拦截分支：纯净模式下，使用基于规则的生成器
-                if pure_mode:
-                    logger.info(f"⚡ 启用纯净旁白模式解析: {chapter_name}")
+                # 🌟 核心双轨制分流：纯净模式 或 非正文内容，直接走纯净旁白模式（免 LLM）
+                if pure_mode or not is_main_text:
+                    logger.info(f"⚡ {'纯净旁白模式' if pure_mode else '检测到附属文本(序言/版权)'}，启用免LLM规则解析: {chapter_name}")
                     micro_script = director.generate_pure_narrator_script(content, chapter_prefix=chapter_name)
                 else:
                     # 🌟 智能动态策略：字数对齐检查 + 自动降低 max_length 重试
