@@ -441,32 +441,51 @@ class LLMScriptDirector:
         micro_script = []
         chunk_id = 1
         
+        # 适当放宽微切片红线，避免正常句子被无故切断
+        smart_chunk_limit = max(self.max_chars_per_chunk, 90) 
+        
         for unit in macro_script:
             content = unit.get("content", "")
             if not content or not content.strip():
                 continue
 
-            # 实施微切片
-            raw_sentences = re.split(r'([。！？；，、：])', content)
-            chunks, temp = [], ""
+            # 🌟 修复：实施智能微切片，优先按大标点切分
+            raw_sentences = re.split(r'([。！？；.!?;])', content)
+            chunks = []
+            temp = ""
             for part in raw_sentences:
-                if not part.strip(): continue
-                if re.match(r'^[。！？；，、：]$', part.strip()):
-                    chunks.append(temp + part)
-                    temp = ""
-                else:
+                if not part.strip():
+                    continue
+                if re.match(r'^[。！？；.!?;]$', part.strip()):
                     temp += part
-                    if len(temp) >= self.max_chars_per_chunk:
+                    # 如果这句长度正常，直接加入（不再被逗号切碎）
+                    if len(temp) <= smart_chunk_limit:
                         chunks.append(temp)
                         temp = ""
+                    else:
+                        # 🚨 只有当单句超长时，才启动逗号/顿号的次级切分
+                        sub_parts = re.split(r'([，、：,:])', temp)
+                        sub_temp = ""
+                        for sub in sub_parts:
+                            if re.match(r'^[，、：,:]$', sub):
+                                sub_temp += sub
+                                chunks.append(sub_temp)
+                                sub_temp = ""
+                            else:
+                                sub_temp += sub
+                        if sub_temp:
+                            chunks.append(sub_temp)
+                        temp = ""
+                else:
+                    temp += part
             if temp: chunks.append(temp)
             
             # 清理空块并计算停顿
             valid_chunks = [c.strip() for c in chunks if c.strip()]
 
-            # 🌟 兜底逻辑：如果正则切分后无有效块，按每60字硬切
+            # 🌟 兜底逻辑：如果正则切分后无有效块，按硬切
             if not valid_chunks and content.strip():
-                hard_cut_chunk_size = self.max_chars_per_chunk
+                hard_cut_chunk_size = smart_chunk_limit
                 stripped = content.strip()
                 valid_chunks = [
                     stripped[i:i + hard_cut_chunk_size]
@@ -861,10 +880,16 @@ class LLMScriptDirector:
         # 改为记录对话密集标志，在 parse_text_to_script 层减小 text_chunk 长度。
         num_ctx = 8192
 
-        user_content = "【任务目标】：将以下原文逐字逐句拆解为合法的 JSON 剧本数组。\n"
-        user_content += "【最高警告】：禁止总结！禁止概括！必须 100% 逐字保留原文的所有对白和旁白！\n\n"
+        # 🌟 修复：使用极限施压指令，防止本地大模型将长文总结为一个单对象字典
+        user_content = "【任务目标】：将以下原文逐字逐句拆解为平铺的 JSON 数组（Array）格式。\n"
+        user_content += "【最高警告】：\n"
+        user_content += "1. 必须且只能输出以 `[` 开头，`]` 结尾的平铺数组！绝对不能输出字典（{}）或嵌套结构！\n"
+        user_content += "2. 禁止总结！禁止概括！你必须将下文中的**每一句话**都转化为数组中的一个独立元素！\n"
+        user_content += "3. 原文有多少字，JSON数组里所有 content 字段加起来就必须有多少字，漏字将导致系统崩溃！\n\n"
+        
         if context:
-            user_content += f"【上文参考（仅供角色一致性参考，不要翻译此段）】\n{context}\n\n"
+            user_content += f"【上文参考（仅供推断谁在说话，绝对不要解析此段）】\n{context}\n\n"
+            
         user_content += f"【待处理原文（严格拆解，不可省略任何一句话）】：\n{text_chunk}"
 
         payload = {
