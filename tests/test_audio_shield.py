@@ -172,7 +172,7 @@ class TestAnalyzer:
     def test_detect_spike(self):
         """A signal with a deliberate spike should be detected."""
         y, sr, spike_time = _make_signal_with_spike()
-        glitches = detect_glitches_from_array(y, sr, sensitivity=0.4)
+        glitches = detect_glitches_from_array(y, sr, sensitivity=0.4, min_duration=0)
         assert len(glitches) >= 1
         # The detected glitch should be near the spike time
         assert any(abs(t - spike_time) < 0.1 for t in glitches)
@@ -184,19 +184,19 @@ class TestAnalyzer:
         t = np.linspace(0, duration, int(sr * duration), endpoint=False)
         y = (0.5 * np.sin(2 * np.pi * 440 * t)).astype(np.float32)
 
-        glitches = detect_glitches_from_array(y, sr, sensitivity=0.4)
+        glitches = detect_glitches_from_array(y, sr, sensitivity=0.4, min_duration=0)
         assert glitches == []
 
     def test_empty_signal(self):
         """An empty or very short signal should return empty list."""
-        assert detect_glitches_from_array(np.array([]), 22050) == []
-        assert detect_glitches_from_array(np.array([0.0]), 22050) == []
+        assert detect_glitches_from_array(np.array([]), 22050, min_duration=0) == []
+        assert detect_glitches_from_array(np.array([0.0]), 22050, min_duration=0) == []
 
     def test_sensitivity_affects_results(self):
         """Higher sensitivity value means lower threshold, detecting more glitches."""
         y, sr, _ = _make_signal_with_spike()
-        g_low = detect_glitches_from_array(y, sr, sensitivity=0.1)
-        g_high = detect_glitches_from_array(y, sr, sensitivity=1.0)
+        g_low = detect_glitches_from_array(y, sr, sensitivity=0.1, min_duration=0)
+        g_high = detect_glitches_from_array(y, sr, sensitivity=1.0, min_duration=0)
         # Higher sensitivity value means lower threshold, detecting more glitches
         assert len(g_high) >= len(g_low)
 
@@ -210,14 +210,14 @@ class TestAnalyzer:
         y[int(sr * 1.1)] = 0.95
         y[int(sr * 1.1) + 1] = -0.9
 
-        glitches = detect_glitches_from_array(y, sr, min_interval=0.5)
+        glitches = detect_glitches_from_array(y, sr, min_interval=0.5, min_duration=0)
         # Should cluster into 1
         assert len(glitches) == 1
 
     def test_constant_signal_no_glitches(self):
         """A constant signal (std=0) should return empty list."""
         y = np.ones(22050, dtype=np.float32) * 0.5
-        glitches = detect_glitches_from_array(y, 22050)
+        glitches = detect_glitches_from_array(y, 22050, min_duration=0)
         assert glitches == []
 
     def test_sliding_window_detects_spike_in_quiet_segment(self):
@@ -242,7 +242,7 @@ class TestAnalyzer:
         y[spike_idx] = 0.05
         y[spike_idx + 1] = -0.05
 
-        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.4)
+        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.4, min_duration=0)
         # The sliding window should detect the spike in the quiet segment
         assert any(abs(t - 3.0) < 0.1 for t in glitches)
 
@@ -250,8 +250,8 @@ class TestAnalyzer:
         """Empty or very short signal should return empty list."""
         from audio_shield.analyzer import detect_audio_glitches_pro
 
-        assert detect_audio_glitches_pro(np.array([]), 22050) == []
-        assert detect_audio_glitches_pro(np.array([0.0]), 22050) == []
+        assert detect_audio_glitches_pro(np.array([]), 22050, min_duration=0) == []
+        assert detect_audio_glitches_pro(np.array([0.0]), 22050, min_duration=0) == []
 
     def test_detect_audio_glitches_pro_window_size(self):
         """Custom window size should work correctly."""
@@ -259,7 +259,7 @@ class TestAnalyzer:
 
         y, sr, spike_time = _make_signal_with_spike()
         glitches = detect_audio_glitches_pro(
-            y, sr, window_size_sec=0.5, sensitivity=0.4
+            y, sr, window_size_sec=0.5, sensitivity=0.4, min_duration=0
         )
         assert len(glitches) >= 1
         assert any(abs(t - spike_time) < 0.1 for t in glitches)
@@ -322,7 +322,7 @@ class TestAnalyzer:
         y[spike_idx] = _MIN_ABS_ENERGY * 0.5
         y[spike_idx + 1] = -_MIN_ABS_ENERGY * 0.5
 
-        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.4)
+        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.4, min_duration=0)
         assert glitches == [], "Quiet spikes below energy gate should not be reported"
 
     def test_rms_filter_reduces_false_positives(self):
@@ -341,9 +341,68 @@ class TestAnalyzer:
         y[spike_idx] = 0.95
         y[spike_idx + 1] = -0.90
 
-        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.4)
+        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.4, min_duration=0)
         assert any(abs(t - 1.0) < 0.1 for t in glitches), \
             "Strong spikes above RMS threshold should still be detected"
+
+    def test_short_noise_filtered_by_default_min_duration(self):
+        """A single short spike (<3s) should be filtered out with default min_duration."""
+        y, sr, _ = _make_signal_with_spike()
+        glitches = detect_glitches_from_array(y, sr, sensitivity=0.4)
+        assert glitches == [], "A single short spike should not be reported as problem noise"
+
+    def test_continuous_noise_detected(self):
+        """Continuous noise spanning >=3 seconds should be detected."""
+        from audio_shield.analyzer import detect_audio_glitches_pro
+
+        sr = 22050
+        duration_sec = 10.0
+        n_samples = int(sr * duration_sec)
+        rng = np.random.default_rng(42)
+        y = rng.normal(0, 0.001, n_samples).astype(np.float32)
+
+        # Insert many spikes spanning 4 seconds (2.0s to 6.0s),
+        # spaced 0.3s apart — continuous noise region
+        for i in range(14):
+            t_spike = 2.0 + i * 0.3
+            idx = int(sr * t_spike)
+            if idx + 1 < n_samples:
+                y[idx] = 0.95
+                y[idx + 1] = -0.90
+
+        glitches = detect_audio_glitches_pro(y, sr, sensitivity=0.4)
+        assert len(glitches) >= 1, "Continuous noise >=3s should be detected"
+        # All detected glitches should be within the noise region
+        assert all(1.5 < t < 6.5 for t in glitches)
+
+    def test_min_duration_zero_disables_filter(self):
+        """Setting min_duration=0 should disable duration filtering."""
+        y, sr, spike_time = _make_signal_with_spike()
+        glitches = detect_glitches_from_array(y, sr, sensitivity=0.4, min_duration=0)
+        assert len(glitches) >= 1
+        assert any(abs(t - spike_time) < 0.1 for t in glitches)
+
+    def test_filter_by_duration_helper(self):
+        """_filter_by_duration should group and filter correctly."""
+        from audio_shield.analyzer import _filter_by_duration
+
+        # Region 1: [1.0, 1.5, 2.0] — span = 1.0s (< 3.0s, filtered out)
+        # Region 2: [5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0] — span = 3.0s (kept)
+        times = [1.0, 1.5, 2.0, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0]
+        result = _filter_by_duration(times, min_duration=3.0)
+        assert all(t >= 5.0 for t in result), "Only the long region should be kept"
+        assert len(result) == 7
+
+    def test_filter_by_duration_empty(self):
+        """_filter_by_duration with empty input should return empty."""
+        from audio_shield.analyzer import _filter_by_duration
+        assert _filter_by_duration([], min_duration=3.0) == []
+
+    def test_filter_by_duration_zero_disables(self):
+        """_filter_by_duration with min_duration=0 should return all."""
+        from audio_shield.analyzer import _filter_by_duration
+        times = [1.0, 2.0, 5.0]
+        assert _filter_by_duration(times, min_duration=0) == times
 
 
 # ===========================================================================
