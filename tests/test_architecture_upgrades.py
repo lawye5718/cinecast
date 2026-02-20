@@ -713,8 +713,6 @@ class TestPhase1ChapterSkip:
 
             # Monkey-patch check_ollama_alive to return True
             producer.check_ollama_alive = lambda: True
-            # Monkey-patch _eject_ollama_memory to be a no-op
-            producer._eject_ollama_memory = lambda: None
 
             # Create a director that fails on first chapter, succeeds on second
             call_count = [0]
@@ -907,7 +905,6 @@ class TestEnableRecapConfig:
                 "enable_recap": False,
             })
             producer.check_ollama_alive = lambda: True
-            producer._eject_ollama_memory = lambda: None
 
             recap_called = [False]
             original_generate = LLMScriptDirector.generate_chapter_recap
@@ -965,7 +962,6 @@ class TestNonContentChapterFiltering:
                 "enable_recap": True,
             })
             producer.check_ollama_alive = lambda: True
-            producer._eject_ollama_memory = lambda: None
 
             recap_called = [False]
 
@@ -1017,7 +1013,6 @@ class TestNonContentChapterFiltering:
                 "enable_recap": True,
             })
             producer.check_ollama_alive = lambda: True
-            producer._eject_ollama_memory = lambda: None
 
             recap_called = [False]
 

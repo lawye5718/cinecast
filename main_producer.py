@@ -205,10 +205,6 @@ class CineCastProducer:
                 chapters[title] = clean_text
         return chapters
     
-    def _eject_ollama_memory(self):
-        """🌟 已废弃：原用于弹射 Ollama 模型释放显存，现已切换为 GLM API 无需本地模型管理"""
-        logger.info("ℹ️ 已切换为 GLM API，无需释放本地模型内存。")
-    
     def check_ollama_alive(self):
         """前置检查：验证 GLM API 服务是否可用"""
         api_key = os.environ.get("ZHIPU_API_KEY", "")
