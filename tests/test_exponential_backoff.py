@@ -256,6 +256,21 @@ class TestPostRequestCooldown:
 
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
+    def test_boundary_input_gets_short_cooldown(self, mock_post, mock_sleep):
+        """Input exactly 8000 chars should get the short 1.5s cooldown."""
+        boundary_text = "这" * 8000  # exactly 8000 chars
+        mock_post.return_value = _ok_response([
+            {"type": "narration", "speaker": "narrator", "gender": "male",
+             "emotion": "平静", "content": boundary_text}
+        ])
+
+        director = _make_director()
+        director._request_llm(boundary_text)
+
+        mock_sleep.assert_called_once_with(1.5)
+
+    @patch("modules.llm_director.time.sleep", return_value=None)
+    @patch("modules.llm_director.requests.post")
     def test_context_included_in_length_calculation(self, mock_post, mock_sleep):
         """Context length should be included in input_len for cooldown threshold."""
         text = "这" * 4000        # 4000 chars

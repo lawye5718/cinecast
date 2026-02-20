@@ -839,8 +839,8 @@ class LLMScriptDirector:
                 response.raise_for_status()
                 content = response.json().get('choices', [{}])[0].get('message', {}).get('content', '[]')
 
-                # 🌟 API 稳定性策略：针对超大上下文 (>8K token) 的强制降速
-                # 8000 tokens 约为 5000-10000 中文字符
+                # 🌟 API 稳定性策略：针对超大上下文的强制降速
+                # 8000 字符约为 5000-8000 tokens
                 if input_len > 8000:
                     cooldown = 30
                     logger.info(f"⏳ 检测到大上下文请求 ({input_len} 字)，执行 1% 速率保护，强制冷却 {cooldown}s...")
