@@ -628,9 +628,7 @@ class LLMScriptDirector:
             
             full_script.extend(chunk_script)
 
-            # 强制节流：每请求完一个大文本块，强制休眠 2 秒，给 TPM 令牌桶留出恢复时间
-            if i < len(text_chunks) - 1:
-                time.sleep(2)
+            # 云端 API 的频率限制由 _request_llm 内部的 429 退避逻辑自动控制，无需人为节流
         
         # 🌟 优化：移除 merge_consecutive_narrators 调用。
         # 因为 parse_and_micro_chunk 会对结果进行严格的 60 字微切片，
@@ -799,9 +797,9 @@ class LLMScriptDirector:
 
         # 🌟 模型状态监控与 Debug 提示
         input_len = len(text_chunk)
-        if input_len > 700:
+        if input_len > 30000:
             logger.warning(
-                f"⚠️ 模型: {self.model_name} | 警告：当前块长度 {input_len} 接近 800 字极限，可能导致 JSON 截断。"
+                f"⚠️ 模型: {self.model_name} | 警告：当前块长度 {input_len} 超过 30000 字，可能导致 JSON 截断。"
             )
         else:
             logger.info(f"🚀 模型: {self.model_name} | 正在解析片段，长度: {input_len}")
@@ -829,8 +827,8 @@ class LLMScriptDirector:
             "max_tokens": 128000,
         }
 
-        max_retries = 6
-        base_wait_time = 3
+        max_retries = 5
+        base_wait_time = 2
 
         for attempt in range(max_retries):
             try:

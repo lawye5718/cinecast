@@ -85,10 +85,10 @@ class TestExponentialBackoff:
 
         assert len(result) == 1
         assert result[0]["content"] == "测试文本。"
-        # Sleep should have been called twice with exponential waits (3, 6)
+        # Sleep should have been called twice with exponential waits (2, 4)
         assert mock_sleep.call_count == 2
-        mock_sleep.assert_any_call(3)   # base_wait_time * 2^0
-        mock_sleep.assert_any_call(6)   # base_wait_time * 2^1
+        mock_sleep.assert_any_call(2)   # base_wait_time * 2^0
+        mock_sleep.assert_any_call(4)   # base_wait_time * 2^1
 
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
@@ -144,13 +144,13 @@ class TestExponentialBackoff:
     @patch("modules.llm_director.requests.post")
     def test_max_retries_exhausted(self, mock_post, mock_sleep):
         """After max_retries consecutive 429s, RuntimeError should be raised."""
-        mock_post.side_effect = [_error_response(429)] * 6
+        mock_post.side_effect = [_error_response(429)] * 5
 
         director = _make_director()
         with pytest.raises(RuntimeError, match="超过最大重试次数"):
             director._request_llm("永远失败。")
 
-        assert mock_post.call_count == 6
+        assert mock_post.call_count == 5
 
     @patch("modules.llm_director.requests.post")
     def test_timeout_is_300(self, mock_post):
@@ -168,11 +168,11 @@ class TestExponentialBackoff:
 
 
 class TestChunkThrottle:
-    """Tests for the throttle sleep between chunks in parse_text_to_script."""
+    """Tests for the throttle behavior between chunks in parse_text_to_script."""
 
     @patch("modules.llm_director.time.sleep", return_value=None)
-    def test_throttle_between_chunks(self, mock_sleep):
-        """parse_text_to_script should sleep(2) between chunks (not after the last)."""
+    def test_no_throttle_between_chunks(self, mock_sleep):
+        """parse_text_to_script should NOT sleep between chunks (cloud API rate limiting handled by 429 retry)."""
         director = _make_director()
         # Provide a cast_db_path attribute expected by _update_cast_db
         director.cast_db_path = None
@@ -189,9 +189,9 @@ class TestChunkThrottle:
              patch.object(director, "_update_cast_db"):
             director.parse_text_to_script("some text")
 
-        # sleep(2) should be called between chunks: after chunk 0 and chunk 1, but not after chunk 2
+        # No throttle sleep(2) should be called between chunks
         sleep_2_calls = [c for c in mock_sleep.call_args_list if c[0] == (2,)]
-        assert len(sleep_2_calls) == 2
+        assert len(sleep_2_calls) == 0
 
     @patch("modules.llm_director.time.sleep", return_value=None)
     def test_no_throttle_for_single_chunk(self, mock_sleep):
