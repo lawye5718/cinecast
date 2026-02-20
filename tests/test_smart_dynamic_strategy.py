@@ -33,14 +33,14 @@ class TestMaxLengthParameter:
         import inspect
         sig = inspect.signature(LLMScriptDirector.parse_text_to_script)
         assert "max_length" in sig.parameters
-        assert sig.parameters["max_length"].default == 800
+        assert sig.parameters["max_length"].default == 50000
 
     def test_parse_and_micro_chunk_accepts_max_length(self):
         """parse_and_micro_chunk signature should accept max_length."""
         import inspect
         sig = inspect.signature(LLMScriptDirector.parse_and_micro_chunk)
         assert "max_length" in sig.parameters
-        assert sig.parameters["max_length"].default == 800
+        assert sig.parameters["max_length"].default == 50000
 
     def test_chunk_text_respects_custom_max_length(self):
         """_chunk_text_for_llm should respect a custom max_length."""
@@ -97,10 +97,10 @@ class TestAntiSummarizationPrompt:
 # ---------------------------------------------------------------------------
 
 class TestWordCountAlignmentRetry:
-    """Test the retry logic in phase_1_generate_scripts for word count alignment."""
+    """Test that the old retry/degradation logic has been removed (GLM-4.7-Flash upgrade)."""
 
-    def test_retry_reduces_max_length_on_content_loss(self):
-        """Verify key retry logic components exist in main_producer.py."""
+    def test_no_retry_degradation_logic(self):
+        """Verify old retry logic components have been removed from main_producer.py."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "main_producer.py",
@@ -108,24 +108,22 @@ class TestWordCountAlignmentRetry:
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
 
-        # Verify retry loop structure
-        assert "chapter_max_length = global_max_length" in source
-        assert "int(chapter_max_length * 0.8)" in source
-        assert "MIN_MAX_LENGTH" in source
-        assert "parsed_len < original_len * 0.9" in source
-        assert "recent_needed_reduction" in source
-        # Verify max_length is passed to parse_and_micro_chunk
-        assert "max_length=chapter_max_length" in source
+        # Old retry loop artifacts should no longer be present
+        assert "chapter_max_length = global_max_length" not in source
+        assert "MIN_MAX_LENGTH" not in source
+        assert "recent_needed_reduction" not in source
+        # GLM-4.7-Flash uses max_length=50000 directly
+        assert "max_length=50000" in source
 
-    def test_max_length_floor_at_400(self):
-        """Verify MIN_MAX_LENGTH is 400 in source code."""
+    def test_no_max_length_floor_at_400(self):
+        """Verify MIN_MAX_LENGTH = 400 is no longer in source code."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "main_producer.py",
         )
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
-        assert "MIN_MAX_LENGTH = 400" in source
+        assert "MIN_MAX_LENGTH = 400" not in source
 
 
 # ---------------------------------------------------------------------------
@@ -133,52 +131,26 @@ class TestWordCountAlignmentRetry:
 # ---------------------------------------------------------------------------
 
 class TestGlobalAdaptiveLogic:
-    """Test the global adaptive max_length reduction logic."""
+    """Test that global adaptive max_length logic has been removed (GLM-4.7-Flash upgrade)."""
 
-    def test_global_reduction_code_exists(self):
-        """main_producer.py should contain the global adaptive logic."""
+    def test_no_global_adaptive_logic(self):
+        """main_producer.py should no longer contain the global adaptive logic."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "main_producer.py",
         )
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
-        # Check that the global adaptive logic references are present
-        assert "global_max_length" in source
-        assert "recent_needed_reduction" in source
-        assert "sum(recent_needed_reduction) >= 3" in source
-        assert "int(global_max_length * 0.8)" in source
+        # Old global adaptive logic artifacts should be removed
+        assert "global_max_length" not in source
+        assert "recent_needed_reduction" not in source
 
-    def test_global_max_length_starts_at_800(self):
-        """global_max_length should start at 800."""
+    def test_glm_direct_call_with_50000(self):
+        """GLM-4.7-Flash should use max_length=50000 directly."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "main_producer.py",
         )
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
-        assert "global_max_length = 800" in source
-
-    def test_sliding_window_size_is_5(self):
-        """The sliding window for reduction tracking should be capped at 5."""
-        source_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "main_producer.py",
-        )
-        with open(source_path, "r", encoding="utf-8") as f:
-            source = f.read()
-        # Window is trimmed after append (> 5 triggers pop)
-        # and checked at exactly 5 elements for the threshold
-        assert "len(recent_needed_reduction) > 5" in source
-        assert "len(recent_needed_reduction) == 5" in source
-        assert "sum(recent_needed_reduction) >= 3" in source
-
-    def test_sliding_window_never_exceeds_5(self):
-        """Simulate the sliding window logic to verify it never exceeds 5 elements."""
-        recent = []
-        for i in range(10):
-            recent.append(True)
-            if len(recent) > 5:
-                recent.pop(0)
-            assert len(recent) <= 5
-        assert len(recent) == 5
+        assert "max_length=50000" in source

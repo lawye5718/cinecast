@@ -269,13 +269,13 @@ class TestJsonOverflowProtection:
     """Verify JSON overflow protection for dialogue-heavy text."""
 
     def test_dialogue_density_protection_exists(self):
-        """Dialogue-density overflow protection logic should exist in _request_llm or parse_text_to_script."""
+        """GLM-4.7-Flash handles full chapters; dialogue density reduction removed."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_llm)
         assert "max_tokens" in source
-        # Verify the overflow protection comment/logic exists in parse_text_to_script
+        # GLM-4.7-Flash with 200k context no longer needs dialogue density reduction
         pts_source = inspect.getsource(director.parse_text_to_script)
-        assert "对话密集型" in pts_source or "dialogue_markers" in pts_source
+        assert "GLM-4.7-Flash" in pts_source or "max_length" in pts_source
 
     def test_max_tokens_used_in_payload(self):
         """The payload should use the max_tokens variable."""

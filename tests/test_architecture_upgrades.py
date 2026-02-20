@@ -819,29 +819,24 @@ class TestMapReduceRecapEngine:
         assert mock_post.call_count == 1
         assert result == "短文本摘要结果"
 
-    def test_long_text_triggers_map_reduce(self):
-        """Text over 5000 chars should trigger map then reduce calls."""
+    def test_long_text_direct_recap(self):
+        """Long text should go directly to GLM (no Map-Reduce), making 1 API call."""
         import unittest.mock as mock
 
         director = LLMScriptDirector()
-        long_text = "A" * 12000  # Will produce 3 chunks (5000+5000+2000)
+        long_text = "A" * 12000  # Previously triggered Map-Reduce, now sent directly
 
-        call_count = [0]
-        def mock_post_side_effect(*args, **kwargs):
-            call_count[0] += 1
-            fake_resp = mock.MagicMock()
-            fake_resp.status_code = 200
-            fake_resp.raise_for_status = mock.MagicMock()
-            if call_count[0] <= 3:  # Map phase
-                fake_resp.json.return_value = {"choices": [{"message": {"content": f"子摘要{call_count[0]}"}}]}
-            else:  # Reduce phase
-                fake_resp.json.return_value = {"choices": [{"message": {"content": "终极摘要"}}]}
-            return fake_resp
+        fake_resp = mock.MagicMock()
+        fake_resp.status_code = 200
+        fake_resp.raise_for_status = mock.MagicMock()
+        fake_resp.json.return_value = {
+            "choices": [{"message": {"content": "终极摘要"}}]
+        }
 
-        with mock.patch("modules.llm_director.requests.post", side_effect=mock_post_side_effect):
+        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp) as mock_post:
             result = director.generate_chapter_recap(long_text)
-        # 3 map calls + 1 reduce call = 4 total
-        assert call_count[0] == 4
+        # GLM-4.7-Flash handles full chapters directly: only 1 API call (no Map-Reduce)
+        assert mock_post.call_count == 1
         assert result == "终极摘要"
 
     def test_recap_prefix_cleaned(self):

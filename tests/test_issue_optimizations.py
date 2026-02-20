@@ -193,7 +193,7 @@ class TestCastDBIsolation:
 # ---------------------------------------------------------------------------
 
 class TestDialogueDenseStrategy:
-    """Verify dialogue-dense detection reduces chunk size instead of max_tokens."""
+    """Verify dialogue-dense detection has been removed (GLM-4.7-Flash upgrade)."""
 
     def test_source_no_longer_reduces_max_tokens(self):
         """_request_llm should NOT reduce max_tokens for dialogue-dense text."""
@@ -204,12 +204,14 @@ class TestDialogueDenseStrategy:
             "max_tokens should no longer be halved for dialogue-dense text"
         )
 
-    def test_parse_text_to_script_has_dialogue_detection(self):
-        """parse_text_to_script should detect dialogue density and adjust max_length."""
+    def test_parse_text_to_script_no_dialogue_reduction(self):
+        """parse_text_to_script should no longer reduce max_length for dialogue-dense text."""
         import inspect
         director = LLMScriptDirector()
         source = inspect.getsource(director.parse_text_to_script)
-        assert "dialogue_markers" in source
+        # Dialogue density reduction is removed; GLM-4.7-Flash handles full chapters
+        assert "dialogue_markers" not in source
+        # max_length parameter still exists for the function signature
         assert "max_length" in source
 
     def test_max_tokens_stays_constant(self):
