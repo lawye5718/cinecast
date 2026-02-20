@@ -41,14 +41,23 @@ def _make_director():
 
 
 def _ok_response(content_json):
-    """Build a mock 200 response returning *content_json* as the LLM output."""
+    """Build a mock 200 streaming response returning *content_json* as the LLM output."""
     resp = MagicMock(spec=requests.Response)
     resp.status_code = 200
     resp.raise_for_status = MagicMock()
-    resp.json.return_value = {
-        "choices": [{"message": {"content": json.dumps(content_json, ensure_ascii=False)}}]
-    }
+    content_str = json.dumps(content_json, ensure_ascii=False)
+    # Simulate streaming SSE: one chunk with the full content, then [DONE]
+    lines = [
+        f'data: {{"choices":[{{"delta":{{"content":"{_escape_json_str(content_str)}"}}}}]}}'.encode('utf-8'),
+        b'data: [DONE]',
+    ]
+    resp.iter_lines = MagicMock(return_value=iter(lines))
     return resp
+
+
+def _escape_json_str(s: str) -> str:
+    """Escape a string for embedding inside a JSON string value."""
+    return s.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
 
 
 def _error_response(status_code, text="error"):
@@ -98,13 +107,13 @@ class TestExponentialBackoff:
         assert len(result) == 1
         assert result[0]["content"] == "测试文本。"
         # Sleep: two 429 retries + one post-request cooldown
-        # 429 attempt 0: 15 * 1.5^0 + 20.0 = 35.0
-        # 429 attempt 1: 15 * 1.5^1 + 20.0 = 42.5
+        # 429 attempt 0: 10 * 2^0 + 20.0 = 30.0
+        # 429 attempt 1: 10 * 2^1 + 20.0 = 40.0
         # post-success cooldown: 5 (input < 10K)
         assert mock_sleep.call_count == 3
         sleep_args = [c[0][0] for c in mock_sleep.call_args_list]
-        assert sleep_args[0] == 35.0
-        assert sleep_args[1] == 42.5
+        assert sleep_args[0] == 30.0
+        assert sleep_args[1] == 40.0
         assert sleep_args[2] == 5
 
     @patch("modules.llm_director.time.time")
@@ -172,20 +181,22 @@ class TestExponentialBackoff:
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
     def test_max_retries_exhausted(self, mock_post, mock_sleep, mock_time, mock_random):
-        """After max_retries (10) consecutive 429s, RuntimeError should be raised."""
+        """After max_retries (5) consecutive 429s, RuntimeError should be raised."""
         mock_time.side_effect = _incrementing_time()
-        mock_post.side_effect = [_error_response(429)] * 10
+        mock_post.side_effect = [_error_response(429)] * 5
 
         director = _make_director()
         with pytest.raises(RuntimeError, match="超过最大重试次数"):
             director._request_llm("永远失败。")
 
-        assert mock_post.call_count == 10
+        assert mock_post.call_count == 5
 
+    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
-    def test_timeout_is_300(self, mock_post, mock_sleep):
-        """requests.post should be called with timeout=300."""
+    def test_timeout_is_300_and_stream_enabled(self, mock_post, mock_sleep, mock_time):
+        """requests.post should be called with timeout=300 and stream=True."""
+        mock_time.side_effect = _incrementing_time()
         mock_post.return_value = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "超时测试。"}
@@ -196,6 +207,7 @@ class TestExponentialBackoff:
 
         _, kwargs = mock_post.call_args
         assert kwargs["timeout"] == 300
+        assert kwargs["stream"] is True
 
 
 class TestChunkThrottle:
@@ -248,10 +260,12 @@ class TestChunkThrottle:
 class TestPostRequestCooldown:
     """Tests for the post-request cooldown logic in _request_llm."""
 
+    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
-    def test_small_input_gets_short_cooldown(self, mock_post, mock_sleep):
+    def test_small_input_gets_short_cooldown(self, mock_post, mock_sleep, mock_time):
         """Input <= 10000 chars should trigger a 5s cooldown."""
+        mock_time.side_effect = _incrementing_time()
         mock_post.return_value = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "短文本。"}
@@ -262,10 +276,12 @@ class TestPostRequestCooldown:
 
         mock_sleep.assert_called_once_with(5)
 
+    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
-    def test_large_input_gets_long_cooldown(self, mock_post, mock_sleep):
+    def test_large_input_gets_long_cooldown(self, mock_post, mock_sleep, mock_time):
         """Input > 10000 chars should trigger a 20s cooldown."""
+        mock_time.side_effect = _incrementing_time()
         large_text = "这" * 11000  # > 10000 chars
         mock_post.return_value = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
@@ -277,10 +293,12 @@ class TestPostRequestCooldown:
 
         mock_sleep.assert_called_once_with(20)
 
+    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
-    def test_boundary_input_gets_short_cooldown(self, mock_post, mock_sleep):
+    def test_boundary_input_gets_short_cooldown(self, mock_post, mock_sleep, mock_time):
         """Input exactly 10000 chars should get the short 5s cooldown."""
+        mock_time.side_effect = _incrementing_time()
         boundary_text = "这" * 10000  # exactly 10000 chars
         mock_post.return_value = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
@@ -292,10 +310,12 @@ class TestPostRequestCooldown:
 
         mock_sleep.assert_called_once_with(5)
 
+    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
-    def test_context_included_in_length_calculation(self, mock_post, mock_sleep):
+    def test_context_included_in_length_calculation(self, mock_post, mock_sleep, mock_time):
         """Context length should be included in input_len for cooldown threshold."""
+        mock_time.side_effect = _incrementing_time()
         text = "这" * 4000        # 4000 chars
         context = "前文" * 3500   # 7000 chars -> total = 11000 > 10000
         mock_post.return_value = _ok_response([

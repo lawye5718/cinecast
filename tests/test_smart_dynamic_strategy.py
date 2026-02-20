@@ -112,8 +112,8 @@ class TestWordCountAlignmentRetry:
         assert "chapter_max_length = global_max_length" not in source
         assert "MIN_MAX_LENGTH" not in source
         assert "recent_needed_reduction" not in source
-        # GLM-4.7-Flash uses max_length=15000 for TPM-safe chunking
-        assert "max_length=15000" in source
+        # Uses reduced max_length=4000 for fine-grained TPM-safe chunking
+        assert "max_length=4000" in source
 
     def test_no_max_length_floor_at_400(self):
         """Verify MIN_MAX_LENGTH = 400 is no longer in source code."""
@@ -145,12 +145,12 @@ class TestGlobalAdaptiveLogic:
         assert "global_max_length" not in source
         assert "recent_needed_reduction" not in source
 
-    def test_glm_direct_call_with_15000(self):
-        """GLM-4.7-Flash should use max_length=15000 for TPM-safe chunking."""
+    def test_glm_direct_call_with_4000(self):
+        """Uses reduced max_length=4000 for fine-grained TPM-safe chunking."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "main_producer.py",
         )
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
-        assert "max_length=15000" in source
+        assert "max_length=4000" in source

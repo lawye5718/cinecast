@@ -126,12 +126,16 @@ class TestModelParameterAdjustments:
         fake_resp = mock.MagicMock()
         fake_resp.status_code = 200
         fake_resp.raise_for_status = mock.MagicMock()
-        fake_resp.json.return_value = {
-            "choices": [{"message": {"content": json.dumps([
-                {"type": "narration", "speaker": "narrator", "gender": "male",
-                 "emotion": "平静", "content": "测试。"}
-            ], ensure_ascii=False)}}]
-        }
+        content_str = json.dumps([
+            {"type": "narration", "speaker": "narrator", "gender": "male",
+             "emotion": "平静", "content": "测试。"}
+        ], ensure_ascii=False)
+        escaped = content_str.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+        lines = [
+            f'data: {{"choices":[{{"delta":{{"content":"{escaped}"}}}}]}}'.encode('utf-8'),
+            b'data: [DONE]',
+        ]
+        fake_resp.iter_lines = mock.MagicMock(return_value=iter(lines))
 
         captured_payloads = []
 
@@ -168,12 +172,16 @@ class TestQuotePreprocessing:
         fake_resp = mock.MagicMock()
         fake_resp.status_code = 200
         fake_resp.raise_for_status = mock.MagicMock()
-        fake_resp.json.return_value = {
-            "choices": [{"message": {"content": json.dumps([
-                {"type": "narration", "speaker": "narrator", "gender": "male",
-                 "emotion": "平静", "content": "测试。"}
-            ], ensure_ascii=False)}}]
-        }
+        content_str = json.dumps([
+            {"type": "narration", "speaker": "narrator", "gender": "male",
+             "emotion": "平静", "content": "测试。"}
+        ], ensure_ascii=False)
+        escaped = content_str.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+        lines = [
+            f'data: {{"choices":[{{"delta":{{"content":"{escaped}"}}}}]}}'.encode('utf-8'),
+            b'data: [DONE]',
+        ]
+        fake_resp.iter_lines = mock.MagicMock(return_value=iter(lines))
 
         captured_payloads = []
 
