@@ -11,6 +11,7 @@ import logging
 import requests
 import os
 import tempfile
+import time
 from typing import List, Dict, Optional
 
 logger = logging.getLogger(__name__)
@@ -626,6 +627,10 @@ class LLMScriptDirector:
                 self._update_cast_db(chunk_script)
             
             full_script.extend(chunk_script)
+
+            # 强制节流：每请求完一个大文本块，强制休眠 2 秒，给 TPM 令牌桶留出恢复时间
+            if i < len(text_chunks) - 1:
+                time.sleep(2)
         
         # 🌟 优化：移除 merge_consecutive_narrators 调用。
         # 因为 parse_and_micro_chunk 会对结果进行严格的 60 字微切片，
@@ -824,82 +829,108 @@ class LLMScriptDirector:
             "max_tokens": 128000,
         }
 
-        try:
-            response = requests.post(
-                self.api_url,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {self.api_key}",
-                },
-                json=payload,
-                timeout=180,
-            )
-            response.raise_for_status()
-            content = response.json().get('choices', [{}])[0].get('message', {}).get('content', '[]')
+        max_retries = 6
+        base_wait_time = 3
 
-            # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
-            # Only strip real control characters; keep escaped sequences
-            # like \n and \t inside JSON strings intact.
-            content = content.replace('\t', ' ').replace('\r', '')
-
-            # Strip Markdown code-block wrappers the LLM may hallucinate
-            content = re.sub(r'^```(?:json)?\s*', '', content.strip(), flags=re.IGNORECASE)
-            content = re.sub(r'\s*```$', '', content.strip())
-
+        for attempt in range(max_retries):
             try:
-                script = json.loads(content)
-            except json.JSONDecodeError:
-                logger.warning("⚠️ JSON 解析失败，尝试修复截断的 JSON ...")
-                script = repair_json_array(content)
-                if script is None:
-                    # 【终极降级 1】：JSON彻底损坏，直接拿原文本做旁白
-                    logger.warning("⚠️ JSON彻底损坏，启用终极降级方案：原文本作为旁白。")
-                    return self._validate_script_elements([
-                        {"type": "narration", "speaker": "narrator", "content": text_chunk}
-                    ])
-                return self._validate_script_elements(script)
+                response = requests.post(
+                    self.api_url,
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {self.api_key}",
+                    },
+                    json=payload,
+                    timeout=300,
+                )
+                response.raise_for_status()
+                content = response.json().get('choices', [{}])[0].get('message', {}).get('content', '[]')
 
-            if isinstance(script, list):
-                return self._validate_script_elements(script)
+                # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
+                # Only strip real control characters; keep escaped sequences
+                # like \n and \t inside JSON strings intact.
+                content = content.replace('\t', ' ').replace('\r', '')
 
-            if isinstance(script, dict):
-                # 容错 1: 空字典 {}
-                if not script:
-                    logger.warning("⚠️ 模型返回了空字典，启用终极降级方案。")
-                    return self._validate_script_elements([
-                        {"type": "narration", "speaker": "narrator", "content": text_chunk}
-                    ])
+                # Strip Markdown code-block wrappers the LLM may hallucinate
+                content = re.sub(r'^```(?:json)?\s*', '', content.strip(), flags=re.IGNORECASE)
+                content = re.sub(r'\s*```$', '', content.strip())
 
-                # 容错 2a: LLM 返回了 {"name": "...", "content": "..."} 结构
-                if "content" in script and "name" in script:
-                    logger.warning("⚠️ 检测到非数组结构（含 name/content），正在将其转换为单条旁白")
-                    script = [{"type": "narration", "speaker": "narrator", "content": script["content"]}]
+                try:
+                    script = json.loads(content)
+                except json.JSONDecodeError:
+                    logger.warning("⚠️ JSON 解析失败，尝试修复截断的 JSON ...")
+                    script = repair_json_array(content)
+                    if script is None:
+                        # 【终极降级 1】：JSON彻底损坏，直接拿原文本做旁白
+                        logger.warning("⚠️ JSON彻底损坏，启用终极降级方案：原文本作为旁白。")
+                        return self._validate_script_elements([
+                            {"type": "narration", "speaker": "narrator", "content": text_chunk}
+                        ])
                     return self._validate_script_elements(script)
-                # 容错 2b: LLM 返回了单个 JSON 对象（如 {"type": "narration", "speaker": "narrator", "content": "..."}）
-                if "content" in script or "type" in script:
-                    logger.warning("⚠️ 模型返回了单个 JSON 对象而非数组，自动使用列表包裹以恢复流水线。")
-                    return self._validate_script_elements([script])
-                # 容错 3: LLM 返回了包含列表的字典 (如 {"script": [...]})
-                for value in script.values():
-                    if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
-                        return self._validate_script_elements(value)
-                
-                # 【终极降级 2】：模型返回了版权页、书籍元数据等无法识别的字典
-                logger.warning(f"⚠️ 模型返回了无法识别的字典结构（如版权信息），启用终极降级方案。")
+
+                if isinstance(script, list):
+                    return self._validate_script_elements(script)
+
+                if isinstance(script, dict):
+                    # 容错 1: 空字典 {}
+                    if not script:
+                        logger.warning("⚠️ 模型返回了空字典，启用终极降级方案。")
+                        return self._validate_script_elements([
+                            {"type": "narration", "speaker": "narrator", "content": text_chunk}
+                        ])
+
+                    # 容错 2a: LLM 返回了 {"name": "...", "content": "..."} 结构
+                    if "content" in script and "name" in script:
+                        logger.warning("⚠️ 检测到非数组结构（含 name/content），正在将其转换为单条旁白")
+                        script = [{"type": "narration", "speaker": "narrator", "content": script["content"]}]
+                        return self._validate_script_elements(script)
+                    # 容错 2b: LLM 返回了单个 JSON 对象（如 {"type": "narration", "speaker": "narrator", "content": "..."}）
+                    if "content" in script or "type" in script:
+                        logger.warning("⚠️ 模型返回了单个 JSON 对象而非数组，自动使用列表包裹以恢复流水线。")
+                        return self._validate_script_elements([script])
+                    # 容错 3: LLM 返回了包含列表的字典 (如 {"script": [...]})
+                    for value in script.values():
+                        if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
+                            return self._validate_script_elements(value)
+                    
+                    # 【终极降级 2】：模型返回了版权页、书籍元数据等无法识别的字典
+                    logger.warning(f"⚠️ 模型返回了无法识别的字典结构（如版权信息），启用终极降级方案。")
+                    return self._validate_script_elements([
+                        {"type": "narration", "speaker": "narrator", "content": text_chunk}
+                    ])
+                    
+                # 【终极降级 3】：大模型返回了字符串或数字等完全不是对象的格式
+                logger.warning("⚠️ 模型返回了非预期结构，启用终极降级方案。")
                 return self._validate_script_elements([
                     {"type": "narration", "speaker": "narrator", "content": text_chunk}
                 ])
-                
-            # 【终极降级 3】：大模型返回了字符串或数字等完全不是对象的格式
-            logger.warning("⚠️ 模型返回了非预期结构，启用终极降级方案。")
-            return self._validate_script_elements([
-                {"type": "narration", "speaker": "narrator", "content": text_chunk}
-            ])
 
-        except RuntimeError:
-            raise
-        except Exception as e:
-            raise RuntimeError(f"❌ GLM API 解析失败: {e}") from e
+            except requests.exceptions.HTTPError as e:
+                if response.status_code == 429:
+                    wait_time = base_wait_time * (2 ** attempt)
+                    logger.warning(
+                        f"⚠️ 触发 GLM API 速率限制 (429 Too Many Requests)。"
+                        f"正在强制冷却，等待 {wait_time} 秒后进行第 {attempt + 1}/{max_retries} 次重试..."
+                    )
+                    time.sleep(wait_time)
+                    continue
+                elif response.status_code >= 500:
+                    logger.warning(f"⚠️ GLM 服务器异常 ({response.status_code})，等待 5 秒后重试...")
+                    time.sleep(5)
+                    continue
+                else:
+                    raise RuntimeError(f"❌ GLM API 致命请求失败: HTTP {response.status_code} - {response.text}") from e
+
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"⚠️ 网络通信异常: {e}，等待 5 秒后重试...")
+                time.sleep(5)
+                continue
+            except RuntimeError:
+                raise
+            except Exception as e:
+                raise RuntimeError(f"❌ GLM API 解析失败: {e}") from e
+
+        raise RuntimeError("❌ 超过最大重试次数，GLM API 请求彻底失败。请登录智谱开放平台检查您的账户额度是否耗尽。")
     
     def _validate_script_elements(self, script: List[Dict]) -> List[Dict]:
         """验证并修复脚本元素，确保包含所有必需字段"""
