@@ -287,7 +287,7 @@ class LLMScriptDirector:
             logger.warning(f"❌ 无法连接到 GLM API 服务: {e}")
             return False
     
-    def _chunk_text_for_llm(self, text: str, max_length: int = 800) -> List[str]:
+    def _chunk_text_for_llm(self, text: str, max_length: int = 50000) -> List[str]:
         """🌟 防止章节过长，按段落切分为安全大小给 LLM 处理"""
         paragraphs = text.split('\n')
         chunks, current_chunk = [], ""
@@ -796,13 +796,8 @@ class LLMScriptDirector:
         text_chunk = text_chunk.replace('"', '\u2018')
 
         # 🌟 模型状态监控与 Debug 提示
-        input_len = len(text_chunk)
-        if input_len > 30000:
-            logger.warning(
-                f"⚠️ 模型: {self.model_name} | 警告：当前块长度 {input_len} 超过 30000 字，可能导致 JSON 截断。"
-            )
-        else:
-            logger.info(f"🚀 模型: {self.model_name} | 正在解析片段，长度: {input_len}")
+        input_len = len(text_chunk) + (len(context) if context else 0)
+        logger.info(f"🚀 模型: {self.model_name} | 发起请求，估计上下文长度: {input_len} 字符")
 
         # 🌟 GLM API 使用 200k 上下文窗口，最大输出 128k token
 
@@ -824,11 +819,11 @@ class LLMScriptDirector:
             "stream": False,
             "temperature": 0.1,
             "top_p": 0.1,
-            "max_tokens": 128000,
+            "max_tokens": 4096,
         }
 
         max_retries = 5
-        base_wait_time = 2
+        base_wait_time = 3
 
         for attempt in range(max_retries):
             try:
@@ -843,6 +838,15 @@ class LLMScriptDirector:
                 )
                 response.raise_for_status()
                 content = response.json().get('choices', [{}])[0].get('message', {}).get('content', '[]')
+
+                # 🌟 API 稳定性策略：针对超大上下文 (>8K token) 的强制降速
+                # 8000 tokens 约为 5000-10000 中文字符
+                if input_len > 8000:
+                    cooldown = 30
+                    logger.info(f"⏳ 检测到大上下文请求 ({input_len} 字)，执行 1% 速率保护，强制冷却 {cooldown}s...")
+                    time.sleep(cooldown)
+                else:
+                    time.sleep(1.5)
 
                 # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
                 # Only strip real control characters; keep escaped sequences
