@@ -35,9 +35,9 @@ class TestVoiceArchetypeMapping:
     """Verify voice archetype mapping guideline is injected into the prompt."""
 
     def test_archetype_guideline_in_source(self):
-        """The _request_ollama method should reference archetype prompt injection."""
+        """The _request_llm method should reference archetype prompt injection."""
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         assert "_get_archetype_prompt" in source
         assert "音色映射指南" in source or "VOICE_ARCHETYPES" in source
 
@@ -67,13 +67,13 @@ class TestEnhancedEmotionInstructions:
     def test_emotion_constrained_instruction(self):
         """system_prompt should instruct constrained emotion from EMOTION_SET."""
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         assert "EMOTION_SET" in source or "emotion 规定" in source
 
     def test_emotion_set_keywords_present(self):
         """EMOTION_SET keywords should be present in the prompt."""
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         assert "平静" in source and "愤怒" in source and "激动" in source
 
 
@@ -87,14 +87,14 @@ class TestAntiHallucinationPrompt:
     def test_anti_hallucination_few_shot_in_prompt(self):
         """system_prompt should contain few-shot example for sentence-by-sentence decomposition."""
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         assert "one_shot_example" in source
         assert "示例参考" in source
 
     def test_anti_hallucination_quote_preprocessing(self):
-        """_request_ollama should preprocess ASCII quotes to avoid JSON conflicts."""
+        """_request_llm should preprocess ASCII quotes to avoid JSON conflicts."""
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         assert "双引号" in source or "\\u201c" in source
 
 
@@ -108,7 +108,7 @@ class TestAntiDriftInstruction:
     def test_simplified_prompt_uses_data_converter_role(self):
         """system_prompt should use high-precision audiobook conversion interface role."""
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         assert "高精度的有声书剧本转换接口" in source
 
 
@@ -127,14 +127,14 @@ class TestLocalSessionCast:
     def test_local_session_cast_populated_after_parse(self):
         """After parsing, _local_session_cast should contain speaker emotions."""
         director = LLMScriptDirector()
-        # Mock _request_ollama to return script with a speaker
+        # Mock _request_llm to return script with a speaker
         script_chunk = [
             {"type": "dialogue", "speaker": "老渔夫", "gender": "male",
              "emotion": "Sad, low volume, shaky voice", "content": "你相信命运吗？"},
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "老渔夫说道。"},
         ]
-        director._request_ollama = lambda text_chunk, context=None: script_chunk
+        director._request_llm = lambda text_chunk, context=None: script_chunk
         director.parse_text_to_script("test text")
         assert "老渔夫" in director._local_session_cast
         assert director._local_session_cast["老渔夫"] == "Sad, low volume, shaky voice"
@@ -157,16 +157,16 @@ class TestLocalSessionCast:
             call_count[0] += 1
             return result
 
-        director._request_ollama = mock_request
+        director._request_llm = mock_request
         director._chunk_text_for_llm = lambda text, max_length=800: ["chunk1", "chunk2"]
         director.parse_text_to_script("test text")
         # First emotion should be preserved
         assert director._local_session_cast["英雄"] == "Angry, high pitch"
 
     def test_voice_lock_in_source(self):
-        """The _request_ollama method should contain Voice Lock injection logic."""
+        """The _request_llm method should contain Voice Lock injection logic."""
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         assert "Voice Lock" in source or "角色音色锁定" in source
 
 
@@ -269,22 +269,23 @@ class TestJsonOverflowProtection:
     """Verify JSON overflow protection for dialogue-heavy text."""
 
     def test_dialogue_density_protection_exists(self):
-        """Dialogue-density overflow protection logic should exist in _request_ollama or parse_text_to_script."""
+        """Dialogue-density overflow protection logic should exist in _request_llm or parse_text_to_script."""
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
-        assert "num_ctx" in source
-        # Verify the overflow protection comment/logic exists
-        assert "对话密集型" in source or "dialogue_markers" in source
+        source = inspect.getsource(director._request_llm)
+        assert "max_tokens" in source
+        # Verify the overflow protection comment/logic exists in parse_text_to_script
+        pts_source = inspect.getsource(director.parse_text_to_script)
+        assert "对话密集型" in pts_source or "dialogue_markers" in pts_source
 
-    def test_num_ctx_used_in_payload(self):
-        """The payload should use the dynamic num_ctx variable."""
+    def test_max_tokens_used_in_payload(self):
+        """The payload should use the max_tokens variable."""
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
-        # Verify dynamic num_ctx is used (not hardcoded 8192)
-        assert '"num_ctx": num_ctx' in source
+        source = inspect.getsource(director._request_llm)
+        # Verify max_tokens is used
+        assert '"max_tokens"' in source
 
     def test_overflow_protection_with_mock(self):
-        """Mock an Ollama call with dialogue-heavy text to verify overflow protection."""
+        """Mock a GLM API call with dialogue-heavy text to verify overflow protection."""
         director = LLMScriptDirector()
         # Create text > 500 chars with many quote marks
         dialogue_text = '"你好吗？"她说。"我很好。"他回答。' * 50  # lots of dialogue markers, > 500 chars
@@ -293,24 +294,24 @@ class TestJsonOverflowProtection:
         fake_resp.status_code = 200
         fake_resp.raise_for_status = mock.MagicMock()
         fake_resp.json.return_value = {
-            "message": {"content": json.dumps([
+            "choices": [{"message": {"content": json.dumps([
                 {"type": "narration", "speaker": "narrator", "gender": "male",
                  "emotion": "平静", "content": "测试内容。"}
-            ], ensure_ascii=False)}
+            ], ensure_ascii=False)}}]
         }
 
         captured_payloads = []
         original_post = mock.MagicMock(return_value=fake_resp)
 
-        def capture_post(url, json=None, timeout=None):
+        def capture_post(url, json=None, timeout=None, **kwargs):
             captured_payloads.append(json)
             return fake_resp
 
         with mock.patch("modules.llm_director.requests.post", side_effect=capture_post):
-            director._request_ollama(dialogue_text)
+            director._request_llm(dialogue_text)
 
         assert len(captured_payloads) == 1
-        payload_num_ctx = captured_payloads[0]["options"]["num_ctx"]
-        # num_ctx should stay at 8192; dialogue-dense strategy now reduces
-        # text chunk size instead of num_ctx to preserve speaker context.
-        assert payload_num_ctx == 8192
+        payload_max_tokens = captured_payloads[0]["max_tokens"]
+        # max_tokens should be set; dialogue-dense strategy now reduces
+        # text chunk size instead of max_tokens to preserve speaker context.
+        assert payload_max_tokens > 0

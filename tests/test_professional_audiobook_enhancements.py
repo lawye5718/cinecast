@@ -7,7 +7,7 @@ Covers:
 - Voice consistency persistence (_load_cast_profiles, _save_cast_profile, _update_cast_db)
 - Context reset for novella collections (reset_context)
 - Story boundary detection (_is_new_story_start)
-- Debug logging in _request_ollama (input length warnings)
+- Debug logging in _request_llm (input length warnings)
 - Emotion field format (dual emotion+acoustic description)
 - Default voice instruction fallback in _validate_script_elements
 """
@@ -242,15 +242,15 @@ class TestStoryBoundaryDetection:
 
 
 # ---------------------------------------------------------------------------
-# Debug Logging (_request_ollama input length check)
+# Debug Logging (_request_llm input length check)
 # ---------------------------------------------------------------------------
 
 class TestDebugLogging:
-    def test_request_ollama_source_has_input_len_warning(self):
-        """_request_ollama should contain input length warning logic."""
+    def test_request_llm_source_has_input_len_warning(self):
+        """_request_llm should contain input length warning logic."""
         import inspect
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         assert "input_len" in source
         assert "800" in source or "700" in source
 
@@ -316,7 +316,7 @@ class TestEmotionFormatInPrompt:
         """The system prompt should constrain emotions to EMOTION_SET keywords."""
         import inspect
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         assert "EMOTION_SET" in source
         assert "情绪约束" in source or "仅限" in source
 
@@ -324,6 +324,6 @@ class TestEmotionFormatInPrompt:
         """EMOTION_SET should contain core Qwen3-TTS emotion keywords."""
         import inspect
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         for emotion in ["平静", "愤怒", "悲伤", "喜悦", "恐惧", "惊讶", "沧桑", "柔和", "激动"]:
             assert emotion in source

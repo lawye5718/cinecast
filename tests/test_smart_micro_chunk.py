@@ -7,7 +7,7 @@ Covers:
 - Secondary comma-level splitting only for overly long sentences
 - Hard-cut fallback uses raised smart_chunk_limit (>=90)
 - Content preservation across all splitting strategies
-- Strengthened user_content prompt in _request_ollama
+- Strengthened user_content prompt in _request_llm
 """
 
 import os
@@ -137,17 +137,17 @@ class TestContentPreservation:
 
 
 # ---------------------------------------------------------------------------
-# Strengthened anti-summarization prompt in _request_ollama
+# Strengthened anti-summarization prompt in _request_llm
 # ---------------------------------------------------------------------------
 
 class TestAntiSummarizationPrompt:
-    """Verify the user_content in _request_ollama contains
+    """Verify the user_content in _request_llm contains
     strengthened anti-summarization directives."""
 
     def test_prompt_contains_array_enforcement(self):
-        """The source code for _request_ollama should contain array enforcement."""
+        """The source code for _request_llm should contain array enforcement."""
         import inspect
-        source = inspect.getsource(LLMScriptDirector._request_ollama)
+        source = inspect.getsource(LLMScriptDirector._request_llm)
         # Must demand flat array output
         assert "平铺的 JSON 数组" in source or "JSON 数组" in source
         # Must forbid dict output
@@ -156,12 +156,12 @@ class TestAntiSummarizationPrompt:
     def test_prompt_forbids_summarization(self):
         """The prompt should forbid merging and deletion of content."""
         import inspect
-        source = inspect.getsource(LLMScriptDirector._request_ollama)
+        source = inspect.getsource(LLMScriptDirector._request_llm)
         assert "严禁合并" in source
         assert "严禁删减" in source
 
     def test_prompt_demands_full_content_preservation(self):
         """The prompt should demand every sentence be preserved via physical alignment."""
         import inspect
-        source = inspect.getsource(LLMScriptDirector._request_ollama)
+        source = inspect.getsource(LLMScriptDirector._request_llm)
         assert "物理对齐" in source or "严禁删减" in source

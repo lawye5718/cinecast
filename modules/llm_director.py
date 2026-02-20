@@ -162,12 +162,14 @@ class LLMScriptDirector:
         "innocent": "Bright, high-pitched, energetic and innocent, clear enunciation.",
     }
 
-    def __init__(self, ollama_url="http://127.0.0.1:11434", use_local_mlx_lm=False, global_cast=None, cast_db_path=None):
-        self.api_url = f"{ollama_url}/api/chat"
-        self.model_name = "qwen14b-pro"
+    def __init__(self, api_key=None, global_cast=None, cast_db_path=None, **kwargs):
+        if kwargs:
+            logger.warning(f"⚠️ LLMScriptDirector 收到未识别的参数（已忽略）: {list(kwargs.keys())}")
+        self.api_url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+        self.model_name = "glm-4.7-flash"
+        self.api_key = api_key or os.environ.get("ZHIPU_API_KEY", "")
         self.max_chars_per_chunk = 60 # 微切片红线（智能配音模式）
         self.pure_narrator_chunk_limit = 100  # 纯净旁白模式切片上限（更长更流畅）
-        self.use_local_mlx_lm = use_local_mlx_lm
         self.global_cast = global_cast or {}  # 🌟 外脑全局角色设定集
         
         # Context sliding window state
@@ -179,8 +181,8 @@ class LLMScriptDirector:
         self.cast_db_path = cast_db_path or os.path.join("workspace", "cast_profiles.json")
         self.cast_profiles: Dict[str, Dict] = self._load_cast_profiles()
         
-        # 测试Ollama连接
-        self._test_ollama_connection()
+        # 测试 GLM API 连接
+        self._test_api_connection()
 
     # ------------------------------------------------------------------
     # 🌟 音色一致性持久化 (Voice Consistency Persistence)
@@ -255,42 +257,33 @@ class LLMScriptDirector:
         self._local_session_cast = {}
         logger.info("♻️ 检测到故事边界，导演引擎已重置上下文。")
 
-    def _test_ollama_connection(self):
-        """测试Ollama服务连接"""
-        try:
-            response = requests.get(f"{self.api_url.replace('/api/chat', '')}/api/tags", timeout=5)
-            if response.status_code == 200:
-                logger.info("✅ Ollama服务连接正常")
-                return True
-            else:
-                logger.warning("❌ Ollama服务响应异常")
-                return False
-        except Exception as e:
-            logger.warning(f"❌ 无法连接到Ollama服务: {e}")
+    def _test_api_connection(self):
+        """测试 GLM API 服务连接"""
+        if not self.api_key:
+            logger.warning("⚠️ 未设置 ZHIPU_API_KEY，智能配音模式将无法使用 GLM API。")
             return False
-    
-    def _try_ollama_qwen(self) -> bool:
-        """尝试使用Ollama的Qwen14B模型"""
         try:
-            import subprocess
-            result = subprocess.run(
-                ["ollama", "list"], 
-                capture_output=True, 
-                text=True, 
-                timeout=10
+            response = requests.post(
+                self.api_url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.api_key}",
+                },
+                json={
+                    "model": self.model_name,
+                    "messages": [{"role": "user", "content": "ping"}],
+                    "max_tokens": 8,
+                },
+                timeout=10,
             )
-            
-            if result.returncode == 0 and "qwen14b-pro" in result.stdout:
-                logger.info("✅ 成功检测到本地Ollama Qwen14B模型")
-                self.model_type = "ollama"
-                self.model_name = "qwen14b-pro"
+            if response.status_code == 200:
+                logger.info("✅ GLM API 服务连接正常")
                 return True
             else:
-                logger.info("未找到Ollama Qwen14B模型")
+                logger.warning(f"❌ GLM API 服务响应异常 (HTTP {response.status_code})")
                 return False
-                
         except Exception as e:
-            logger.warning(f"检查Ollama模型时出错: {e}")
+            logger.warning(f"❌ 无法连接到 GLM API 服务: {e}")
             return False
     
     def _chunk_text_for_llm(self, text: str, max_length: int = 800) -> List[str]:
@@ -616,7 +609,7 @@ class LLMScriptDirector:
                 except Exception:
                     pass
             
-            chunk_script = self._request_ollama(chunk, context="\n".join(context_parts) if context_parts else None)
+            chunk_script = self._request_llm(chunk, context="\n".join(context_parts) if context_parts else None)
             
             # Update sliding window state
             if chunk_script:
@@ -688,12 +681,21 @@ class LLMScriptDirector:
                         {"role": "user", "content": f"小说片段：\n{chunk}"}
                     ],
                     "stream": False,
-                    "options": {"temperature": 0.3}
+                    "temperature": 0.3,
+                    "max_tokens": 4096,
                 }
                 try:
-                    resp = requests.post(self.api_url, json=payload, timeout=120)
+                    resp = requests.post(
+                        self.api_url,
+                        headers={
+                            "Content-Type": "application/json",
+                            "Authorization": f"Bearer {self.api_key}",
+                        },
+                        json=payload,
+                        timeout=120,
+                    )
                     resp.raise_for_status()
-                    sub_sum = resp.json().get('message', {}).get('content', '').strip()
+                    sub_sum = resp.json().get('choices', [{}])[0].get('message', {}).get('content', '').strip()
                     sub_summaries.append(sub_sum)
                     logger.debug(f"   ✓ 完成第 {idx+1}/{len(chunks)} 块提炼")
                 except Exception as e:
@@ -722,13 +724,23 @@ class LLMScriptDirector:
                 {"role": "user", "content": f"上一章内容：\n{final_input}"}
             ],
             "stream": False,
-            "options": {"temperature": 0.5, "top_p": 0.8}
+            "temperature": 0.5,
+            "top_p": 0.8,
+            "max_tokens": 4096,
         }
 
         try:
-            response = requests.post(self.api_url, json=payload, timeout=180)
+            response = requests.post(
+                self.api_url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.api_key}",
+                },
+                json=payload,
+                timeout=180,
+            )
             response.raise_for_status()
-            recap_result = response.json().get('message', {}).get('content', '').strip()
+            recap_result = response.json().get('choices', [{}])[0].get('message', {}).get('content', '').strip()
 
             # 清理大模型可能违规加上的前缀
             recap_result = re.sub(r'^(前情提要|前情摘要|回顾|摘要)[:：]\s*', '', recap_result)
@@ -737,8 +749,8 @@ class LLMScriptDirector:
             logger.error(f"终极摘要生成失败: {e}")
             return ""
     
-    def _request_ollama(self, text_chunk: str, *, context: Optional[str] = None) -> List[Dict]:
-        """向Ollama发送单个文本块请求
+    def _request_llm(self, text_chunk: str, *, context: Optional[str] = None) -> List[Dict]:
+        """向 GLM API 发送单个文本块请求
 
         Args:
             text_chunk: The raw text to convert into a script.
@@ -840,9 +852,7 @@ class LLMScriptDirector:
         else:
             logger.info(f"🚀 模型: {self.model_name} | 正在解析片段，长度: {input_len}")
 
-        # 🌟 JSON 溢出保护：对话密集型文本维持 num_ctx 以保留上下文（判断"谁在说话"），
-        # 改为记录对话密集标志，在 parse_text_to_script 层减小 text_chunk 长度。
-        num_ctx = 8192
+        # 🌟 GLM API 使用 200k 上下文窗口，最大输出 128k token
 
         # 🌟 防幻觉加固：结构化 User Prompt
         user_content = f"【指令：将以下文本转换为平铺的 JSON 数组，严禁最外层使用字典】\n\n"
@@ -859,21 +869,24 @@ class LLMScriptDirector:
                 {"role": "system", "content": system_prompt + "\n示例参考：" + one_shot_example},
                 {"role": "user", "content": user_content}
             ],
-            "format": "json",
             "stream": False,
-            "keep_alive": "10m",
-            "options": {
-                "num_ctx": num_ctx,
-                "temperature": 0,
-                "top_p": 0.1,
-                "num_predict": 2048
-            }
+            "temperature": 0.1,
+            "top_p": 0.1,
+            "max_tokens": 128000,
         }
 
         try:
-            response = requests.post(self.api_url, json=payload, timeout=180)
+            response = requests.post(
+                self.api_url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.api_key}",
+                },
+                json=payload,
+                timeout=180,
+            )
             response.raise_for_status()
-            content = response.json().get('message', {}).get('content', '[]')
+            content = response.json().get('choices', [{}])[0].get('message', {}).get('content', '[]')
 
             # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
             # Only strip real control characters; keep escaped sequences
@@ -937,7 +950,7 @@ class LLMScriptDirector:
         except RuntimeError:
             raise
         except Exception as e:
-            raise RuntimeError(f"❌ Ollama 解析失败: {e}") from e
+            raise RuntimeError(f"❌ GLM API 解析失败: {e}") from e
     
     def _validate_script_elements(self, script: List[Dict]) -> List[Dict]:
         """验证并修复脚本元素，确保包含所有必需字段"""

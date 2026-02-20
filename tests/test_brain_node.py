@@ -256,17 +256,17 @@ class TestCustomRecapsInjection:
 
 
 # ---------------------------------------------------------------------------
-# Test: Global cast whitelist injected into _request_ollama prompt
+# Test: Global cast whitelist injected into _request_llm prompt
 # ---------------------------------------------------------------------------
 
 class TestGlobalCastWhitelist:
     def test_global_cast_whitelist_code_exists(self):
-        """The _request_ollama method should contain cast whitelist injection logic."""
+        """The _request_llm method should contain cast whitelist injection logic."""
         from modules.llm_director import LLMScriptDirector
         import inspect
 
         director = LLMScriptDirector(global_cast={"老渔夫": {"gender": "male"}})
-        source = inspect.getsource(director._request_ollama)
+        source = inspect.getsource(director._request_llm)
         assert "全局选角纪律" in source
         assert "Cast Whitelist" in source
         assert "self.global_cast" in source
