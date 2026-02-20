@@ -19,7 +19,7 @@ def test_improved_llm_director():
     print("=" * 60)
     
     # 初始化导演（启用本地模型）
-    director = LLMScriptDirector(use_local_mlx_lm=True)
+    director = LLMScriptDirector()
     
     # 测试文本
     test_text = """
@@ -68,7 +68,7 @@ def test_fallback_mechanism():
     print("=" * 60)
     
     # 初始化导演（禁用本地模型，强制使用降级方案）
-    director = LLMScriptDirector(use_local_mlx_lm=False)
+    director = LLMScriptDirector()
     
     test_text = "这是测试文本。\"你好吗？\"他说。她回答：\"我很好。\""
     

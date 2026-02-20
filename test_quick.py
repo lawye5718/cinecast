@@ -48,7 +48,7 @@ def test_llm_director():
     
     try:
         from modules.llm_director import LLMScriptDirector
-        director = LLMScriptDirector(use_local_mlx_lm=False)  # 使用降级方案测试
+        director = LLMScriptDirector()  # 使用降级方案测试
         
         test_text = "第一章 测试\n这是测试文本。\n\"你好吗？\"他说。\n她回答：\"我很好。\""
         

@@ -407,10 +407,10 @@ class TestValidateScriptElements:
 # ---------------------------------------------------------------------------
 
 class TestLLMDictFormatTolerance:
-    """Tests for _request_ollama handling of dict responses from LLM."""
+    """Tests for _request_llm handling of dict responses from LLM."""
 
     def _make_director_with_mock_response(self, json_content):
-        """Create a director where _request_ollama returns a mocked HTTP response."""
+        """Create a director where _request_llm returns a mocked HTTP response."""
         import unittest.mock as mock
 
         director = LLMScriptDirector()
@@ -418,11 +418,11 @@ class TestLLMDictFormatTolerance:
         fake_resp.status_code = 200
         fake_resp.raise_for_status = mock.MagicMock()
         fake_resp.json.return_value = {
-            "message": {"content": json.dumps(json_content, ensure_ascii=False)}
+            "choices": [{"message": {"content": json.dumps(json_content, ensure_ascii=False)}}]
         }
 
         with mock.patch("modules.llm_director.requests.post", return_value=fake_resp):
-            return director._request_ollama("任意文本")
+            return director._request_llm("任意文本")
 
     def test_name_content_dict_converted_to_narration(self):
         """LLM returns {"name": "第一章 风雪", "content": "原文..."} — should become a single narration."""
@@ -514,11 +514,11 @@ class TestLLMDictFormatTolerance:
         fake_resp.status_code = 200
         fake_resp.raise_for_status = mock.MagicMock()
         fake_resp.json.return_value = {
-            "message": {"content": "This is not JSON at all, just random text."}
+            "choices": [{"message": {"content": "This is not JSON at all, just random text."}}]
         }
 
         with mock.patch("modules.llm_director.requests.post", return_value=fake_resp):
-            result = director._request_ollama("原始文本内容")
+            result = director._request_llm("原始文本内容")
         assert isinstance(result, list)
         assert len(result) == 1
         assert result[0]["type"] == "narration"
@@ -568,17 +568,17 @@ class TestNoRegexFallback:
         director = LLMScriptDirector()
         assert not hasattr(director, '_fallback_regex_parse')
 
-    def test_request_ollama_raises_on_connection_error(self):
-        """When Ollama is unreachable, _request_ollama should raise RuntimeError."""
-        director = LLMScriptDirector(ollama_url="http://127.0.0.1:19999")
-        with pytest.raises(RuntimeError, match="Ollama 解析失败"):
-            director._request_ollama("测试文本")
+    def test_request_llm_raises_on_connection_error(self):
+        """When GLM API is unreachable, _request_llm should raise RuntimeError."""
+        director = LLMScriptDirector()
+        with pytest.raises(RuntimeError, match="GLM API 解析失败"):
+            director._request_llm("测试文本")
 
     def test_parse_text_to_script_raises_on_empty(self):
         """parse_text_to_script should raise RuntimeError when result is empty."""
         director = LLMScriptDirector()
-        # Monkey-patch _request_ollama to return an empty list
-        director._request_ollama = lambda text_chunk, context=None: []
+        # Monkey-patch _request_llm to return an empty list
+        director._request_llm = lambda text_chunk, context=None: []
         with pytest.raises(RuntimeError, match="剧本解析结果为空"):
             director.parse_text_to_script("测试文本")
 

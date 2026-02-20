@@ -4,7 +4,7 @@ Tests for the four optimizations from the issue:
 
 1. Flexible JSON repair (order-independent salvage_json_entries)
 2. Cast DB isolation (project-name-based cast_db_path)
-3. Dialogue-dense text reduces chunk size instead of num_ctx
+3. Dialogue-dense text reduces chunk size instead of max_tokens
 4. Smart recap injection position (preserves title/subtitle)
 """
 
@@ -189,19 +189,19 @@ class TestCastDBIsolation:
 
 
 # ---------------------------------------------------------------------------
-# 3. Dialogue-dense: reduce chunk size, not num_ctx
+# 3. Dialogue-dense: reduce chunk size, not max_tokens
 # ---------------------------------------------------------------------------
 
 class TestDialogueDenseStrategy:
-    """Verify dialogue-dense detection reduces chunk size instead of num_ctx."""
+    """Verify dialogue-dense detection reduces chunk size instead of max_tokens."""
 
-    def test_source_no_longer_reduces_num_ctx(self):
-        """_request_ollama should NOT reduce num_ctx for dialogue-dense text."""
+    def test_source_no_longer_reduces_max_tokens(self):
+        """_request_llm should NOT reduce max_tokens for dialogue-dense text."""
         import inspect
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
-        assert "num_ctx // 2" not in source, (
-            "num_ctx should no longer be halved for dialogue-dense text"
+        source = inspect.getsource(director._request_llm)
+        assert "max_tokens // 2" not in source, (
+            "max_tokens should no longer be halved for dialogue-dense text"
         )
 
     def test_parse_text_to_script_has_dialogue_detection(self):
@@ -212,14 +212,14 @@ class TestDialogueDenseStrategy:
         assert "dialogue_markers" in source
         assert "max_length" in source
 
-    def test_num_ctx_stays_constant(self):
-        """_request_ollama should always use num_ctx=8192."""
+    def test_max_tokens_stays_constant(self):
+        """_request_llm should use a consistent max_tokens value."""
         import inspect
         director = LLMScriptDirector()
-        source = inspect.getsource(director._request_ollama)
-        assert "num_ctx = 8192" in source
-        # Should not conditionally modify num_ctx
-        assert "num_ctx = max(" not in source
+        source = inspect.getsource(director._request_llm)
+        assert "max_tokens" in source
+        # Should not conditionally modify max_tokens
+        assert "max_tokens = max(" not in source
 
 
 # ---------------------------------------------------------------------------

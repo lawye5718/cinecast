@@ -38,7 +38,7 @@ def _init_director(director):
     director.model_name = "qwen14b-pro"
     director.max_chars_per_chunk = 60
     director.pure_narrator_chunk_limit = 100
-    director.use_local_mlx_lm = False
+    director.use_local_mlx_lm = False  # legacy field; no-op after API migration
     director._prev_characters = []
     director._prev_tail_entries = []
 
