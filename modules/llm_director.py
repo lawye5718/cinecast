@@ -566,8 +566,10 @@ class LLMScriptDirector:
     def parse_text_to_script(self, text: str, max_length: int = 50000) -> List[Dict]:
         """阶段一：宏观剧本解析 (GLM-4.7-Flash 超大上下文版)
 
-        直接整章传入 GLM-4.7-Flash（200k 上下文），无需碎步快跑。
+        直接整章传入 GLM-4.7-Flash（200k token 上下文），无需碎步快跑。
         仅在单章极端长（超过 max_length）时才触发切分。
+        max_length 设为 50000 字符（约 75k-100k token），为 200k token
+        上下文窗口留足安全余量（含 system prompt + 输出 token 预算）。
 
         Args:
             text: 待处理的章节文本
