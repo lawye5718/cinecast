@@ -106,10 +106,10 @@ class TestAntiDriftInstruction:
     """Verify anti-instruction-drift features in the prompt."""
 
     def test_simplified_prompt_uses_data_converter_role(self):
-        """system_prompt should use simplified data converter role instead of director."""
+        """system_prompt should use high-precision audiobook conversion interface role."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
-        assert "数据格式转换工具" in source
+        assert "高精度的有声书剧本转换接口" in source
 
 
 # ---------------------------------------------------------------------------

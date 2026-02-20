@@ -118,15 +118,15 @@ class TestIronRuleStrengthened:
     """Verify the system prompt contains the anti-omission warning."""
 
     def test_anti_omission_warning_in_source(self):
-        """llm_director.py should include the paragraph-omission penalty."""
+        """llm_director.py should include the anti-omission physical alignment rule."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "modules", "llm_director.py",
         )
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
-        assert "严禁漏掉任何一个自然段" in source
-        assert "任务失败" in source
+        assert "严禁合并" in source
+        assert "严禁删减" in source
 
     def test_voice_description_fallback_in_source(self):
         """llm_director.py should instruct LLM to generate voice descriptions for unlisted characters."""

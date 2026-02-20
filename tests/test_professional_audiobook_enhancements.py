@@ -318,7 +318,7 @@ class TestEmotionFormatInPrompt:
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_ollama)
         assert "EMOTION_SET" in source
-        assert "仅限从以下词汇中选择" in source or "emotion 规定" in source
+        assert "情绪约束" in source or "仅限" in source
 
     def test_emotion_set_contains_core_emotions(self):
         """EMOTION_SET should contain core Qwen3-TTS emotion keywords."""

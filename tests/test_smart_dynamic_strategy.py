@@ -81,16 +81,15 @@ class TestAntiSummarizationPrompt:
     """Verify the system prompt contains strengthened anti-summarization directives."""
 
     def test_anti_summarization_keywords_in_source(self):
-        """llm_director.py should include the strengthened prohibition."""
+        """llm_director.py should include the physical alignment anti-merge/delete rules."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "modules", "llm_director.py",
         )
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
-        assert "禁止总结" in source
-        assert "禁止概括" in source
-        assert "禁止压缩" in source
+        assert "严禁合并" in source
+        assert "严禁删减" in source
 
 
 # ---------------------------------------------------------------------------
