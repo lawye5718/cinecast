@@ -711,8 +711,8 @@ class TestPhase1ChapterSkip:
                 "use_local_llm": False,
             })
 
-            # Monkey-patch check_ollama_alive to return True
-            producer.check_ollama_alive = lambda: True
+            # Monkey-patch check_api_connectivity to return True
+            producer.check_api_connectivity = lambda: True
 
             # Create a director that fails on first chapter, succeeds on second
             call_count = [0]
@@ -904,7 +904,7 @@ class TestEnableRecapConfig:
                 "use_local_llm": False,
                 "enable_recap": False,
             })
-            producer.check_ollama_alive = lambda: True
+            producer.check_api_connectivity = lambda: True
 
             recap_called = [False]
             original_generate = LLMScriptDirector.generate_chapter_recap
@@ -961,7 +961,7 @@ class TestNonContentChapterFiltering:
                 "use_local_llm": False,
                 "enable_recap": True,
             })
-            producer.check_ollama_alive = lambda: True
+            producer.check_api_connectivity = lambda: True
 
             recap_called = [False]
 
@@ -1012,7 +1012,7 @@ class TestNonContentChapterFiltering:
                 "use_local_llm": False,
                 "enable_recap": True,
             })
-            producer.check_ollama_alive = lambda: True
+            producer.check_api_connectivity = lambda: True
 
             recap_called = [False]
 

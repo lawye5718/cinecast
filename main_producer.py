@@ -205,8 +205,8 @@ class CineCastProducer:
                 chapters[title] = clean_text
         return chapters
     
-    def check_ollama_alive(self):
-        """前置检查：验证 GLM API 服务是否可用"""
+    def check_api_connectivity(self):
+        """前置检查：验证云端 API 连通性 (取代原有 Ollama 检查)"""
         api_key = os.environ.get("ZHIPU_API_KEY", "")
         if not api_key:
             logger.error("❌ 未设置 ZHIPU_API_KEY 环境变量，无法使用 GLM API。")
@@ -303,7 +303,7 @@ class CineCastProducer:
         pure_mode = self.config.get("pure_narrator_mode", False)
 
         # 🌟 前置检查：纯净模式下不需要 GLM API 服务
-        if not pure_mode and not self.check_ollama_alive():
+        if not pure_mode and not self.check_api_connectivity():
             logger.error("❌ GLM API 服务不可用，阶段一中止。请检查 ZHIPU_API_KEY 是否已配置。")
             return False
 

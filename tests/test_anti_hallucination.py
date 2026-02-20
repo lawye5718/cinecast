@@ -139,14 +139,15 @@ class TestModelParameterAdjustments:
             captured_payloads.append(json)
             return fake_resp
 
-        with mock.patch("modules.llm_director.requests.post", side_effect=capture_post):
+        with mock.patch("modules.llm_director.requests.post", side_effect=capture_post), \
+             mock.patch("modules.llm_director.time.sleep"):
             director._request_llm("测试文本。")
 
         assert len(captured_payloads) == 1
         payload = captured_payloads[0]
         assert payload["temperature"] == 0.1
         assert payload["top_p"] == 0.1
-        assert payload["max_tokens"] == 128000
+        assert payload["max_tokens"] == 4096
 
 
 # ---------------------------------------------------------------------------
@@ -182,7 +183,8 @@ class TestQuotePreprocessing:
 
         input_text = '"你好，"他说。'
 
-        with mock.patch("modules.llm_director.requests.post", side_effect=capture_post):
+        with mock.patch("modules.llm_director.requests.post", side_effect=capture_post), \
+             mock.patch("modules.llm_director.time.sleep"):
             director._request_llm(input_text)
 
         assert len(captured_payloads) == 1
