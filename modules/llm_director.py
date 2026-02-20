@@ -678,7 +678,7 @@ class LLMScriptDirector:
             "stream": False,
             "temperature": 0.5,
             "top_p": 0.8,
-            "max_tokens": 4096,
+            "max_tokens": 8192,
         }
 
         try:
@@ -819,7 +819,7 @@ class LLMScriptDirector:
             "stream": False,
             "temperature": 0.1,
             "top_p": 0.1,
-            "max_tokens": 4096,
+            "max_tokens": 65536,
         }
 
         max_retries = 5
@@ -841,9 +841,9 @@ class LLMScriptDirector:
 
                 # 🌟 API 稳定性策略：针对超大上下文的强制降速
                 # 8000 字符约为 5000-8000 tokens
-                if input_len > 8000:
-                    cooldown = 30
-                    logger.info(f"⏳ 检测到大上下文请求 ({input_len} 字)，执行 1% 速率保护，强制冷却 {cooldown}s...")
+                if input_len > 30000:
+                    cooldown = 20
+                    logger.info(f"⏳ 检测到超长上下文请求 ({input_len} 字)，执行速率保护，强制冷却 {cooldown}s...")
                     time.sleep(cooldown)
                 else:
                     time.sleep(1.5)
