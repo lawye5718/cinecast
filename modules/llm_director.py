@@ -421,13 +421,13 @@ class LLMScriptDirector:
 
         return micro_script
 
-    def parse_and_micro_chunk(self, text: str, chapter_prefix: str = "chunk", max_length: int = 800) -> List[Dict]:
+    def parse_and_micro_chunk(self, text: str, chapter_prefix: str = "chunk", max_length: int = 50000) -> List[Dict]:
         """宏观剧本解析 -> 自动展开为微切片剧本
         
         Args:
             text: 待处理的章节文本
             chapter_prefix: 章节名称前缀，用于避免文件名冲突
-            max_length: LLM 单次处理的最大字符数上限，默认800
+            max_length: LLM 单次处理的最大字符数上限，默认50000（整章直出）
         """
         # 第一步：生成宏观剧本
         macro_script = self.parse_text_to_script(text, max_length=max_length)
@@ -563,29 +563,21 @@ class LLMScriptDirector:
 
         return text
 
-    def parse_text_to_script(self, text: str, max_length: int = 800) -> List[Dict]:
-        """阶段一：宏观剧本解析（保持原有逻辑）
-        
-        Implements a context sliding window: each chunk receives the previous
-        chunk's cast list and last three entries as context so that character
-        names and speaking styles stay consistent across slices.
+    def parse_text_to_script(self, text: str, max_length: int = 50000) -> List[Dict]:
+        """阶段一：宏观剧本解析 (GLM-4.7-Flash 超大上下文版)
+
+        直接整章传入 GLM-4.7-Flash（200k token 上下文），无需碎步快跑。
+        仅在单章极端长（超过 max_length）时才触发切分。
+        max_length 设为 50000 字符（约 75k-100k token），为 200k token
+        上下文窗口留足安全余量（含 system prompt + 输出 token 预算）。
 
         Args:
             text: 待处理的章节文本
-            max_length: LLM 单次处理的最大字符数上限，默认800
+            max_length: LLM 单次处理的最大字符数上限，默认50000
         """
-        # 🌟 对话密集型文本检测：维持 num_ctx 以保留上下文（判断"谁在说话"），
-        # 改为减小 text_chunk 长度来避免 JSON 溢出。
-        dialogue_markers = text.count('"') + text.count('\u201c') + text.count('\u201d')
-        if len(text) > 500 and dialogue_markers > 10:
-            reduced = max(400, max_length // 2)
-            logger.info(
-                f"🔧 检测到对话密集型文本({dialogue_markers}个引号)，"
-                f"text_chunk 长度 {max_length}->{reduced}（维持 num_ctx 以保留说话人上下文）"
-            )
-            max_length = reduced
+        logger.info(f"🚀 启动 GLM-4.7-Flash 剧本解析，当前章节字数: {len(text)}")
 
-        # 🌟 修复截断漏洞：按段落切分长章节
+        # 🌟 GLM-4.7-Flash 拥有 200k 超大上下文，整章直出，仅超长章节才切分
         text_chunks = self._chunk_text_for_llm(text, max_length=max_length)
         full_script = []
         
@@ -652,64 +644,21 @@ class LLMScriptDirector:
     
     def generate_chapter_recap(self, prev_chapter_text: str) -> str:
         """
-        🌟 Map-Reduce 前情摘要引擎
-        解决长章节导致大模型 OOM 或注意力丢失的问题
-        - 短文本 (<=5000字): 直接生成终极摘要
-        - 长文本 (>5000字): 分块提炼 -> 合并 -> 终极摘要
+        🌟 前情摘要引擎 (GLM-4.7-Flash 超大上下文版)
+        利用 GLM-4.7-Flash 的 200k 超大上下文，直接整章传入生成摘要，
+        无需 Map-Reduce 分块处理。
         """
-        chunk_size = 5000
-
         # 1. 基础清理
         text = prev_chapter_text.strip()
         if not text:
             return ""
 
-        # 2. 如果文本极长，执行 Map 阶段 (分块总结)
-        if len(text) > chunk_size:
-            logger.info(f"🔄 上一章超长 ({len(text)}字)，启动 Map-Reduce 摘要分块处理...")
-            chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
-            sub_summaries = []
+        logger.info(f"🚀 启动 GLM-4.7-Flash 前情摘要生成，上一章字数: {len(text)}")
 
-            for idx, chunk in enumerate(chunks):
-                map_prompt = ("你是一个剧情提炼专家。请将以下小说片段压缩成不超过200字的纯剧情摘要。"
-                              "要求：只保留核心冲突、关键人物动作和重要线索。不加任何前缀和废话。")
-
-                payload = {
-                    "model": self.model_name,
-                    "messages": [
-                        {"role": "system", "content": map_prompt},
-                        {"role": "user", "content": f"小说片段：\n{chunk}"}
-                    ],
-                    "stream": False,
-                    "temperature": 0.3,
-                    "max_tokens": 4096,
-                }
-                try:
-                    resp = requests.post(
-                        self.api_url,
-                        headers={
-                            "Content-Type": "application/json",
-                            "Authorization": f"Bearer {self.api_key}",
-                        },
-                        json=payload,
-                        timeout=120,
-                    )
-                    resp.raise_for_status()
-                    sub_sum = resp.json().get('choices', [{}])[0].get('message', {}).get('content', '').strip()
-                    sub_summaries.append(sub_sum)
-                    logger.debug(f"   ✓ 完成第 {idx+1}/{len(chunks)} 块提炼")
-                except Exception as e:
-                    logger.warning(f"区块 {idx+1} 总结失败，已跳过: {e}")
-
-            # 组合所有子摘要作为 Reduce 阶段的输入
-            final_input = "\n".join(sub_summaries)
-        else:
-            final_input = text
-
-        # 3. Reduce 阶段 (终极摘要 + 悬念钩子)
+        # 直接生成终极摘要 + 悬念钩子（GLM 200k 上下文足以容纳整章内容）
         reduce_prompt = (
             '你是一位顶级的有声书剧本编辑和悬疑大师。'
-            '请根据提供的上一章内容（或内容摘要），写一段不超过100字的\u201c前情摘要\u201d。'
+            '请根据提供的上一章内容，写一段不超过100字的\u201c前情摘要\u201d。'
             '绝对纪律：'
             '1. 语言必须高度凝练，具有美剧片头的电影感（\u201cPreviously on...\u201d的风格）。'
             '2. 只保留最具张力的剧情矛盾。'
@@ -721,7 +670,7 @@ class LLMScriptDirector:
             "model": self.model_name,
             "messages": [
                 {"role": "system", "content": reduce_prompt},
-                {"role": "user", "content": f"上一章内容：\n{final_input}"}
+                {"role": "user", "content": f"上一章内容：\n{text}"}
             ],
             "stream": False,
             "temperature": 0.5,
@@ -758,7 +707,7 @@ class LLMScriptDirector:
                      (character list + tail entries) to maintain consistency.
         """
         # 🌟 防幻觉加固：定义 Qwen3-TTS 官方支持的感情子集，防止模型乱写
-        EMOTION_SET = "平静, 愤怒, 悲伤, 喜悦, 恐惧, 惊讶, 沧桑, 柔和, 激动"
+        EMOTION_SET = "平静, 愤怒, 悲伤, 喜悦, 恐惧, 惊讶, 沧桑, 柔和, 激动, 嘲讽, 哽咽, 冰冷, 狂喜"
 
         # 🌟 防幻觉加固：高精度有声书剧本转换接口 System Prompt
         system_prompt = f"""你是一个高精度的有声书剧本转换接口。
@@ -768,7 +717,7 @@ class LLMScriptDirector:
 2. 根节点约束：输出结果必须是一个标准的 JSON 数组（即以 `[` 开头）。严禁输出 `{{"data": [...]}}` 这种格式。
 3. 字段要求：每个对象必须包含 type, speaker, gender, emotion, content 字段。
 4. 角色一致性：speaker 必须根据上下文推断。
-5. 情绪约束：仅限 [{EMOTION_SET}]。
+5. 情绪约束：仅限 [{EMOTION_SET}]。如伴随特定发音特征（如"叹气", "低语"），可在情绪后加括号说明，例如："悲伤 (带哭腔)"。
 """
 
         # 🌟 防幻觉加固：强化 Few-Shot 锚定，展示逐句拆解的物理长度
