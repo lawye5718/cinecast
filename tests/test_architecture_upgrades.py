@@ -810,7 +810,7 @@ class TestMapReduceRecapEngine:
         fake_resp.status_code = 200
         fake_resp.raise_for_status = mock.MagicMock()
         fake_resp.json.return_value = {
-            "message": {"content": "短文本摘要结果"}
+            "choices": [{"message": {"content": "短文本摘要结果"}}]
         }
 
         with mock.patch("modules.llm_director.requests.post", return_value=fake_resp) as mock_post:
@@ -833,9 +833,9 @@ class TestMapReduceRecapEngine:
             fake_resp.status_code = 200
             fake_resp.raise_for_status = mock.MagicMock()
             if call_count[0] <= 3:  # Map phase
-                fake_resp.json.return_value = {"message": {"content": f"子摘要{call_count[0]}"}}
+                fake_resp.json.return_value = {"choices": [{"message": {"content": f"子摘要{call_count[0]}"}}]}
             else:  # Reduce phase
-                fake_resp.json.return_value = {"message": {"content": "终极摘要"}}
+                fake_resp.json.return_value = {"choices": [{"message": {"content": "终极摘要"}}]}
             return fake_resp
 
         with mock.patch("modules.llm_director.requests.post", side_effect=mock_post_side_effect):
@@ -853,7 +853,7 @@ class TestMapReduceRecapEngine:
         fake_resp.status_code = 200
         fake_resp.raise_for_status = mock.MagicMock()
         fake_resp.json.return_value = {
-            "message": {"content": "前情提要：这是摘要正文"}
+            "choices": [{"message": {"content": "前情提要：这是摘要正文"}}]
         }
 
         with mock.patch("modules.llm_director.requests.post", return_value=fake_resp):

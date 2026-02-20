@@ -273,8 +273,9 @@ class TestJsonOverflowProtection:
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_llm)
         assert "max_tokens" in source
-        # Verify the overflow protection comment/logic exists
-        assert "对话密集型" in source or "dialogue_markers" in source
+        # Verify the overflow protection comment/logic exists in parse_text_to_script
+        pts_source = inspect.getsource(director.parse_text_to_script)
+        assert "对话密集型" in pts_source or "dialogue_markers" in pts_source
 
     def test_max_tokens_used_in_payload(self):
         """The payload should use the max_tokens variable."""

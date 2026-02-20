@@ -225,7 +225,7 @@ def run_cinecast(epub_file, mode_choice,
         "ambient_theme": "iceland_wind" if ambient_file else "default",
         "target_duration_min": 30,
         "min_tail_min": 10,
-        "use_local_llm": True,
+        "use_local_llm": False,
         "pure_narrator_mode": is_pure,
         "global_cast": global_cast,        # 🌟 路由给 LLM 导演选角用
         "custom_recaps": custom_recaps,    # 🌟 路由给主控程序拼接摘要用

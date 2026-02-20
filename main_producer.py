@@ -92,9 +92,7 @@ class CineCastProducer:
             logger.info("✅ 资产管理系统初始化完成")
             
             # 2. 初始化LLM剧本导演
-            self.director = LLMScriptDirector(
-                use_local_mlx_lm=self.config["use_local_llm"]
-            )
+            self.director = LLMScriptDirector()
             logger.info("✅ LLM剧本导演初始化完成")
             
             # 3. 初始化MLX渲染引擎
@@ -208,32 +206,37 @@ class CineCastProducer:
         return chapters
     
     def _eject_ollama_memory(self):
-        """🌟 核心绝招：强行弹射 Ollama 模型，清空 M4 显存"""
-        logger.info("🧹 正在卸载 Ollama 模型释放显存...")
-        try:
-            requests.post(
-                "http://127.0.0.1:11434/api/generate",
-                json={"model": "qwen14b-pro", "prompt": "bye", "keep_alive": 0},
-                timeout=10
-            )
-            logger.info("✅ 14B 大模型已成功从统一内存中弹射！")
-        except Exception as e:
-            logger.warning(f"⚠️ 弹射 Ollama 失败，可能已自动释放: {e}")
+        """🌟 已废弃：原用于弹射 Ollama 模型释放显存，现已切换为 GLM API 无需本地模型管理"""
+        logger.info("ℹ️ 已切换为 GLM API，无需释放本地模型内存。")
     
     def check_ollama_alive(self):
-        """前置检查：验证 Ollama 服务是否可用"""
+        """前置检查：验证 GLM API 服务是否可用"""
+        api_key = os.environ.get("ZHIPU_API_KEY", "")
+        if not api_key:
+            logger.error("❌ 未设置 ZHIPU_API_KEY 环境变量，无法使用 GLM API。")
+            return False
         try:
-            response = requests.get(
-                "http://127.0.0.1:11434/api/tags", timeout=10
+            response = requests.post(
+                "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}",
+                },
+                json={
+                    "model": "glm-4.7-flash",
+                    "messages": [{"role": "user", "content": "ping"}],
+                    "max_tokens": 8,
+                },
+                timeout=10,
             )
             if response.status_code == 200:
-                logger.info("✅ Ollama 服务前置检查通过")
+                logger.info("✅ GLM API 服务前置检查通过")
                 return True
             else:
-                logger.error(f"❌ Ollama 服务响应异常 (HTTP {response.status_code})")
+                logger.error(f"❌ GLM API 服务响应异常 (HTTP {response.status_code})")
                 return False
         except Exception as e:
-            logger.error(f"❌ Ollama 服务不可达: {e}")
+            logger.error(f"❌ GLM API 服务不可达: {e}")
             return False
 
     # ==========================================
@@ -292,20 +295,20 @@ class CineCastProducer:
     # 🎬 阶段一：剧本化与微切片 (Script & Micro-chunking)
     # ==========================================
     def phase_1_generate_scripts(self, input_source, max_chapters=None, is_preview=False):
-        """阶段一：编剧期 (Ollama) - 生成包含chunk_id和停顿时间的微切片剧本
+        """阶段一：编剧期 (GLM API) - 生成包含chunk_id和停顿时间的微切片剧本
 
         Args:
             input_source: EPUB文件路径或TXT目录路径
             max_chapters: 最多处理的章节数（None表示全部，试听模式传1）
             is_preview: 是否为试听模式（强制注入摘要、截断前10句）
         """
-        logger.info("\n" + "="*50 + "\n🎬 [阶段一] 编剧期 (Ollama)\n" + "="*50)
+        logger.info("\n" + "="*50 + "\n🎬 [阶段一] 编剧期 (GLM API)\n" + "="*50)
         
         pure_mode = self.config.get("pure_narrator_mode", False)
 
-        # 🌟 前置检查：纯净模式下不需要 Ollama 服务
+        # 🌟 前置检查：纯净模式下不需要 GLM API 服务
         if not pure_mode and not self.check_ollama_alive():
-            logger.error("❌ Ollama 服务不可用，阶段一中止。请检查 Ollama 是否已启动。")
+            logger.error("❌ GLM API 服务不可用，阶段一中止。请检查 ZHIPU_API_KEY 是否已配置。")
             return False
 
         # 支持EPUB和TXT两种输入格式
@@ -574,14 +577,14 @@ class CineCastProducer:
                 failed_chapters.append(chapter_name)
                 continue
                 
-        # 强制弹射Ollama内存（纯净模式下无需弹射）
+        # 阶段一完成（GLM API 无需释放本地内存）
         if not pure_mode:
             self._eject_ollama_memory()
 
         if failed_chapters:
             logger.warning(f"⚠️ 以下章节处理失败: {', '.join(failed_chapters)}")
 
-        logger.info("✅ 阶段一完成，Ollama已从内存中安全撤离！")
+        logger.info("✅ 阶段一完成，剧本生成已完毕！")
         return True
     
     # ==========================================
