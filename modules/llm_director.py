@@ -268,7 +268,39 @@ class LLMScriptDirector:
         except Exception as e:
             logger.warning(f"❌ 无法连接到Ollama服务: {e}")
             return False
-    
+
+    # ------------------------------------------------------------------
+    # 🔍 LLM 调试日志 (Debug Logging for LLM Interactions)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _log_llm_request(tag: str, payload: dict) -> None:
+        """记录发送给大模型的完整请求（同时输出到终端、网页日志和日志文件）"""
+        separator = "=" * 60
+        messages_str = json.dumps(payload.get("messages", []), ensure_ascii=False, indent=2)
+        options_str = json.dumps(payload.get("options", {}), ensure_ascii=False, indent=2)
+        log_text = (
+            f"\n{separator}\n"
+            f"🔍 [LLM_DEBUG] [{tag}] >>> 发送请求给大模型\n"
+            f"   模型: {payload.get('model', 'unknown')}\n"
+            f"   消息内容:\n{messages_str}\n"
+            f"   参数选项: {options_str}\n"
+            f"{separator}"
+        )
+        logger.info(log_text)
+
+    @staticmethod
+    def _log_llm_response(tag: str, raw_content: str) -> None:
+        """记录大模型的完整回复（同时输出到终端、网页日志和日志文件）"""
+        separator = "=" * 60
+        log_text = (
+            f"\n{separator}\n"
+            f"🔍 [LLM_DEBUG] [{tag}] <<< 收到大模型回复\n"
+            f"   回复内容:\n{raw_content}\n"
+            f"{separator}"
+        )
+        logger.info(log_text)
+
     def _try_ollama_qwen(self) -> bool:
         """尝试使用Ollama的Qwen14B模型"""
         try:
@@ -691,9 +723,11 @@ class LLMScriptDirector:
                     "options": {"temperature": 0.3}
                 }
                 try:
+                    self._log_llm_request(f"Recap-Map({idx+1}/{len(chunks)})", payload)
                     resp = requests.post(self.api_url, json=payload, timeout=120)
                     resp.raise_for_status()
                     sub_sum = resp.json().get('message', {}).get('content', '').strip()
+                    self._log_llm_response(f"Recap-Map({idx+1}/{len(chunks)})", sub_sum)
                     sub_summaries.append(sub_sum)
                     logger.debug(f"   ✓ 完成第 {idx+1}/{len(chunks)} 块提炼")
                 except Exception as e:
@@ -726,9 +760,11 @@ class LLMScriptDirector:
         }
 
         try:
+            self._log_llm_request("Recap-Reduce", payload)
             response = requests.post(self.api_url, json=payload, timeout=180)
             response.raise_for_status()
             recap_result = response.json().get('message', {}).get('content', '').strip()
+            self._log_llm_response("Recap-Reduce", recap_result)
 
             # 清理大模型可能违规加上的前缀
             recap_result = re.sub(r'^(前情提要|前情摘要|回顾|摘要)[:：]\s*', '', recap_result)
@@ -871,9 +907,11 @@ class LLMScriptDirector:
         }
 
         try:
+            self._log_llm_request("ScriptParse", payload)
             response = requests.post(self.api_url, json=payload, timeout=180)
             response.raise_for_status()
             content = response.json().get('message', {}).get('content', '[]')
+            self._log_llm_response("ScriptParse", content)
 
             # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
             # Only strip real control characters; keep escaped sequences
