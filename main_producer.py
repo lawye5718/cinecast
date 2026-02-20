@@ -413,7 +413,7 @@ class CineCastProducer:
                     # 🌟 GLM-4.7-Flash 整章直出，无需碎步快跑和降级重试
                     micro_script = director.parse_and_micro_chunk(
                         content, chapter_prefix=chapter_name,
-                        max_length=15000
+                        max_length=4000  # 🌟 减小分块大小，分散 TPM 压力
                     )
                 
                 # 验证生成的剧本数据结构

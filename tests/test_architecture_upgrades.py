@@ -417,11 +417,16 @@ class TestLLMDictFormatTolerance:
         fake_resp = mock.MagicMock()
         fake_resp.status_code = 200
         fake_resp.raise_for_status = mock.MagicMock()
-        fake_resp.json.return_value = {
-            "choices": [{"message": {"content": json.dumps(json_content, ensure_ascii=False)}}]
-        }
+        content_str = json.dumps(json_content, ensure_ascii=False)
+        escaped = content_str.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+        lines = [
+            f'data: {{"choices":[{{"delta":{{"content":"{escaped}"}}}}]}}'.encode('utf-8'),
+            b'data: [DONE]',
+        ]
+        fake_resp.iter_lines = mock.MagicMock(return_value=iter(lines))
 
-        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp):
+        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp), \
+             mock.patch("modules.llm_director.time.sleep"):
             return director._request_llm("任意文本")
 
     def test_name_content_dict_converted_to_narration(self):
@@ -513,11 +518,16 @@ class TestLLMDictFormatTolerance:
         fake_resp = mock.MagicMock()
         fake_resp.status_code = 200
         fake_resp.raise_for_status = mock.MagicMock()
-        fake_resp.json.return_value = {
-            "choices": [{"message": {"content": "This is not JSON at all, just random text."}}]
-        }
+        broken_content = "This is not JSON at all, just random text."
+        escaped = broken_content.replace('\\', '\\\\').replace('"', '\\"')
+        lines = [
+            f'data: {{"choices":[{{"delta":{{"content":"{escaped}"}}}}]}}'.encode('utf-8'),
+            b'data: [DONE]',
+        ]
+        fake_resp.iter_lines = mock.MagicMock(return_value=iter(lines))
 
-        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp):
+        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp), \
+             mock.patch("modules.llm_director.time.sleep"):
             result = director._request_llm("原始文本内容")
         assert isinstance(result, list)
         assert len(result) == 1

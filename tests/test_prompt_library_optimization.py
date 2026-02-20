@@ -293,21 +293,25 @@ class TestJsonOverflowProtection:
         fake_resp = mock.MagicMock()
         fake_resp.status_code = 200
         fake_resp.raise_for_status = mock.MagicMock()
-        fake_resp.json.return_value = {
-            "choices": [{"message": {"content": json.dumps([
-                {"type": "narration", "speaker": "narrator", "gender": "male",
-                 "emotion": "平静", "content": "测试内容。"}
-            ], ensure_ascii=False)}}]
-        }
+        content_str = json.dumps([
+            {"type": "narration", "speaker": "narrator", "gender": "male",
+             "emotion": "平静", "content": "测试内容。"}
+        ], ensure_ascii=False)
+        escaped = content_str.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+        lines = [
+            f'data: {{"choices":[{{"delta":{{"content":"{escaped}"}}}}]}}'.encode('utf-8'),
+            b'data: [DONE]',
+        ]
+        fake_resp.iter_lines = mock.MagicMock(return_value=iter(lines))
 
         captured_payloads = []
-        original_post = mock.MagicMock(return_value=fake_resp)
 
         def capture_post(url, json=None, timeout=None, **kwargs):
             captured_payloads.append(json)
             return fake_resp
 
-        with mock.patch("modules.llm_director.requests.post", side_effect=capture_post):
+        with mock.patch("modules.llm_director.requests.post", side_effect=capture_post), \
+             mock.patch("modules.llm_director.time.sleep"):
             director._request_llm(dialogue_text)
 
         assert len(captured_payloads) == 1

@@ -817,14 +817,14 @@ class LLMScriptDirector:
                 {"role": "system", "content": system_prompt + "\n示例参考：" + one_shot_example},
                 {"role": "user", "content": user_content}
             ],
-            "stream": False,
+            "stream": True,  # 🌟 开启流式输出
             "temperature": 0.1,
             "top_p": 0.1,
             "max_tokens": 65536,
         }
 
-        max_retries = 10
-        base_wait_time = 15
+        max_retries = 5
+        base_wait_time = 10
 
         for attempt in range(max_retries):
             # 🌟 [防御 1] 强制 RPM 保护：确保请求之间有物理间隔
@@ -836,6 +836,7 @@ class LLMScriptDirector:
                 time.sleep(wait_gap)
 
             try:
+                logger.info(f"🚀 发起请求 (尝试 {attempt + 1}) | 长度: {len(text_chunk)}")
                 self._last_call_time = time.time()
                 response = requests.post(
                     self.api_url,
@@ -845,20 +846,52 @@ class LLMScriptDirector:
                     },
                     json=payload,
                     timeout=300,
+                    stream=True,  # 必须配合 stream=True
                 )
 
                 # 🌟 [防御 2] 显式检查 429，使用激进退避 + 随机抖动
                 if response.status_code == 429:
-                    wait_time = base_wait_time * (1.5 ** attempt) + random.uniform(10, 30)
+                    wait_time = base_wait_time * (2 ** attempt) + random.uniform(5, 15)
                     logger.warning(
-                        f"⚠️ 触发 GLM API 速率限制 (429 Too Many Requests)。"
-                        f"正在强制冷却，等待 {wait_time:.1f} 秒后进行第 {attempt + 1}/{max_retries} 次重试..."
+                        f"⚠️ 触发限制 (429)，等待 {wait_time:.1f}s 后重试 (尝试 {attempt + 1}/{max_retries})..."
                     )
                     time.sleep(wait_time)
                     continue
 
                 response.raise_for_status()
-                content = response.json().get('choices', [{}])[0].get('message', {}).get('content', '[]')
+
+                # 🌟 流式读取与速率控制逻辑
+                full_content = ""
+                start_time = time.time()
+                tokens_count = 0
+                TARGET_RATE = 35  # 目标速率设为 35 tokens/s，预留安全余量
+
+                for line in response.iter_lines():
+                    if not line:
+                        continue
+                    line_str = line.decode('utf-8') if isinstance(line, bytes) else line
+                    if line_str.startswith("data: "):
+                        if line_str == "data: [DONE]":
+                            break
+                        try:
+                            data = json.loads(line_str[6:])
+                            chunk_text = data['choices'][0]['delta'].get('content', '')
+                            if chunk_text:
+                                full_content += chunk_text
+                                tokens_count += 1
+                                # 计算当前速率并控制
+                                elapsed_stream = time.time() - start_time
+                                if elapsed_stream > 0:
+                                    current_rate = tokens_count / elapsed_stream
+                                    if current_rate > TARGET_RATE:
+                                        sleep_time = (tokens_count / TARGET_RATE) - elapsed_stream
+                                        if sleep_time > 0:
+                                            time.sleep(sleep_time)
+                        except (json.JSONDecodeError, KeyError, IndexError) as e:
+                            logger.debug(f"Failed to parse streaming chunk: {e}")
+                            continue
+
+                content = full_content.strip()
 
                 # 🌟 API 稳定性策略：成功后根据输入大小增加冷却
                 if input_len > 10000:
