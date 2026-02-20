@@ -853,7 +853,7 @@ class LLMScriptDirector:
                 if response.status_code == 429:
                     wait_time = base_wait_time * (2 ** attempt) + random.uniform(5, 15)
                     logger.warning(
-                        f"⚠️ 触发限制，等待 {wait_time:.1f}s..."
+                        f"⚠️ 触发限制 (429)，等待 {wait_time:.1f}s 后重试 (尝试 {attempt + 1}/{max_retries})..."
                     )
                     time.sleep(wait_time)
                     continue
@@ -864,7 +864,7 @@ class LLMScriptDirector:
                 full_content = ""
                 start_time = time.time()
                 tokens_count = 0
-                TARGET_RATE = 35  # 目标速率设为 35，预留安全余量
+                TARGET_RATE = 35  # 目标速率设为 35 tokens/s，预留安全余量
 
                 for line in response.iter_lines():
                     if not line:
@@ -887,7 +887,8 @@ class LLMScriptDirector:
                                         sleep_time = (tokens_count / TARGET_RATE) - elapsed_stream
                                         if sleep_time > 0:
                                             time.sleep(sleep_time)
-                        except (json.JSONDecodeError, KeyError, IndexError):
+                        except (json.JSONDecodeError, KeyError, IndexError) as e:
+                            logger.debug(f"Failed to parse streaming chunk: {e}")
                             continue
 
                 content = full_content.strip()
