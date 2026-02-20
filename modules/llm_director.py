@@ -163,6 +163,8 @@ class LLMScriptDirector:
     }
 
     def __init__(self, api_key=None, global_cast=None, cast_db_path=None, **kwargs):
+        if kwargs:
+            logger.warning(f"⚠️ LLMScriptDirector 收到未识别的参数（已忽略）: {list(kwargs.keys())}")
         self.api_url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
         self.model_name = "glm-4.7-flash"
         self.api_key = api_key or os.environ.get("ZHIPU_API_KEY", "")
