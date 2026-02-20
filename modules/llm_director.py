@@ -6,6 +6,7 @@ CineCast 大模型剧本预处理器
 """
 
 import json
+import random
 import re
 import logging
 import requests
@@ -822,11 +823,20 @@ class LLMScriptDirector:
             "max_tokens": 65536,
         }
 
-        max_retries = 5
-        base_wait_time = 3
+        max_retries = 10
+        base_wait_time = 15
 
         for attempt in range(max_retries):
+            # 🌟 [防御 1] 强制 RPM 保护：确保请求之间有物理间隔
+            now = time.time()
+            elapsed = now - getattr(self, '_last_call_time', 0)
+            if elapsed < 12:
+                wait_gap = 12 - elapsed + random.uniform(1, 4)
+                logger.info(f"⏳ 正在执行 RPM 频率控制，强制静默 {wait_gap:.1f}s...")
+                time.sleep(wait_gap)
+
             try:
+                self._last_call_time = time.time()
                 response = requests.post(
                     self.api_url,
                     headers={
@@ -836,17 +846,27 @@ class LLMScriptDirector:
                     json=payload,
                     timeout=300,
                 )
+
+                # 🌟 [防御 2] 显式检查 429，使用激进退避 + 随机抖动
+                if response.status_code == 429:
+                    wait_time = base_wait_time * (1.5 ** attempt) + random.uniform(10, 30)
+                    logger.warning(
+                        f"⚠️ 触发 GLM API 速率限制 (429 Too Many Requests)。"
+                        f"正在强制冷却，等待 {wait_time:.1f} 秒后进行第 {attempt + 1}/{max_retries} 次重试..."
+                    )
+                    time.sleep(wait_time)
+                    continue
+
                 response.raise_for_status()
                 content = response.json().get('choices', [{}])[0].get('message', {}).get('content', '[]')
 
-                # 🌟 API 稳定性策略：针对超大上下文的强制降速
-                # 8000 字符约为 5000-8000 tokens
-                if input_len > 30000:
+                # 🌟 API 稳定性策略：成功后根据输入大小增加冷却
+                if input_len > 10000:
                     cooldown = 20
-                    logger.info(f"⏳ 检测到超长上下文请求 ({input_len} 字)，执行速率保护，强制冷却 {cooldown}s...")
+                    logger.info(f"⏳ 检测到大上下文请求 ({input_len} 字)，执行速率保护，强制冷却 {cooldown}s...")
                     time.sleep(cooldown)
                 else:
-                    time.sleep(1.5)
+                    time.sleep(5)
 
                 # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
                 # Only strip real control characters; keep escaped sequences
@@ -908,24 +928,23 @@ class LLMScriptDirector:
                 ])
 
             except requests.exceptions.HTTPError as e:
-                if response.status_code == 429:
-                    wait_time = base_wait_time * (2 ** attempt)
-                    logger.warning(
-                        f"⚠️ 触发 GLM API 速率限制 (429 Too Many Requests)。"
-                        f"正在强制冷却，等待 {wait_time} 秒后进行第 {attempt + 1}/{max_retries} 次重试..."
-                    )
-                    time.sleep(wait_time)
-                    continue
-                elif response.status_code >= 500:
-                    logger.warning(f"⚠️ GLM 服务器异常 ({response.status_code})，等待 5 秒后重试...")
-                    time.sleep(5)
+                if response.status_code >= 500:
+                    logger.warning(f"⚠️ GLM 服务器异常 ({response.status_code})，等待 15 秒后重试...")
+                    time.sleep(15)
                     continue
                 else:
                     raise RuntimeError(f"❌ GLM API 致命请求失败: HTTP {response.status_code} - {response.text}") from e
 
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+                # 🌟 [防御 3] 超时/连接异常：服务器可能过载，长时间冷却
+                wait_time = 30 + (attempt * 10)
+                logger.warning(f"⚠️ 网络超时/连接异常，休息 {wait_time}s 后重试: {e}")
+                time.sleep(wait_time)
+                continue
+
             except requests.exceptions.RequestException as e:
-                logger.warning(f"⚠️ 网络通信异常: {e}，等待 5 秒后重试...")
-                time.sleep(5)
+                logger.warning(f"⚠️ 网络通信异常: {e}，等待 10 秒后重试...")
+                time.sleep(10)
                 continue
             except RuntimeError:
                 raise
