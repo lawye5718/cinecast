@@ -147,7 +147,7 @@ class TestModelParameterAdjustments:
         payload = captured_payloads[0]
         assert payload["temperature"] == 0.1
         assert payload["top_p"] == 0.1
-        assert payload["max_tokens"] == 4096
+        assert payload["max_tokens"] == 65536
 
 
 # ---------------------------------------------------------------------------

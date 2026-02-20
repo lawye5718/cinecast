@@ -62,13 +62,25 @@ def _error_response(status_code, text="error"):
     return resp
 
 
+def _incrementing_time():
+    """Return a side_effect callable for time.time that increments by 100 each call."""
+    counter = [0]
+    def _time():
+        counter[0] += 100
+        return float(counter[0])
+    return _time
+
+
 class TestExponentialBackoff:
     """Tests for the retry / backoff logic inside _request_llm."""
 
+    @patch("modules.llm_director.random.uniform", return_value=20.0)
+    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
-    def test_429_retries_with_exponential_backoff(self, mock_post, mock_sleep):
-        """429 should trigger exponential backoff and eventually succeed."""
+    def test_429_retries_with_exponential_backoff(self, mock_post, mock_sleep, mock_time, mock_random):
+        """429 should trigger aggressive exponential backoff with jitter and eventually succeed."""
+        mock_time.side_effect = _incrementing_time()
         ok = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "测试文本。"}
@@ -85,16 +97,22 @@ class TestExponentialBackoff:
 
         assert len(result) == 1
         assert result[0]["content"] == "测试文本。"
-        # Sleep should have been called 3 times: two 429 retries (3, 6) + one post-request cooldown (1.5)
+        # Sleep: two 429 retries + one post-request cooldown
+        # 429 attempt 0: 15 * 1.5^0 + 20.0 = 35.0
+        # 429 attempt 1: 15 * 1.5^1 + 20.0 = 42.5
+        # post-success cooldown: 5 (input < 10K)
         assert mock_sleep.call_count == 3
-        mock_sleep.assert_any_call(3)   # base_wait_time * 2^0
-        mock_sleep.assert_any_call(6)   # base_wait_time * 2^1
-        mock_sleep.assert_any_call(1.5) # post-request cooldown (input < 8K)
+        sleep_args = [c[0][0] for c in mock_sleep.call_args_list]
+        assert sleep_args[0] == 35.0
+        assert sleep_args[1] == 42.5
+        assert sleep_args[2] == 5
 
+    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
-    def test_5xx_retries(self, mock_post, mock_sleep):
-        """5xx errors should retry with fixed 5s wait."""
+    def test_5xx_retries(self, mock_post, mock_sleep, mock_time):
+        """5xx errors should retry with fixed 15s wait."""
+        mock_time.side_effect = _incrementing_time()
         ok = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "成功。"}
@@ -108,10 +126,10 @@ class TestExponentialBackoff:
         result = director._request_llm("成功。")
 
         assert len(result) == 1
-        # Sleep called twice: once for 5xx retry (5s) + once for post-request cooldown (1.5s)
+        # Sleep called twice: once for 5xx retry (15s) + once for post-request cooldown (5s)
         assert mock_sleep.call_count == 2
+        mock_sleep.assert_any_call(15)
         mock_sleep.assert_any_call(5)
-        mock_sleep.assert_any_call(1.5)
 
     @patch("modules.llm_director.requests.post")
     def test_4xx_fatal_no_retry(self, mock_post):
@@ -125,10 +143,12 @@ class TestExponentialBackoff:
         # Only one call – no retry
         assert mock_post.call_count == 1
 
+    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
-    def test_network_exception_retries(self, mock_post, mock_sleep):
-        """Network-level exceptions should retry with 5s wait."""
+    def test_network_exception_retries(self, mock_post, mock_sleep, mock_time):
+        """Network-level exceptions (Timeout/ConnectionError) should retry with long cooldown."""
+        mock_time.side_effect = _incrementing_time()
         ok = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "网络恢复。"}
@@ -142,22 +162,25 @@ class TestExponentialBackoff:
         result = director._request_llm("网络恢复。")
 
         assert len(result) == 1
-        # Sleep called twice: once for network retry (5s) + once for post-request cooldown (1.5s)
+        # Sleep called twice: once for network retry (30 + 0*10 = 30s) + once for post-request cooldown (5s)
         assert mock_sleep.call_count == 2
+        mock_sleep.assert_any_call(30)
         mock_sleep.assert_any_call(5)
-        mock_sleep.assert_any_call(1.5)
 
+    @patch("modules.llm_director.random.uniform", return_value=20.0)
+    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
-    def test_max_retries_exhausted(self, mock_post, mock_sleep):
-        """After max_retries consecutive 429s, RuntimeError should be raised."""
-        mock_post.side_effect = [_error_response(429)] * 5
+    def test_max_retries_exhausted(self, mock_post, mock_sleep, mock_time, mock_random):
+        """After max_retries (10) consecutive 429s, RuntimeError should be raised."""
+        mock_time.side_effect = _incrementing_time()
+        mock_post.side_effect = [_error_response(429)] * 10
 
         director = _make_director()
         with pytest.raises(RuntimeError, match="超过最大重试次数"):
             director._request_llm("永远失败。")
 
-        assert mock_post.call_count == 5
+        assert mock_post.call_count == 10
 
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
@@ -228,7 +251,7 @@ class TestPostRequestCooldown:
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
     def test_small_input_gets_short_cooldown(self, mock_post, mock_sleep):
-        """Input < 8000 chars should trigger a 1.5s cooldown."""
+        """Input <= 10000 chars should trigger a 5s cooldown."""
         mock_post.return_value = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "短文本。"}
@@ -237,13 +260,13 @@ class TestPostRequestCooldown:
         director = _make_director()
         director._request_llm("短文本。")
 
-        mock_sleep.assert_called_once_with(1.5)
+        mock_sleep.assert_called_once_with(5)
 
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
     def test_large_input_gets_long_cooldown(self, mock_post, mock_sleep):
-        """Input > 8000 chars should trigger a 30s cooldown."""
-        large_text = "这" * 9000  # > 8000 chars
+        """Input > 10000 chars should trigger a 20s cooldown."""
+        large_text = "这" * 11000  # > 10000 chars
         mock_post.return_value = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": large_text}
@@ -252,13 +275,13 @@ class TestPostRequestCooldown:
         director = _make_director()
         director._request_llm(large_text)
 
-        mock_sleep.assert_called_once_with(30)
+        mock_sleep.assert_called_once_with(20)
 
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
     def test_boundary_input_gets_short_cooldown(self, mock_post, mock_sleep):
-        """Input exactly 8000 chars should get the short 1.5s cooldown."""
-        boundary_text = "这" * 8000  # exactly 8000 chars
+        """Input exactly 10000 chars should get the short 5s cooldown."""
+        boundary_text = "这" * 10000  # exactly 10000 chars
         mock_post.return_value = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": boundary_text}
@@ -267,14 +290,14 @@ class TestPostRequestCooldown:
         director = _make_director()
         director._request_llm(boundary_text)
 
-        mock_sleep.assert_called_once_with(1.5)
+        mock_sleep.assert_called_once_with(5)
 
     @patch("modules.llm_director.time.sleep", return_value=None)
     @patch("modules.llm_director.requests.post")
     def test_context_included_in_length_calculation(self, mock_post, mock_sleep):
         """Context length should be included in input_len for cooldown threshold."""
         text = "这" * 4000        # 4000 chars
-        context = "前文" * 2500   # 5000 chars -> total = 9000 > 8000
+        context = "前文" * 3500   # 7000 chars -> total = 11000 > 10000
         mock_post.return_value = _ok_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": text}
@@ -283,7 +306,7 @@ class TestPostRequestCooldown:
         director = _make_director()
         director._request_llm(text, context=context)
 
-        mock_sleep.assert_called_once_with(30)
+        mock_sleep.assert_called_once_with(20)
 
 
 class TestChunkDefaultSize:
