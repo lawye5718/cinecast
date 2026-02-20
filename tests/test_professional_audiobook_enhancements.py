@@ -252,7 +252,7 @@ class TestDebugLogging:
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_llm)
         assert "input_len" in source
-        assert "10000" in source
+        assert "input_len > 10000" in source
 
 
 # ---------------------------------------------------------------------------
