@@ -113,45 +113,44 @@ class TestModelParameterAdjustments:
     def test_temperature_lowered(self):
         """Temperature should be set low for maximum stability."""
         source = inspect.getsource(LLMScriptDirector._request_llm)
-        assert '"temperature"' in source
+        assert "temperature" in source
 
     def test_max_tokens_set(self):
         """max_tokens should be set for sufficient output length."""
         source = inspect.getsource(LLMScriptDirector._request_llm)
-        assert '"max_tokens"' in source
+        assert "max_tokens" in source
 
     def test_parameters_in_mock_payload(self):
-        """Verify the actual payload sent to Qwen API contains correct parameters."""
+        """Verify the actual parameters sent to Qwen API via OpenAI SDK."""
         director = LLMScriptDirector()
-        fake_resp = mock.MagicMock()
-        fake_resp.status_code = 200
-        fake_resp.raise_for_status = mock.MagicMock()
+
         content_str = json.dumps([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "测试。"}
         ], ensure_ascii=False)
-        escaped = content_str.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
-        lines = [
-            f'data: {{"choices":[{{"delta":{{"content":"{escaped}"}}}}]}}'.encode('utf-8'),
-            b'data: [DONE]',
-        ]
-        fake_resp.iter_lines = mock.MagicMock(return_value=iter(lines))
 
-        captured_payloads = []
+        # Build a mock streaming completion
+        mock_chunk = mock.MagicMock()
+        mock_chunk.choices = [mock.MagicMock()]
+        mock_chunk.choices[0].delta = mock.MagicMock()
+        mock_chunk.choices[0].delta.content = content_str
+        mock_chunk.choices[0].delta.reasoning_content = None
 
-        def capture_post(url, json=None, timeout=None, **kwargs):
-            captured_payloads.append(json)
-            return fake_resp
+        captured_kwargs = []
 
-        with mock.patch("modules.llm_director.requests.post", side_effect=capture_post), \
-             mock.patch("modules.llm_director.time.sleep"):
-            director._request_llm("测试文本。")
+        def capture_create(**kwargs):
+            captured_kwargs.append(kwargs)
+            return iter([mock_chunk])
 
-        assert len(captured_payloads) == 1
-        payload = captured_payloads[0]
-        assert payload["temperature"] == 0.1
-        assert payload["top_p"] == 0.1
-        assert payload["max_tokens"] == 32768
+        director.client = mock.MagicMock()
+        director.client.chat.completions.create = capture_create
+
+        director._request_llm("测试文本。")
+
+        assert len(captured_kwargs) == 1
+        params = captured_kwargs[0]
+        assert params["temperature"] == 0.1
+        assert params["max_tokens"] == 32000
 
 
 # ---------------------------------------------------------------------------
@@ -167,36 +166,35 @@ class TestQuotePreprocessing:
         assert "双引号" in source or "\\u201c" in source
 
     def test_quotes_replaced_in_payload(self):
-        """ASCII double quotes in input text should be replaced in the payload."""
+        """ASCII double quotes in input text should be replaced in the messages."""
         director = LLMScriptDirector()
-        fake_resp = mock.MagicMock()
-        fake_resp.status_code = 200
-        fake_resp.raise_for_status = mock.MagicMock()
+
         content_str = json.dumps([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "测试。"}
         ], ensure_ascii=False)
-        escaped = content_str.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
-        lines = [
-            f'data: {{"choices":[{{"delta":{{"content":"{escaped}"}}}}]}}'.encode('utf-8'),
-            b'data: [DONE]',
-        ]
-        fake_resp.iter_lines = mock.MagicMock(return_value=iter(lines))
 
-        captured_payloads = []
+        mock_chunk = mock.MagicMock()
+        mock_chunk.choices = [mock.MagicMock()]
+        mock_chunk.choices[0].delta = mock.MagicMock()
+        mock_chunk.choices[0].delta.content = content_str
+        mock_chunk.choices[0].delta.reasoning_content = None
 
-        def capture_post(url, json=None, timeout=None, **kwargs):
-            captured_payloads.append(json)
-            return fake_resp
+        captured_kwargs = []
+
+        def capture_create(**kwargs):
+            captured_kwargs.append(kwargs)
+            return iter([mock_chunk])
+
+        director.client = mock.MagicMock()
+        director.client.chat.completions.create = capture_create
 
         input_text = '"你好，"他说。'
 
-        with mock.patch("modules.llm_director.requests.post", side_effect=capture_post), \
-             mock.patch("modules.llm_director.time.sleep"):
-            director._request_llm(input_text)
+        director._request_llm(input_text)
 
-        assert len(captured_payloads) == 1
-        user_content = captured_payloads[0]["messages"][1]["content"]
+        assert len(captured_kwargs) == 1
+        user_content = captured_kwargs[0]["messages"][1]["content"]
         # The processed text portion should not contain ASCII double quotes
         # (they are replaced with Chinese quotes to avoid JSON conflicts)
         assert '\u201c' in user_content or '\u201d' in user_content

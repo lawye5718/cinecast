@@ -33,14 +33,14 @@ class TestMaxLengthParameter:
         import inspect
         sig = inspect.signature(LLMScriptDirector.parse_text_to_script)
         assert "max_length" in sig.parameters
-        assert sig.parameters["max_length"].default == 50000
+        assert sig.parameters["max_length"].default == 10000
 
     def test_parse_and_micro_chunk_accepts_max_length(self):
         """parse_and_micro_chunk signature should accept max_length."""
         import inspect
         sig = inspect.signature(LLMScriptDirector.parse_and_micro_chunk)
         assert "max_length" in sig.parameters
-        assert sig.parameters["max_length"].default == 50000
+        assert sig.parameters["max_length"].default == 10000
 
     def test_chunk_text_respects_custom_max_length(self):
         """_chunk_text_for_llm should respect a custom max_length."""
