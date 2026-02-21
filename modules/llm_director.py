@@ -819,9 +819,6 @@ class LLMScriptDirector:
                 # 🌟 优化：优雅的流式读取，没有任何阻碍速度的 sleep
                 for chunk in completion:
                     delta = chunk.choices[0].delta
-                    if hasattr(delta, "reasoning_content") and delta.reasoning_content:
-                        pass
-
                     if hasattr(delta, "content") and delta.content:
                         full_content += delta.content
 
@@ -888,7 +885,7 @@ class LLMScriptDirector:
                 time.sleep(wait_time)
                 continue
 
-        raise RuntimeError("❌ 超过最大重试次数，Qwen API 请求彻底失败。")
+        raise RuntimeError("❌ 超过最大重试次数，Qwen API 请求彻底失败。请检查您的 DASHSCOPE_API_KEY 是否有效以及账户额度是否充足。")
     
     def _validate_script_elements(self, script: List[Dict]) -> List[Dict]:
         """验证并修复脚本元素，确保包含所有必需字段"""
