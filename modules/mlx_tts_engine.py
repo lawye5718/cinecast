@@ -149,8 +149,11 @@ class MLXRenderEngine:
 
     def _async_write_wav(self, path, data, sr):
         """后台线程写入 WAV 文件，避免阻塞推理"""
-        sf.write(path, data, sr, format='WAV')
-        logger.debug(f"💾 异步写入完成: {path}")
+        try:
+            sf.write(path, data, sr, format='WAV')
+            logger.debug(f"💾 异步写入完成: {path}")
+        except Exception as e:
+            logger.error(f"❌ 异步写入失败: {path}: {e}")
 
     def destroy(self):
         """显式清理 MLX 模型资源，释放显存"""
@@ -207,9 +210,11 @@ class MLXRenderEngine:
             if len(render_text) > self.max_chars:
                 safe_text = render_text[:self.max_chars]
                 # 匹配常见中英文断句标点，从后往前找最后一个
-                match = re.search(r'[。！？；.,!?;]', safe_text)
-                if match:
-                    render_text = safe_text[:match.end()]
+                last_match = None
+                for match in re.finditer(r'[。！？；.,!?;]', safe_text):
+                    last_match = match
+                if last_match:
+                    render_text = safe_text[:last_match.end()]
                 else:
                     render_text = safe_text + "。"
             

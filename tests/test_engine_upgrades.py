@@ -39,9 +39,11 @@ def _smart_truncate(text: str, max_chars: int = 60) -> str:
     render_text = re.sub(r'\s+', ' ', render_text).strip()
     if len(render_text) > max_chars:
         safe_text = render_text[:max_chars]
-        match = re.search(r'[。！？；.,!?;]', safe_text)
-        if match:
-            render_text = safe_text[:match.end()]
+        last_match = None
+        for match in re.finditer(r'[。！？；.,!?;]', safe_text):
+            last_match = match
+        if last_match:
+            render_text = safe_text[:last_match.end()]
         else:
             render_text = safe_text + "。"
     if not _CLOSING_PUNCT_RE.search(render_text):
@@ -81,10 +83,11 @@ class TestSmartTruncation:
     """Verify smart punctuation-aware truncation replaces brute-force cut."""
 
     def test_source_has_smart_truncation(self):
-        """Smart truncation regex must exist in source."""
+        """Smart truncation regex must exist in source using finditer for last match."""
         source = _read_source()
-        assert "re.search" in source
+        assert "re.finditer" in source
         assert "safe_text" in source
+        assert "last_match" in source
 
     def test_truncate_at_nearest_punctuation(self):
         """Long text with punctuation should truncate at the last punct within limit."""
