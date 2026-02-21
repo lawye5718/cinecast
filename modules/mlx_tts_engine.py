@@ -34,6 +34,9 @@ from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
+# CustomVoice 模型默认 speaker name (当 voice_cfg 未指定时使用)
+DEFAULT_CUSTOM_VOICE = "Ethan"
+
 
 def group_indices_by_voice_type(
     micro_script: List[Dict],
@@ -276,13 +279,13 @@ class MLXRenderEngine:
                         "text": render_text,
                     }
                     # CustomVoice 模型必须传递 'voice' 参数 (speaker name)
-                    # 支持旧版 "speaker" 字段名以及新版 "voice" 字段名
+                    # 兼容旧版 voice_cfg 中使用 "speaker" 字段的配置
                     voice_name = voice_cfg.get("voice") or voice_cfg.get("speaker")
                     if voice_name:
                         generate_kwargs["voice"] = voice_name
                     else:
                         # CustomVoice 模型要求 voice 参数，使用默认值
-                        generate_kwargs["voice"] = "Ethan"
+                        generate_kwargs["voice"] = DEFAULT_CUSTOM_VOICE
                     results = list(self.model.generate(**generate_kwargs))
             
             audio_array = results[0].audio

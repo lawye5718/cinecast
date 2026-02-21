@@ -4,7 +4,7 @@ Tests for CustomVoice 'voice' parameter fix.
 
 The CustomVoice model requires a 'voice' parameter (speaker name) to be passed
 in generate_kwargs. Previously the code used 'speaker' as the key name, which
-the MLX library does not recognise, and default voice configs omitted the key
+the MLX library does not recognize, and default voice configs omitted the key
 entirely, causing all preset-mode renders to fail.
 
 These tests verify:
@@ -62,10 +62,11 @@ class TestCustomVoiceParameter:
     def test_default_voice_provided(self):
         """A default voice name must be set when voice_cfg has no voice key."""
         source = _read_engine_source()
+        # DEFAULT_CUSTOM_VOICE constant should be defined at module level
+        assert "DEFAULT_CUSTOM_VOICE" in source
         preset_idx = source.index("# 传统 Preset 模式")
         block = source[preset_idx:preset_idx + 600]
-        # Must have a fallback default voice value
-        assert '"Ethan"' in block
+        assert "DEFAULT_CUSTOM_VOICE" in block
 
     def test_supports_legacy_speaker_field(self):
         """voice_cfg with legacy 'speaker' field should still be read."""
