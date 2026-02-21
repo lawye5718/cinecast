@@ -266,7 +266,7 @@ class MLXRenderEngine:
                     }
                     # 防御性追加：以防错误地用 CustomVoice 模型跑 clone 模式
                     if "speaker" in voice_cfg or "voice" in voice_cfg:
-                        generate_kwargs["voice"] = voice_cfg.get("voice", voice_cfg.get("speaker", "Ethan"))
+                        generate_kwargs["voice"] = voice_cfg.get("voice", voice_cfg.get("speaker", "eric"))
                     
                     results = list(self.model.generate(**generate_kwargs))
 
@@ -284,8 +284,8 @@ class MLXRenderEngine:
                     }
                     
                     # 🌟 核心修复：强制提取 voice 参数，兼容旧版 speaker 字段
-                    # 如果都没有提供，则默认使用 'Ethan' 作为安全兜底，防止引擎崩溃
-                    target_voice = voice_cfg.get("voice", voice_cfg.get("speaker", "Ethan"))
+                    # 如果都没有提供，则默认使用 'eric' 作为安全兜底，防止引擎崩溃
+                    target_voice = voice_cfg.get("voice", voice_cfg.get("speaker", "eric"))
                     generate_kwargs["voice"] = target_voice
                     
                     # 如果配置里带了参考音频（基于基底音色做微调克隆）
