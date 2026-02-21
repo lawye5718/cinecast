@@ -167,9 +167,9 @@ class LLMScriptDirector:
     def __init__(self, api_key=None, global_cast=None, cast_db_path=None, **kwargs):
         if kwargs:
             logger.warning(f"⚠️ LLMScriptDirector 收到未识别的参数（已忽略）: {list(kwargs.keys())}")
-        self.api_url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
-        self.model_name = "glm-4.7-flash"
-        self.api_key = api_key or os.environ.get("ZHIPU_API_KEY", "")
+        self.api_url = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+        self.model_name = "qwen-flash"
+        self.api_key = api_key or os.environ.get("DASHSCOPE_API_KEY", "")
         self.max_chars_per_chunk = 60 # 微切片红线（智能配音模式）
         self.pure_narrator_chunk_limit = 100  # 纯净旁白模式切片上限（更长更流畅）
         self.global_cast = global_cast or {}  # 🌟 外脑全局角色设定集
@@ -183,7 +183,7 @@ class LLMScriptDirector:
         self.cast_db_path = cast_db_path or os.path.join("workspace", "cast_profiles.json")
         self.cast_profiles: Dict[str, Dict] = self._load_cast_profiles()
         
-        # 测试 GLM API 连接
+        # 测试 Qwen API 连接
         self._test_api_connection()
 
     # ------------------------------------------------------------------
@@ -260,9 +260,9 @@ class LLMScriptDirector:
         logger.info("♻️ 检测到故事边界，导演引擎已重置上下文。")
 
     def _test_api_connection(self):
-        """测试 GLM API 服务连接"""
+        """测试 Qwen API 服务连接"""
         if not self.api_key:
-            logger.warning("⚠️ 未设置 ZHIPU_API_KEY，智能配音模式将无法使用 GLM API。")
+            logger.warning("⚠️ 未设置 DASHSCOPE_API_KEY，智能配音模式将无法使用 Qwen API。")
             return False
         try:
             response = requests.post(
@@ -279,13 +279,13 @@ class LLMScriptDirector:
                 timeout=10,
             )
             if response.status_code == 200:
-                logger.info("✅ GLM API 服务连接正常")
+                logger.info("✅ Qwen API 服务连接正常")
                 return True
             else:
-                logger.warning(f"❌ GLM API 服务响应异常 (HTTP {response.status_code})")
+                logger.warning(f"❌ Qwen API 服务响应异常 (HTTP {response.status_code})")
                 return False
         except Exception as e:
-            logger.warning(f"❌ 无法连接到 GLM API 服务: {e}")
+            logger.warning(f"❌ 无法连接到 Qwen API 服务: {e}")
             return False
     
     def _chunk_text_for_llm(self, text: str, max_length: int = 50000) -> List[str]:
@@ -566,20 +566,20 @@ class LLMScriptDirector:
         return text
 
     def parse_text_to_script(self, text: str, max_length: int = 50000) -> List[Dict]:
-        """阶段一：宏观剧本解析 (GLM-4.7-Flash 超大上下文版)
+        """阶段一：宏观剧本解析 (Qwen-Flash 超大上下文版)
 
-        直接整章传入 GLM-4.7-Flash（200k token 上下文），无需碎步快跑。
+        直接整章传入 Qwen-Flash（1M token 上下文），无需碎步快跑。
         仅在单章极端长（超过 max_length）时才触发切分。
-        max_length 设为 50000 字符（约 75k-100k token），为 200k token
+        max_length 设为 50000 字符（约 75k-100k token），为 1M token
         上下文窗口留足安全余量（含 system prompt + 输出 token 预算）。
 
         Args:
             text: 待处理的章节文本
             max_length: LLM 单次处理的最大字符数上限，默认50000
         """
-        logger.info(f"🚀 启动 GLM-4.7-Flash 剧本解析，当前章节字数: {len(text)}")
+        logger.info(f"🚀 启动 Qwen-Flash 剧本解析，当前章节字数: {len(text)}")
 
-        # 🌟 GLM-4.7-Flash 拥有 200k 超大上下文，整章直出，仅超长章节才切分
+        # 🌟 Qwen-Flash 拥有 1M 超大上下文，整章直出，仅超长章节才切分
         text_chunks = self._chunk_text_for_llm(text, max_length=max_length)
         full_script = []
         
@@ -648,8 +648,8 @@ class LLMScriptDirector:
     
     def generate_chapter_recap(self, prev_chapter_text: str) -> str:
         """
-        🌟 前情摘要引擎 (GLM-4.7-Flash 超大上下文版)
-        利用 GLM-4.7-Flash 的 200k 超大上下文，直接整章传入生成摘要，
+        🌟 前情摘要引擎 (Qwen-Flash 超大上下文版)
+        利用 Qwen-Flash 的 1M 超大上下文，直接整章传入生成摘要，
         无需 Map-Reduce 分块处理。
         """
         # 1. 基础清理
@@ -657,9 +657,9 @@ class LLMScriptDirector:
         if not text:
             return ""
 
-        logger.info(f"🚀 启动 GLM-4.7-Flash 前情摘要生成，上一章字数: {len(text)}")
+        logger.info(f"🚀 启动 Qwen-Flash 前情摘要生成，上一章字数: {len(text)}")
 
-        # 直接生成终极摘要 + 悬念钩子（GLM 200k 上下文足以容纳整章内容）
+        # 直接生成终极摘要 + 悬念钩子（Qwen 1M 上下文足以容纳整章内容）
         reduce_prompt = (
             '你是一位顶级的有声书剧本编辑和悬疑大师。'
             '请根据提供的上一章内容，写一段不超过100字的\u201c前情摘要\u201d。'
@@ -703,7 +703,7 @@ class LLMScriptDirector:
             return ""
     
     def _request_llm(self, text_chunk: str, *, context: Optional[str] = None) -> List[Dict]:
-        """向 GLM API 发送单个文本块请求
+        """向 Qwen API 发送单个文本块请求
 
         Args:
             text_chunk: The raw text to convert into a script.
@@ -800,7 +800,7 @@ class LLMScriptDirector:
         input_len = len(text_chunk) + (len(context) if context else 0)
         logger.info(f"🚀 模型: {self.model_name} | 发起请求，估计上下文长度: {input_len} 字符")
 
-        # 🌟 GLM API 使用 200k 上下文窗口，最大输出 128k token
+        # 🌟 Qwen API 使用 1M 上下文窗口，最大输出 32K token
 
         # 🌟 防幻觉加固：结构化 User Prompt
         user_content = f"【指令：将以下文本转换为平铺的 JSON 数组，严禁最外层使用字典】\n\n"
@@ -820,18 +820,18 @@ class LLMScriptDirector:
             "stream": True,  # 🌟 开启流式输出
             "temperature": 0.1,
             "top_p": 0.1,
-            "max_tokens": 65536,
+            "max_tokens": 32768,
         }
 
         max_retries = 5
         base_wait_time = 10
 
         for attempt in range(max_retries):
-            # 🌟 [防御 1] 强制 RPM 保护：确保请求之间有物理间隔
+            # 🌟 [防御 1] RPM 保护：Qwen-Flash RPM 上限 30000，间隔 2s 即可保证安全
             now = time.time()
             elapsed = now - getattr(self, '_last_call_time', 0)
-            if elapsed < 12:
-                wait_gap = 12 - elapsed + random.uniform(1, 4)
+            if elapsed < 2:
+                wait_gap = 2 - elapsed + random.uniform(0.5, 1.5)
                 logger.info(f"⏳ 正在执行 RPM 频率控制，强制静默 {wait_gap:.1f}s...")
                 time.sleep(wait_gap)
 
@@ -895,11 +895,11 @@ class LLMScriptDirector:
 
                 # 🌟 API 稳定性策略：成功后根据输入大小增加冷却
                 if input_len > 10000:
-                    cooldown = 20
+                    cooldown = 5
                     logger.info(f"⏳ 检测到大上下文请求 ({input_len} 字)，执行速率保护，强制冷却 {cooldown}s...")
                     time.sleep(cooldown)
                 else:
-                    time.sleep(5)
+                    time.sleep(2)
 
                 # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
                 # Only strip real control characters; keep escaped sequences
@@ -962,11 +962,11 @@ class LLMScriptDirector:
 
             except requests.exceptions.HTTPError as e:
                 if response.status_code >= 500:
-                    logger.warning(f"⚠️ GLM 服务器异常 ({response.status_code})，等待 15 秒后重试...")
+                    logger.warning(f"⚠️ Qwen 服务器异常 ({response.status_code})，等待 15 秒后重试...")
                     time.sleep(15)
                     continue
                 else:
-                    raise RuntimeError(f"❌ GLM API 致命请求失败: HTTP {response.status_code} - {response.text}") from e
+                    raise RuntimeError(f"❌ Qwen API 致命请求失败: HTTP {response.status_code} - {response.text}") from e
 
             except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
                 # 🌟 [防御 3] 超时/连接异常：服务器可能过载，长时间冷却
@@ -982,9 +982,9 @@ class LLMScriptDirector:
             except RuntimeError:
                 raise
             except Exception as e:
-                raise RuntimeError(f"❌ GLM API 解析失败: {e}") from e
+                raise RuntimeError(f"❌ Qwen API 解析失败: {e}") from e
 
-        raise RuntimeError("❌ 超过最大重试次数，GLM API 请求彻底失败。请登录智谱开放平台检查您的账户额度是否耗尽。")
+        raise RuntimeError("❌ 超过最大重试次数，Qwen API 请求彻底失败。请检查您的 DASHSCOPE_API_KEY 是否有效以及账户额度是否充足。")
     
     def _validate_script_elements(self, script: List[Dict]) -> List[Dict]:
         """验证并修复脚本元素，确保包含所有必需字段"""

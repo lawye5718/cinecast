@@ -121,7 +121,7 @@ class TestModelParameterAdjustments:
         assert '"max_tokens"' in source
 
     def test_parameters_in_mock_payload(self):
-        """Verify the actual payload sent to GLM API contains correct parameters."""
+        """Verify the actual payload sent to Qwen API contains correct parameters."""
         director = LLMScriptDirector()
         fake_resp = mock.MagicMock()
         fake_resp.status_code = 200
@@ -151,7 +151,7 @@ class TestModelParameterAdjustments:
         payload = captured_payloads[0]
         assert payload["temperature"] == 0.1
         assert payload["top_p"] == 0.1
-        assert payload["max_tokens"] == 65536
+        assert payload["max_tokens"] == 32768
 
 
 # ---------------------------------------------------------------------------

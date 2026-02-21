@@ -193,7 +193,7 @@ class TestCastDBIsolation:
 # ---------------------------------------------------------------------------
 
 class TestDialogueDenseStrategy:
-    """Verify dialogue-dense detection has been removed (GLM-4.7-Flash upgrade)."""
+    """Verify dialogue-dense detection has been removed (Qwen-Flash upgrade)."""
 
     def test_source_no_longer_reduces_max_tokens(self):
         """_request_llm should NOT reduce max_tokens for dialogue-dense text."""
@@ -209,7 +209,7 @@ class TestDialogueDenseStrategy:
         import inspect
         director = LLMScriptDirector()
         source = inspect.getsource(director.parse_text_to_script)
-        # Dialogue density reduction is removed; GLM-4.7-Flash handles full chapters
+        # Dialogue density reduction is removed; Qwen-Flash handles full chapters
         assert "dialogue_markers" not in source
         # max_length parameter still exists for the function signature
         assert "max_length" in source

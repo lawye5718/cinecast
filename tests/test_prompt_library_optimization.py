@@ -269,13 +269,13 @@ class TestJsonOverflowProtection:
     """Verify JSON overflow protection for dialogue-heavy text."""
 
     def test_dialogue_density_protection_exists(self):
-        """GLM-4.7-Flash handles full chapters; dialogue density reduction removed."""
+        """Qwen-Flash handles full chapters; dialogue density reduction removed."""
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_llm)
         assert "max_tokens" in source
-        # GLM-4.7-Flash with 200k context no longer needs dialogue density reduction
+        # Qwen-Flash with 1M context no longer needs dialogue density reduction
         pts_source = inspect.getsource(director.parse_text_to_script)
-        assert "GLM-4.7-Flash" in pts_source or "max_length" in pts_source
+        assert "Qwen-Flash" in pts_source or "max_length" in pts_source
 
     def test_max_tokens_used_in_payload(self):
         """The payload should use the max_tokens variable."""
@@ -285,7 +285,7 @@ class TestJsonOverflowProtection:
         assert '"max_tokens"' in source
 
     def test_overflow_protection_with_mock(self):
-        """Mock a GLM API call with dialogue-heavy text to verify overflow protection."""
+        """Mock a Qwen API call with dialogue-heavy text to verify overflow protection."""
         director = LLMScriptDirector()
         # Create text > 500 chars with many quote marks
         dialogue_text = '"你好吗？"她说。"我很好。"他回答。' * 50  # lots of dialogue markers, > 500 chars
