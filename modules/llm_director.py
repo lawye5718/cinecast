@@ -827,12 +827,12 @@ class LLMScriptDirector:
         base_wait_time = 10
 
         for attempt in range(max_retries):
-            # 🌟 [防御 1] RPM 保护：Qwen-Flash RPM 上限 30000，间隔 2s 即可保证安全
+            # 🌟 [防御 1] RPM 保护：Qwen-Flash RPM 上限 30000，2s 间隔作为保守安全余量
             now = time.time()
             elapsed = now - getattr(self, '_last_call_time', 0)
             if elapsed < 2:
                 wait_gap = 2 - elapsed + random.uniform(0.5, 1.5)
-                logger.info(f"⏳ 正在执行 RPM 频率控制，强制静默 {wait_gap:.1f}s...")
+                logger.info(f"⏳ 正在执行 RPM 频率控制，保守静默 {wait_gap:.1f}s...")
                 time.sleep(wait_gap)
 
             try:
