@@ -579,9 +579,9 @@ class TestNoRegexFallback:
         assert not hasattr(director, '_fallback_regex_parse')
 
     def test_request_llm_raises_on_connection_error(self):
-        """When GLM API is unreachable, _request_llm should raise RuntimeError."""
+        """When Qwen API is unreachable, _request_llm should raise RuntimeError."""
         director = LLMScriptDirector()
-        with pytest.raises(RuntimeError, match="GLM API 解析失败"):
+        with pytest.raises(RuntimeError, match="Qwen API 解析失败"):
             director._request_llm("测试文本")
 
     def test_parse_text_to_script_raises_on_empty(self):
@@ -828,7 +828,7 @@ class TestMapReduceRecapEngine:
         assert result == "短文本摘要结果"
 
     def test_long_text_direct_recap(self):
-        """Long text should go directly to GLM (no Map-Reduce), making 1 API call."""
+        """Long text should go directly to Qwen (no Map-Reduce), making 1 API call."""
         import unittest.mock as mock
 
         director = LLMScriptDirector()
@@ -843,7 +843,7 @@ class TestMapReduceRecapEngine:
 
         with mock.patch("modules.llm_director.requests.post", return_value=fake_resp) as mock_post:
             result = director.generate_chapter_recap(long_text)
-        # GLM-4.7-Flash handles full chapters directly: only 1 API call (no Map-Reduce)
+        # Qwen-Flash handles full chapters directly: only 1 API call (no Map-Reduce)
         assert mock_post.call_count == 1
         assert result == "终极摘要"
 
