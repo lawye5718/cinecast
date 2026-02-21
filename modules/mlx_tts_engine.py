@@ -34,6 +34,9 @@ from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
+# CustomVoice 模型默认 speaker name (当 voice_cfg 未指定时使用)
+DEFAULT_CUSTOM_VOICE = "Ethan"
+
 
 def group_indices_by_voice_type(
     micro_script: List[Dict],
@@ -274,13 +277,15 @@ class MLXRenderEngine:
                     # 传统 Preset 模式 (兼容旧版)
                     generate_kwargs = {
                         "text": render_text,
-                        "ref_audio": voice_cfg["audio"],
-                        "ref_text": voice_cfg["text"],
                     }
-                    # 如果 voice_cfg 包含 speaker 字段 (CustomVoice 内置角色,
-                    # 如 "Male_01", "Female_03" 等 Qwen3-TTS 预设角色 ID)
-                    if "speaker" in voice_cfg:
-                        generate_kwargs["speaker"] = voice_cfg["speaker"]
+                    # CustomVoice 模型必须传递 'voice' 参数 (speaker name)
+                    # 兼容旧版 voice_cfg 中使用 "speaker" 字段的配置
+                    voice_name = voice_cfg.get("voice") or voice_cfg.get("speaker")
+                    if voice_name:
+                        generate_kwargs["voice"] = voice_name
+                    else:
+                        # CustomVoice 模型要求 voice 参数，使用默认值
+                        generate_kwargs["voice"] = DEFAULT_CUSTOM_VOICE
                     results = list(self.model.generate(**generate_kwargs))
             
             audio_array = results[0].audio

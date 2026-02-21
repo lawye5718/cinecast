@@ -210,7 +210,7 @@ class AssetManager:
         if speaker_id:
             profile = {
                 "mode": "preset",
-                "speaker": speaker_id,
+                "voice": speaker_id,
                 "audio": self.voices["narrator"]["audio"],
                 "text": self.voices["narrator"]["text"],
                 "speed": 1.0
