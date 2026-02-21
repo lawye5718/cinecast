@@ -439,10 +439,10 @@ class CineCastProducer:
                     logger.info(f"⚡ {'纯净旁白模式' if pure_mode else '检测到附属文本(序言/版权)'}，启用免LLM规则解析: {chapter_name}")
                     micro_script = director.generate_pure_narrator_script(content, chapter_prefix=chapter_name)
                 else:
-                    # 🌟 Qwen-Flash 整章直出，无需碎步快跑和降级重试
+                    # 🌟 Qwen-Flash 整章直出，设为 10000 既高效又绝对防止 32K 输出溢出
                     micro_script = director.parse_and_micro_chunk(
                         content, chapter_prefix=chapter_name,
-                        max_length=4000  # 🌟 减小分块大小，分散 TPM 压力
+                        max_length=10000  # 🌟 解除 4000 封印，对齐底层引擎的最佳甜点位
                     )
                 
                 # 验证生成的剧本数据结构
