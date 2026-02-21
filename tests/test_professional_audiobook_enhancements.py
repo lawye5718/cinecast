@@ -246,13 +246,13 @@ class TestStoryBoundaryDetection:
 # ---------------------------------------------------------------------------
 
 class TestDebugLogging:
-    def test_request_llm_source_has_input_len_warning(self):
-        """_request_llm should contain input length warning logic."""
+    def test_request_llm_source_has_logging(self):
+        """_request_llm should contain logging for request tracking."""
         import inspect
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_llm)
-        assert "input_len" in source
-        assert "input_len > 10000" in source
+        assert "logger.info" in source
+        assert "原文字数" in source
 
 
 # ---------------------------------------------------------------------------

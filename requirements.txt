@@ -11,6 +11,9 @@ numpy>=1.24.0
 # 网络请求
 requests>=2.31.0
 
+# OpenAI SDK (阿里云百炼兼容模式)
+openai>=1.0.0
+
 # EPUB解析
 ebooklib>=0.18
 beautifulsoup4>=4.12.0

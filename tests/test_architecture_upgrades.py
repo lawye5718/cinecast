@@ -410,24 +410,22 @@ class TestLLMDictFormatTolerance:
     """Tests for _request_llm handling of dict responses from LLM."""
 
     def _make_director_with_mock_response(self, json_content):
-        """Create a director where _request_llm returns a mocked HTTP response."""
+        """Create a director where _request_llm returns a mocked OpenAI streaming response."""
         import unittest.mock as mock
 
         director = LLMScriptDirector()
-        fake_resp = mock.MagicMock()
-        fake_resp.status_code = 200
-        fake_resp.raise_for_status = mock.MagicMock()
         content_str = json.dumps(json_content, ensure_ascii=False)
-        escaped = content_str.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
-        lines = [
-            f'data: {{"choices":[{{"delta":{{"content":"{escaped}"}}}}]}}'.encode('utf-8'),
-            b'data: [DONE]',
-        ]
-        fake_resp.iter_lines = mock.MagicMock(return_value=iter(lines))
 
-        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp), \
-             mock.patch("modules.llm_director.time.sleep"):
-            return director._request_llm("任意文本")
+        mock_chunk = mock.MagicMock()
+        mock_chunk.choices = [mock.MagicMock()]
+        mock_chunk.choices[0].delta = mock.MagicMock()
+        mock_chunk.choices[0].delta.content = content_str
+        mock_chunk.choices[0].delta.reasoning_content = None
+
+        director.client = mock.MagicMock()
+        director.client.chat.completions.create.return_value = iter([mock_chunk])
+
+        return director._request_llm("任意文本")
 
     def test_name_content_dict_converted_to_narration(self):
         """LLM returns {"name": "第一章 风雪", "content": "原文..."} — should become a single narration."""
@@ -515,20 +513,18 @@ class TestLLMDictFormatTolerance:
         import unittest.mock as mock
 
         director = LLMScriptDirector()
-        fake_resp = mock.MagicMock()
-        fake_resp.status_code = 200
-        fake_resp.raise_for_status = mock.MagicMock()
         broken_content = "This is not JSON at all, just random text."
-        escaped = broken_content.replace('\\', '\\\\').replace('"', '\\"')
-        lines = [
-            f'data: {{"choices":[{{"delta":{{"content":"{escaped}"}}}}]}}'.encode('utf-8'),
-            b'data: [DONE]',
-        ]
-        fake_resp.iter_lines = mock.MagicMock(return_value=iter(lines))
 
-        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp), \
-             mock.patch("modules.llm_director.time.sleep"):
-            result = director._request_llm("原始文本内容")
+        mock_chunk = mock.MagicMock()
+        mock_chunk.choices = [mock.MagicMock()]
+        mock_chunk.choices[0].delta = mock.MagicMock()
+        mock_chunk.choices[0].delta.content = broken_content
+        mock_chunk.choices[0].delta.reasoning_content = None
+
+        director.client = mock.MagicMock()
+        director.client.chat.completions.create.return_value = iter([mock_chunk])
+
+        result = director._request_llm("原始文本内容")
         assert isinstance(result, list)
         assert len(result) == 1
         assert result[0]["type"] == "narration"
@@ -580,9 +576,13 @@ class TestNoRegexFallback:
 
     def test_request_llm_raises_on_connection_error(self):
         """When Qwen API is unreachable, _request_llm should raise RuntimeError."""
+        import unittest.mock as mock
         director = LLMScriptDirector()
-        with pytest.raises(RuntimeError, match="Qwen API 解析失败"):
-            director._request_llm("测试文本")
+        director.client = mock.MagicMock()
+        director.client.chat.completions.create.side_effect = Exception("connection refused")
+        with mock.patch("modules.llm_director.time.sleep"):
+            with pytest.raises(RuntimeError, match="超过最大重试次数"):
+                director._request_llm("测试文本")
 
     def test_parse_text_to_script_raises_on_empty(self):
         """parse_text_to_script should raise RuntimeError when result is empty."""
@@ -815,16 +815,16 @@ class TestMapReduceRecapEngine:
         short_text = "A" * 3000
 
         fake_resp = mock.MagicMock()
-        fake_resp.status_code = 200
-        fake_resp.raise_for_status = mock.MagicMock()
-        fake_resp.json.return_value = {
-            "choices": [{"message": {"content": "短文本摘要结果"}}]
-        }
+        fake_resp.choices = [mock.MagicMock()]
+        fake_resp.choices[0].message = mock.MagicMock()
+        fake_resp.choices[0].message.content = "短文本摘要结果"
 
-        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp) as mock_post:
-            result = director.generate_chapter_recap(short_text)
+        director.client = mock.MagicMock()
+        director.client.chat.completions.create.return_value = fake_resp
+
+        result = director.generate_chapter_recap(short_text)
         # Should be called exactly once (reduce only, no map)
-        assert mock_post.call_count == 1
+        assert director.client.chat.completions.create.call_count == 1
         assert result == "短文本摘要结果"
 
     def test_long_text_direct_recap(self):
@@ -835,16 +835,16 @@ class TestMapReduceRecapEngine:
         long_text = "A" * 12000  # Previously triggered Map-Reduce, now sent directly
 
         fake_resp = mock.MagicMock()
-        fake_resp.status_code = 200
-        fake_resp.raise_for_status = mock.MagicMock()
-        fake_resp.json.return_value = {
-            "choices": [{"message": {"content": "终极摘要"}}]
-        }
+        fake_resp.choices = [mock.MagicMock()]
+        fake_resp.choices[0].message = mock.MagicMock()
+        fake_resp.choices[0].message.content = "终极摘要"
 
-        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp) as mock_post:
-            result = director.generate_chapter_recap(long_text)
+        director.client = mock.MagicMock()
+        director.client.chat.completions.create.return_value = fake_resp
+
+        result = director.generate_chapter_recap(long_text)
         # Qwen-Flash handles full chapters directly: only 1 API call (no Map-Reduce)
-        assert mock_post.call_count == 1
+        assert director.client.chat.completions.create.call_count == 1
         assert result == "终极摘要"
 
     def test_recap_prefix_cleaned(self):
@@ -852,15 +852,16 @@ class TestMapReduceRecapEngine:
         import unittest.mock as mock
 
         director = LLMScriptDirector()
-        fake_resp = mock.MagicMock()
-        fake_resp.status_code = 200
-        fake_resp.raise_for_status = mock.MagicMock()
-        fake_resp.json.return_value = {
-            "choices": [{"message": {"content": "前情提要：这是摘要正文"}}]
-        }
 
-        with mock.patch("modules.llm_director.requests.post", return_value=fake_resp):
-            result = director.generate_chapter_recap("测试文本")
+        fake_resp = mock.MagicMock()
+        fake_resp.choices = [mock.MagicMock()]
+        fake_resp.choices[0].message = mock.MagicMock()
+        fake_resp.choices[0].message.content = "前情提要：这是摘要正文"
+
+        director.client = mock.MagicMock()
+        director.client.chat.completions.create.return_value = fake_resp
+
+        result = director.generate_chapter_recap("测试文本")
         assert result == "这是摘要正文"
 
     def test_llm_failure_returns_empty(self):
@@ -868,8 +869,10 @@ class TestMapReduceRecapEngine:
         import unittest.mock as mock
 
         director = LLMScriptDirector()
-        with mock.patch("modules.llm_director.requests.post", side_effect=Exception("LLM down")):
-            result = director.generate_chapter_recap("测试文本")
+        director.client = mock.MagicMock()
+        director.client.chat.completions.create.side_effect = Exception("LLM down")
+
+        result = director.generate_chapter_recap("测试文本")
         assert result == ""
 
 

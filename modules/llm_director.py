@@ -6,14 +6,13 @@ CineCast 大模型剧本预处理器
 """
 
 import json
-import random
 import re
 import logging
-import requests
 import os
 import tempfile
 import time
 from typing import List, Dict, Optional
+from openai import OpenAI
 
 logger = logging.getLogger(__name__)
 
@@ -167,9 +166,15 @@ class LLMScriptDirector:
     def __init__(self, api_key=None, global_cast=None, cast_db_path=None, **kwargs):
         if kwargs:
             logger.warning(f"⚠️ LLMScriptDirector 收到未识别的参数（已忽略）: {list(kwargs.keys())}")
-        self.api_url = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
-        self.model_name = "qwen-flash"
         self.api_key = api_key or os.environ.get("DASHSCOPE_API_KEY", "")
+        self.model_name = "qwen-flash"
+        
+        # 🌟 优化：使用标准 OpenAI SDK 客户端连接阿里云百炼
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        )
+        
         self.max_chars_per_chunk = 60 # 微切片红线（智能配音模式）
         self.pure_narrator_chunk_limit = 100  # 纯净旁白模式切片上限（更长更流畅）
         self.global_cast = global_cast or {}  # 🌟 外脑全局角色设定集
@@ -265,31 +270,23 @@ class LLMScriptDirector:
             logger.warning("⚠️ 未设置 DASHSCOPE_API_KEY，智能配音模式将无法使用 Qwen API。")
             return False
         try:
-            response = requests.post(
-                self.api_url,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {self.api_key}",
-                },
-                json={
-                    "model": self.model_name,
-                    "messages": [{"role": "user", "content": "ping"}],
-                    "max_tokens": 8,
-                },
-                timeout=10,
+            self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[{"role": "user", "content": "ping"}],
+                max_tokens=8,
             )
-            if response.status_code == 200:
-                logger.info("✅ Qwen API 服务连接正常")
-                return True
-            else:
-                logger.warning(f"❌ Qwen API 服务响应异常 (HTTP {response.status_code})")
-                return False
+            logger.info("✅ Qwen API 服务连接正常")
+            return True
         except Exception as e:
             logger.warning(f"❌ 无法连接到 Qwen API 服务: {e}")
             return False
     
-    def _chunk_text_for_llm(self, text: str, max_length: int = 50000) -> List[str]:
-        """🌟 防止章节过长，按段落切分为安全大小给 LLM 处理"""
+    def _chunk_text_for_llm(self, text: str, max_length: int = 10000) -> List[str]:
+        """🌟 防止章节过长，按段落切分为安全大小给 LLM 处理
+        
+        虽然上下文窗口 1M，但输出限制 32K token，为防止 JSON 膨胀截断，
+        建议单块 10000 字符。
+        """
         paragraphs = text.split('\n')
         chunks, current_chunk = [], ""
         for para in paragraphs:
@@ -423,13 +420,13 @@ class LLMScriptDirector:
 
         return micro_script
 
-    def parse_and_micro_chunk(self, text: str, chapter_prefix: str = "chunk", max_length: int = 50000) -> List[Dict]:
+    def parse_and_micro_chunk(self, text: str, chapter_prefix: str = "chunk", max_length: int = 10000) -> List[Dict]:
         """宏观剧本解析 -> 自动展开为微切片剧本
         
         Args:
             text: 待处理的章节文本
             chapter_prefix: 章节名称前缀，用于避免文件名冲突
-            max_length: LLM 单次处理的最大字符数上限，默认50000（整章直出）
+            max_length: LLM 单次处理的最大字符数上限，默认10000
         """
         # 第一步：生成宏观剧本
         macro_script = self.parse_text_to_script(text, max_length=max_length)
@@ -565,17 +562,15 @@ class LLMScriptDirector:
 
         return text
 
-    def parse_text_to_script(self, text: str, max_length: int = 50000) -> List[Dict]:
-        """阶段一：宏观剧本解析 (Qwen-Flash 超大上下文版)
+    def parse_text_to_script(self, text: str, max_length: int = 10000) -> List[Dict]:
+        """阶段一：宏观剧本解析 (Qwen-Flash 高效并发版)
 
-        直接整章传入 Qwen-Flash（1M token 上下文），无需碎步快跑。
-        仅在单章极端长（超过 max_length）时才触发切分。
-        max_length 设为 50000 字符（约 75k-100k token），为 1M token
-        上下文窗口留足安全余量（含 system prompt + 输出 token 预算）。
+        虽然 Qwen-Flash 拥有 1M token 上下文，但输出限制 32K token。
+        为防止 JSON 膨胀截断，将切片长度调整为 10000 字符。
 
         Args:
             text: 待处理的章节文本
-            max_length: LLM 单次处理的最大字符数上限，默认50000
+            max_length: LLM 单次处理的最大字符数上限，默认10000
         """
         logger.info(f"🚀 启动 Qwen-Flash 剧本解析，当前章节字数: {len(text)}")
 
@@ -670,30 +665,19 @@ class LLMScriptDirector:
             '4. 绝对不要输出\u201c前情提要：\u201d这样的标题，直接输出正文。'
         )
 
-        payload = {
-            "model": self.model_name,
-            "messages": [
-                {"role": "system", "content": reduce_prompt},
-                {"role": "user", "content": f"上一章内容：\n{text}"}
-            ],
-            "stream": False,
-            "temperature": 0.5,
-            "top_p": 0.8,
-            "max_tokens": 8192,
-        }
-
         try:
-            response = requests.post(
-                self.api_url,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {self.api_key}",
-                },
-                json=payload,
-                timeout=180,
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": reduce_prompt},
+                    {"role": "user", "content": f"上一章内容：\n{text}"}
+                ],
+                stream=False,
+                temperature=0.5,
+                top_p=0.8,
+                max_tokens=8192,
             )
-            response.raise_for_status()
-            recap_result = response.json().get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+            recap_result = response.choices[0].message.content.strip()
 
             # 清理大模型可能违规加上的前缀
             recap_result = re.sub(r'^(前情提要|前情摘要|回顾|摘要)[:：]\s*', '', recap_result)
@@ -810,105 +794,43 @@ class LLMScriptDirector:
 
         user_content += f"待处理原文：\n{text_chunk}"
 
-        # 🌟 防幻觉加固：调整模型参数，降低随机性，确保有足够输出长度
-        payload = {
-            "model": self.model_name,
-            "messages": [
-                {"role": "system", "content": system_prompt + "\n示例参考：" + one_shot_example},
-                {"role": "user", "content": user_content}
-            ],
-            "stream": True,  # 🌟 开启流式输出
-            "temperature": 0.1,
-            "top_p": 0.1,
-            "max_tokens": 32768,
-        }
+        messages = [
+            {"role": "system", "content": system_prompt + "\n示例参考：" + one_shot_example},
+            {"role": "user", "content": user_content}
+        ]
 
-        max_retries = 5
-        base_wait_time = 10
+        logger.info(f"🚀 发起 Qwen-Flash 解析请求 | 原文字数: {len(text_chunk)}")
+
+        max_retries = 3
 
         for attempt in range(max_retries):
-            # 🌟 [防御 1] RPM 保护：Qwen-Flash RPM 上限 30000，2s 间隔作为保守安全余量
-            now = time.time()
-            elapsed = now - getattr(self, '_last_call_time', 0)
-            if elapsed < 2:
-                wait_gap = 2 - elapsed + random.uniform(0.5, 1.5)
-                logger.info(f"⏳ 正在执行 RPM 频率控制，保守静默 {wait_gap:.1f}s...")
-                time.sleep(wait_gap)
-
             try:
-                logger.info(f"🚀 发起请求 (尝试 {attempt + 1}) | 长度: {len(text_chunk)}")
-                self._last_call_time = time.time()
-                response = requests.post(
-                    self.api_url,
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": f"Bearer {self.api_key}",
-                    },
-                    json=payload,
-                    timeout=300,
-                    stream=True,  # 必须配合 stream=True
+                # 🌟 优化：使用原生的 OpenAI SDK 发起请求
+                completion = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    stream=True,
+                    temperature=0.1,
+                    max_tokens=32000,
                 )
 
-                # 🌟 [防御 2] 显式检查 429，使用激进退避 + 随机抖动
-                if response.status_code == 429:
-                    wait_time = base_wait_time * (2 ** attempt) + random.uniform(5, 15)
-                    logger.warning(
-                        f"⚠️ 触发限制 (429)，等待 {wait_time:.1f}s 后重试 (尝试 {attempt + 1}/{max_retries})..."
-                    )
-                    time.sleep(wait_time)
-                    continue
-
-                response.raise_for_status()
-
-                # 🌟 流式读取与速率控制逻辑
                 full_content = ""
-                start_time = time.time()
-                tokens_count = 0
-                TARGET_RATE = 35  # 目标速率设为 35 tokens/s，预留安全余量
 
-                for line in response.iter_lines():
-                    if not line:
-                        continue
-                    line_str = line.decode('utf-8') if isinstance(line, bytes) else line
-                    if line_str.startswith("data: "):
-                        if line_str == "data: [DONE]":
-                            break
-                        try:
-                            data = json.loads(line_str[6:])
-                            chunk_text = data['choices'][0]['delta'].get('content', '')
-                            if chunk_text:
-                                full_content += chunk_text
-                                tokens_count += 1
-                                # 计算当前速率并控制
-                                elapsed_stream = time.time() - start_time
-                                if elapsed_stream > 0:
-                                    current_rate = tokens_count / elapsed_stream
-                                    if current_rate > TARGET_RATE:
-                                        sleep_time = (tokens_count / TARGET_RATE) - elapsed_stream
-                                        if sleep_time > 0:
-                                            time.sleep(sleep_time)
-                        except (json.JSONDecodeError, KeyError, IndexError) as e:
-                            logger.debug(f"Failed to parse streaming chunk: {e}")
-                            continue
+                # 🌟 优化：优雅的流式读取，没有任何阻碍速度的 sleep
+                for chunk in completion:
+                    delta = chunk.choices[0].delta
+                    if hasattr(delta, "reasoning_content") and delta.reasoning_content:
+                        pass
+
+                    if hasattr(delta, "content") and delta.content:
+                        full_content += delta.content
 
                 content = full_content.strip()
 
-                # 🌟 API 稳定性策略：成功后根据输入大小增加冷却
-                if input_len > 10000:
-                    cooldown = 5
-                    logger.info(f"⏳ 检测到大上下文请求 ({input_len} 字)，执行速率保护，强制冷却 {cooldown}s...")
-                    time.sleep(cooldown)
-                else:
-                    time.sleep(2)
-
-                # 🌟 预处理：清洗实际控制字符（防止 LLM 输出破坏 JSON 解析）
-                # Only strip real control characters; keep escaped sequences
-                # like \n and \t inside JSON strings intact.
+                # 🌟 清理 Markdown 标记
                 content = content.replace('\t', ' ').replace('\r', '')
-
-                # Strip Markdown code-block wrappers the LLM may hallucinate
-                content = re.sub(r'^```(?:json)?\s*', '', content.strip(), flags=re.IGNORECASE)
-                content = re.sub(r'\s*```$', '', content.strip())
+                content = re.sub(r'^```(?:json)?\s*', '', content, flags=re.IGNORECASE)
+                content = re.sub(r'\s*```$', '', content)
 
                 try:
                     script = json.loads(content)
@@ -960,31 +882,13 @@ class LLMScriptDirector:
                     {"type": "narration", "speaker": "narrator", "content": text_chunk}
                 ])
 
-            except requests.exceptions.HTTPError as e:
-                if response.status_code >= 500:
-                    logger.warning(f"⚠️ Qwen 服务器异常 ({response.status_code})，等待 15 秒后重试...")
-                    time.sleep(15)
-                    continue
-                else:
-                    raise RuntimeError(f"❌ Qwen API 致命请求失败: HTTP {response.status_code} - {response.text}") from e
-
-            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-                # 🌟 [防御 3] 超时/连接异常：服务器可能过载，长时间冷却
-                wait_time = 30 + (attempt * 10)
-                logger.warning(f"⚠️ 网络超时/连接异常，休息 {wait_time}s 后重试: {e}")
+            except Exception as e:
+                wait_time = 5 * (2 ** attempt)
+                logger.warning(f"⚠️ 请求异常 ({e})，等待 {wait_time}s 后重试 (尝试 {attempt + 1}/{max_retries})...")
                 time.sleep(wait_time)
                 continue
 
-            except requests.exceptions.RequestException as e:
-                logger.warning(f"⚠️ 网络通信异常: {e}，等待 10 秒后重试...")
-                time.sleep(10)
-                continue
-            except RuntimeError:
-                raise
-            except Exception as e:
-                raise RuntimeError(f"❌ Qwen API 解析失败: {e}") from e
-
-        raise RuntimeError("❌ 超过最大重试次数，Qwen API 请求彻底失败。请检查您的 DASHSCOPE_API_KEY 是否有效以及账户额度是否充足。")
+        raise RuntimeError("❌ 超过最大重试次数，Qwen API 请求彻底失败。")
     
     def _validate_script_elements(self, script: List[Dict]) -> List[Dict]:
         """验证并修复脚本元素，确保包含所有必需字段"""

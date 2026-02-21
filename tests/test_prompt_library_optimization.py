@@ -282,40 +282,38 @@ class TestJsonOverflowProtection:
         director = LLMScriptDirector()
         source = inspect.getsource(director._request_llm)
         # Verify max_tokens is used
-        assert '"max_tokens"' in source
+        assert "max_tokens" in source
 
     def test_overflow_protection_with_mock(self):
         """Mock a Qwen API call with dialogue-heavy text to verify overflow protection."""
         director = LLMScriptDirector()
         # Create text > 500 chars with many quote marks
-        dialogue_text = '"你好吗？"她说。"我很好。"他回答。' * 50  # lots of dialogue markers, > 500 chars
+        dialogue_text = '\u201c你好吗？\u201d她说。\u201c我很好。\u201d他回答。' * 50  # lots of dialogue markers, > 500 chars
 
-        fake_resp = mock.MagicMock()
-        fake_resp.status_code = 200
-        fake_resp.raise_for_status = mock.MagicMock()
         content_str = json.dumps([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "测试内容。"}
         ], ensure_ascii=False)
-        escaped = content_str.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
-        lines = [
-            f'data: {{"choices":[{{"delta":{{"content":"{escaped}"}}}}]}}'.encode('utf-8'),
-            b'data: [DONE]',
-        ]
-        fake_resp.iter_lines = mock.MagicMock(return_value=iter(lines))
 
-        captured_payloads = []
+        mock_chunk = mock.MagicMock()
+        mock_chunk.choices = [mock.MagicMock()]
+        mock_chunk.choices[0].delta = mock.MagicMock()
+        mock_chunk.choices[0].delta.content = content_str
+        mock_chunk.choices[0].delta.reasoning_content = None
 
-        def capture_post(url, json=None, timeout=None, **kwargs):
-            captured_payloads.append(json)
-            return fake_resp
+        captured_kwargs = []
 
-        with mock.patch("modules.llm_director.requests.post", side_effect=capture_post), \
-             mock.patch("modules.llm_director.time.sleep"):
-            director._request_llm(dialogue_text)
+        def capture_create(**kwargs):
+            captured_kwargs.append(kwargs)
+            return iter([mock_chunk])
 
-        assert len(captured_payloads) == 1
-        payload_max_tokens = captured_payloads[0]["max_tokens"]
+        director.client = mock.MagicMock()
+        director.client.chat.completions.create = capture_create
+
+        director._request_llm(dialogue_text)
+
+        assert len(captured_kwargs) == 1
+        payload_max_tokens = captured_kwargs[0]["max_tokens"]
         # max_tokens should be set; dialogue-dense strategy now reduces
         # text chunk size instead of max_tokens to preserve speaker context.
         assert payload_max_tokens > 0

@@ -34,7 +34,6 @@ def director():
 @pytest.fixture(autouse=True)
 def _init_director(director):
     """Initialise director fields without hitting the network."""
-    director.api_url = "http://127.0.0.1:11434/api/chat"
     director.model_name = "qwen14b-pro"
     director.max_chars_per_chunk = 60
     director.pure_narrator_chunk_limit = 100

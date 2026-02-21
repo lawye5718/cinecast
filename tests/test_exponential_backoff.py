@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """
-Tests for exponential backoff retry and throttle logic in LLMScriptDirector.
+Tests for exponential backoff retry logic in LLMScriptDirector.
 
 Covers:
-- Exponential backoff on 429 rate-limit responses
-- Retry on 5xx server errors
-- Fatal error on other 4xx responses (no retry)
-- Retry on network-level exceptions (RequestException)
+- Exponential backoff on exceptions
 - Max retries exhaustion raises RuntimeError
 - Throttle sleep between chunks in parse_text_to_script
+- Chunk default size
 """
 
 import json
@@ -18,7 +16,6 @@ import time
 from unittest.mock import patch, MagicMock
 
 import pytest
-import requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -28,7 +25,6 @@ from modules.llm_director import LLMScriptDirector
 def _make_director():
     """Create a LLMScriptDirector with dummy credentials."""
     d = LLMScriptDirector.__new__(LLMScriptDirector)
-    d.api_url = "https://fake.api/v1/chat/completions"
     d.api_key = "fake-key"
     d.model_name = "qwen-flash"
     d.global_cast = {}
@@ -37,176 +33,85 @@ def _make_director():
     d._prev_characters = []
     d._prev_tail_entries = []
     d.VOICE_ARCHETYPES = {}
+    d.client = MagicMock()
     return d
 
 
-def _ok_response(content_json):
-    """Build a mock 200 streaming response returning *content_json* as the LLM output."""
-    resp = MagicMock(spec=requests.Response)
-    resp.status_code = 200
-    resp.raise_for_status = MagicMock()
+def _ok_streaming_response(content_json):
+    """Build a mock OpenAI streaming response returning *content_json* as the LLM output."""
     content_str = json.dumps(content_json, ensure_ascii=False)
-    # Simulate streaming SSE: one chunk with the full content, then [DONE]
-    lines = [
-        f'data: {{"choices":[{{"delta":{{"content":"{_escape_json_str(content_str)}"}}}}]}}'.encode('utf-8'),
-        b'data: [DONE]',
-    ]
-    resp.iter_lines = MagicMock(return_value=iter(lines))
-    return resp
-
-
-def _escape_json_str(s: str) -> str:
-    """Escape a string for embedding inside a JSON string value."""
-    return s.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
-
-
-def _error_response(status_code, text="error"):
-    """Build a mock HTTP error response."""
-    resp = MagicMock(spec=requests.Response)
-    resp.status_code = status_code
-    resp.text = text
-    resp.raise_for_status.side_effect = requests.exceptions.HTTPError(
-        response=resp
-    )
-    return resp
-
-
-def _incrementing_time():
-    """Return a side_effect callable for time.time that increments by 100 each call."""
-    counter = [0]
-    def _time():
-        counter[0] += 100
-        return float(counter[0])
-    return _time
+    mock_chunk = MagicMock()
+    mock_chunk.choices = [MagicMock()]
+    mock_chunk.choices[0].delta = MagicMock()
+    mock_chunk.choices[0].delta.content = content_str
+    mock_chunk.choices[0].delta.reasoning_content = None
+    return iter([mock_chunk])
 
 
 class TestExponentialBackoff:
     """Tests for the retry / backoff logic inside _request_llm."""
 
-    @patch("modules.llm_director.random.uniform", return_value=20.0)
-    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
-    @patch("modules.llm_director.requests.post")
-    def test_429_retries_with_exponential_backoff(self, mock_post, mock_sleep, mock_time, mock_random):
-        """429 should trigger aggressive exponential backoff with jitter and eventually succeed."""
-        mock_time.side_effect = _incrementing_time()
-        ok = _ok_response([
+    def test_exception_retries_with_exponential_backoff(self, mock_sleep):
+        """Exceptions should trigger exponential backoff and eventually succeed."""
+        ok = _ok_streaming_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": "测试文本。"}
         ])
-        # First two calls: 429, third call: success
-        mock_post.side_effect = [
-            _error_response(429),
-            _error_response(429),
+        director = _make_director()
+        # First two calls: exception, third call: success
+        director.client.chat.completions.create.side_effect = [
+            Exception("rate limit"),
+            Exception("rate limit"),
             ok,
         ]
 
-        director = _make_director()
         result = director._request_llm("测试文本。")
 
         assert len(result) == 1
         assert result[0]["content"] == "测试文本。"
-        # Sleep: two 429 retries + one post-request cooldown
-        # 429 attempt 0: 10 * 2^0 + 20.0 = 30.0
-        # 429 attempt 1: 10 * 2^1 + 20.0 = 40.0
-        # post-success cooldown: 2 (input < 10K)
-        assert mock_sleep.call_count == 3
+        # Sleep called for two retries: 5*2^0=5, 5*2^1=10
+        assert mock_sleep.call_count == 2
         sleep_args = [c[0][0] for c in mock_sleep.call_args_list]
-        assert sleep_args[0] == 30.0
-        assert sleep_args[1] == 40.0
-        assert sleep_args[2] == 2
+        assert sleep_args[0] == 5
+        assert sleep_args[1] == 10
 
-    @patch("modules.llm_director.time.time")
     @patch("modules.llm_director.time.sleep", return_value=None)
-    @patch("modules.llm_director.requests.post")
-    def test_5xx_retries(self, mock_post, mock_sleep, mock_time):
-        """5xx errors should retry with fixed 15s wait."""
-        mock_time.side_effect = _incrementing_time()
-        ok = _ok_response([
-            {"type": "narration", "speaker": "narrator", "gender": "male",
-             "emotion": "平静", "content": "成功。"}
-        ])
-        mock_post.side_effect = [
-            _error_response(502),
-            ok,
-        ]
-
+    def test_max_retries_exhausted(self, mock_sleep):
+        """After max_retries (3) consecutive failures, RuntimeError should be raised."""
         director = _make_director()
-        result = director._request_llm("成功。")
+        director.client.chat.completions.create.side_effect = Exception("always fails")
 
-        assert len(result) == 1
-        # Sleep called twice: once for 5xx retry (15s) + once for post-request cooldown (2s)
-        assert mock_sleep.call_count == 2
-        mock_sleep.assert_any_call(15)
-        mock_sleep.assert_any_call(2)
-
-    @patch("modules.llm_director.requests.post")
-    def test_4xx_fatal_no_retry(self, mock_post):
-        """Non-429/5xx HTTP errors should raise immediately without retry."""
-        mock_post.return_value = _error_response(401, "Unauthorized")
-
-        director = _make_director()
-        with pytest.raises(RuntimeError, match="致命请求失败"):
-            director._request_llm("测试。")
-
-        # Only one call – no retry
-        assert mock_post.call_count == 1
-
-    @patch("modules.llm_director.time.time")
-    @patch("modules.llm_director.time.sleep", return_value=None)
-    @patch("modules.llm_director.requests.post")
-    def test_network_exception_retries(self, mock_post, mock_sleep, mock_time):
-        """Network-level exceptions (Timeout/ConnectionError) should retry with long cooldown."""
-        mock_time.side_effect = _incrementing_time()
-        ok = _ok_response([
-            {"type": "narration", "speaker": "narrator", "gender": "male",
-             "emotion": "平静", "content": "网络恢复。"}
-        ])
-        mock_post.side_effect = [
-            requests.exceptions.ConnectionError("DNS failure"),
-            ok,
-        ]
-
-        director = _make_director()
-        result = director._request_llm("网络恢复。")
-
-        assert len(result) == 1
-        # Sleep called twice: once for network retry (30 + 0*10 = 30s) + once for post-request cooldown (2s)
-        assert mock_sleep.call_count == 2
-        mock_sleep.assert_any_call(30)
-        mock_sleep.assert_any_call(2)
-
-    @patch("modules.llm_director.random.uniform", return_value=20.0)
-    @patch("modules.llm_director.time.time")
-    @patch("modules.llm_director.time.sleep", return_value=None)
-    @patch("modules.llm_director.requests.post")
-    def test_max_retries_exhausted(self, mock_post, mock_sleep, mock_time, mock_random):
-        """After max_retries (5) consecutive 429s, RuntimeError should be raised."""
-        mock_time.side_effect = _incrementing_time()
-        mock_post.side_effect = [_error_response(429)] * 5
-
-        director = _make_director()
         with pytest.raises(RuntimeError, match="超过最大重试次数"):
             director._request_llm("永远失败。")
 
-        assert mock_post.call_count == 5
+        assert director.client.chat.completions.create.call_count == 3
 
-    @patch("modules.llm_director.time.time")
-    @patch("modules.llm_director.time.sleep", return_value=None)
-    @patch("modules.llm_director.requests.post")
-    def test_timeout_is_300_and_stream_enabled(self, mock_post, mock_sleep, mock_time):
-        """requests.post should be called with timeout=300 and stream=True."""
-        mock_time.side_effect = _incrementing_time()
-        mock_post.return_value = _ok_response([
+    def test_successful_request_no_sleep(self):
+        """A successful request should not trigger any sleep."""
+        director = _make_director()
+        director.client.chat.completions.create.return_value = _ok_streaming_response([
             {"type": "narration", "speaker": "narrator", "gender": "male",
-             "emotion": "平静", "content": "超时测试。"}
+             "emotion": "平静", "content": "成功。"}
         ])
 
-        director = _make_director()
-        director._request_llm("超时测试。")
+        with patch("modules.llm_director.time.sleep") as mock_sleep:
+            result = director._request_llm("成功。")
 
-        _, kwargs = mock_post.call_args
-        assert kwargs["timeout"] == 300
+        assert len(result) == 1
+        assert mock_sleep.call_count == 0
+
+    def test_stream_parameter_used(self):
+        """OpenAI SDK should be called with stream=True."""
+        director = _make_director()
+        director.client.chat.completions.create.return_value = _ok_streaming_response([
+            {"type": "narration", "speaker": "narrator", "gender": "male",
+             "emotion": "平静", "content": "流式测试。"}
+        ])
+
+        director._request_llm("流式测试。")
+
+        _, kwargs = director.client.chat.completions.create.call_args
         assert kwargs["stream"] is True
 
 
@@ -215,7 +120,7 @@ class TestChunkThrottle:
 
     @patch("modules.llm_director.time.sleep", return_value=None)
     def test_no_throttle_between_chunks(self, mock_sleep):
-        """parse_text_to_script should NOT sleep between chunks (cloud API rate limiting handled by 429 retry)."""
+        """parse_text_to_script should NOT sleep between chunks (cloud API rate limiting handled by retry)."""
         director = _make_director()
         # Provide a cast_db_path attribute expected by _update_cast_db
         director.cast_db_path = None
@@ -257,90 +162,18 @@ class TestChunkThrottle:
         assert len(sleep_2_calls) == 0
 
 
-class TestPostRequestCooldown:
-    """Tests for the post-request cooldown logic in _request_llm."""
-
-    @patch("modules.llm_director.time.time")
-    @patch("modules.llm_director.time.sleep", return_value=None)
-    @patch("modules.llm_director.requests.post")
-    def test_small_input_gets_short_cooldown(self, mock_post, mock_sleep, mock_time):
-        """Input <= 10000 chars should trigger a 2s cooldown."""
-        mock_time.side_effect = _incrementing_time()
-        mock_post.return_value = _ok_response([
-            {"type": "narration", "speaker": "narrator", "gender": "male",
-             "emotion": "平静", "content": "短文本。"}
-        ])
-
-        director = _make_director()
-        director._request_llm("短文本。")
-
-        mock_sleep.assert_called_once_with(2)
-
-    @patch("modules.llm_director.time.time")
-    @patch("modules.llm_director.time.sleep", return_value=None)
-    @patch("modules.llm_director.requests.post")
-    def test_large_input_gets_long_cooldown(self, mock_post, mock_sleep, mock_time):
-        """Input > 10000 chars should trigger a 5s cooldown."""
-        mock_time.side_effect = _incrementing_time()
-        large_text = "这" * 11000  # > 10000 chars
-        mock_post.return_value = _ok_response([
-            {"type": "narration", "speaker": "narrator", "gender": "male",
-             "emotion": "平静", "content": large_text}
-        ])
-
-        director = _make_director()
-        director._request_llm(large_text)
-
-        mock_sleep.assert_called_once_with(5)
-
-    @patch("modules.llm_director.time.time")
-    @patch("modules.llm_director.time.sleep", return_value=None)
-    @patch("modules.llm_director.requests.post")
-    def test_boundary_input_gets_short_cooldown(self, mock_post, mock_sleep, mock_time):
-        """Input exactly 10000 chars should get the short 2s cooldown."""
-        mock_time.side_effect = _incrementing_time()
-        boundary_text = "这" * 10000  # exactly 10000 chars
-        mock_post.return_value = _ok_response([
-            {"type": "narration", "speaker": "narrator", "gender": "male",
-             "emotion": "平静", "content": boundary_text}
-        ])
-
-        director = _make_director()
-        director._request_llm(boundary_text)
-
-        mock_sleep.assert_called_once_with(2)
-
-    @patch("modules.llm_director.time.time")
-    @patch("modules.llm_director.time.sleep", return_value=None)
-    @patch("modules.llm_director.requests.post")
-    def test_context_included_in_length_calculation(self, mock_post, mock_sleep, mock_time):
-        """Context length should be included in input_len for cooldown threshold."""
-        mock_time.side_effect = _incrementing_time()
-        text = "这" * 4000        # 4000 chars
-        context = "前文" * 3500   # 7000 chars -> total = 11000 > 10000
-        mock_post.return_value = _ok_response([
-            {"type": "narration", "speaker": "narrator", "gender": "male",
-             "emotion": "平静", "content": text}
-        ])
-
-        director = _make_director()
-        director._request_llm(text, context=context)
-
-        mock_sleep.assert_called_once_with(5)
-
-
 class TestChunkDefaultSize:
     """Tests for the updated _chunk_text_for_llm default size."""
 
-    def test_default_max_length_is_50000(self):
-        """_chunk_text_for_llm should have default max_length of 50000."""
+    def test_default_max_length_is_10000(self):
+        """_chunk_text_for_llm should have default max_length of 10000."""
         import inspect
         director = _make_director()
         sig = inspect.signature(director._chunk_text_for_llm)
-        assert sig.parameters["max_length"].default == 50000
+        assert sig.parameters["max_length"].default == 10000
 
     def test_short_text_not_chunked(self):
-        """Text shorter than 50000 chars should be returned as a single chunk."""
+        """Text shorter than 10000 chars should be returned as a single chunk."""
         director = _make_director()
         text = "这是一段测试文本。\n第二段。\n第三段。"
         chunks = director._chunk_text_for_llm(text)

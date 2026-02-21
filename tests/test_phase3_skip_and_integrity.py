@@ -77,37 +77,37 @@ class TestExportVolumeSkipExisting:
 
 
 # ---------------------------------------------------------------------------
-# Fix 2a: LLM chunk size reduced to 800
+# Fix 2a: LLM chunk size set to 10000
 # ---------------------------------------------------------------------------
 
 class TestChunkSizeReduced:
-    """Verify _chunk_text_for_llm default max_length is 800."""
+    """Verify _chunk_text_for_llm default max_length is 10000."""
 
-    def test_default_max_length_800(self):
-        """Source should show default max_length=800."""
+    def test_default_max_length_10000(self):
+        """Source should show default max_length=10000."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "modules", "llm_director.py",
         )
         with open(source_path, "r", encoding="utf-8") as f:
             source = f.read()
-        assert "max_length: int = 800" in source
+        assert "max_length: int = 10000" in source
 
-    def test_chunking_respects_800_limit(self):
-        """Long text should be chunked at ~800 chars, not 1500."""
+    def test_chunking_respects_10000_limit(self):
+        """Long text should be chunked at ~10000 chars."""
         director = LLMScriptDirector.__new__(LLMScriptDirector)
         director.global_cast = {}
         director._prev_characters = []
         director._prev_tail_entries = []
 
-        # Create text with paragraphs that collectively exceed 800 but not 1500
-        para = "这是一段中文测试文本。" * 20  # ~200 chars per paragraph
-        text = "\n".join([para, para, para, para, para])  # ~1000 chars total
+        # Create text with paragraphs that collectively exceed 10000
+        para = "这是一段中文测试文本。" * 200  # ~2000 chars per paragraph
+        text = "\n".join([para] * 8)  # ~16000 chars total
 
         chunks = director._chunk_text_for_llm(text)
         max_para_len = len(para)
         for chunk in chunks:
-            assert len(chunk) <= 800 + max_para_len  # allow one paragraph overshoot
+            assert len(chunk) <= 10000 + max_para_len  # allow one paragraph overshoot
 
 
 # ---------------------------------------------------------------------------
