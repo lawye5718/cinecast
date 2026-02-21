@@ -43,7 +43,14 @@ def _apply_text_cleaning(text: str, max_chars: int = 60) -> str:
     render_text = re.sub(r'[~～]+', '。', render_text)
     render_text = re.sub(r'\s+', ' ', render_text).strip()
     if len(render_text) > max_chars:
-        render_text = render_text[:max_chars] + "。"
+        safe_text = render_text[:max_chars]
+        last_match = None
+        for match in re.finditer(r'[。！？；.,!?;]', safe_text):
+            last_match = match
+        if last_match:
+            render_text = safe_text[:last_match.end()]
+        else:
+            render_text = safe_text + "。"
     if not _CLOSING_PUNCT_RE.search(render_text):
         render_text += "。"
     return render_text
