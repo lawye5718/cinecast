@@ -12,9 +12,18 @@ chunks that share the same voice first, render each cluster in one pass,
 and then reassemble in the original order during Stage 3.
 """
 
+import concurrent.futures
 import gc
 import os
 import re
+import warnings
+
+# 拦截 Tokenizer 正则警告，保持终端日志纯净
+warnings.filterwarnings("ignore", message=".*incorrect regex pattern.*")
+# 尝试向底层环境变量注入修复标志（部分 transformers 版本兼容）
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["FIX_MISTRAL_REGEX"] = "1"
+
 import numpy as np
 import soundfile as sf
 import mlx.core as mx
@@ -65,14 +74,17 @@ class MLXRenderEngine:
         self.config = config or {}
         self.current_mode = None
         self.model = None
+        # 创建专门用于磁盘写入的单线程池，避免阻塞推理
+        self.io_executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        # 严格映射本地模型，避免意外降级
+        self._model_paths = {
+            "preset": self.config.get("model_path_custom", "./models/Qwen3-TTS-12Hz-1.7B-CustomVoice-4bit"),
+            "design": self.config.get("model_path_design", "./models/Qwen3-TTS-12Hz-1.7B-VoiceDesign-4bit"),
+            "clone": self.config.get("model_path_base", "./models/Qwen3-TTS-12Hz-1.7B-Base-4bit"),
+        }
         self._fallback_path = self.config.get(
             "model_path_fallback", model_path
         )
-        self._model_paths = {
-            "clone": self.config.get("model_path_base"),
-            "design": self.config.get("model_path_design"),
-            "preset": self.config.get("model_path_custom"),
-        }
         try:
             # 默认加载：如果配置了 preset 路径则用 preset，否则用传入的 model_path
             default_path = self._model_paths.get("preset") or model_path
@@ -135,8 +147,15 @@ class MLXRenderEngine:
                 except Exception as e:
                     logger.warning(f"⚠️ 预热 [{mode}] 失败: {e}")
 
+    def _async_write_wav(self, path, data, sr):
+        """后台线程写入 WAV 文件，避免阻塞推理"""
+        sf.write(path, data, sr, format='WAV')
+        logger.debug(f"💾 异步写入完成: {path}")
+
     def destroy(self):
         """显式清理 MLX 模型资源，释放显存"""
+        if hasattr(self, 'io_executor') and self.io_executor is not None:
+            self.io_executor.shutdown(wait=True)
         if hasattr(self, 'model') and self.model is not None:
             del self.model
             self.model = None
@@ -144,6 +163,15 @@ class MLXRenderEngine:
         mx.clear_cache()
         logger.info("🧹 MLX 渲染引擎资源已显式释放")
     
+    # 情感指令字典 (映射到 VoiceDesign 的 instruct)
+    EMOTION_PROMPTS = {
+        "愤怒": "Speaking with a harsh, angry, and aggressive tone, slightly louder.",
+        "悲伤": "Speaking slowly with a sad, melancholic, and tearful voice.",
+        "激动": "Speaking fast with high pitch, very excited and energetic.",
+        "恐惧": "Speaking with a trembling, nervous, and scared voice.",
+        "平静": "",  # 保持基准音色
+    }
+
     def render_dry_chunk(self, content: str, voice_cfg: dict, save_path: str, emotion: str = "平静") -> bool:
         """
         只负责将文本变成 WAV 文件，绝不维护状态
@@ -158,11 +186,8 @@ class MLXRenderEngine:
             content: 要渲染的文本内容
             voice_cfg: 音色配置 (支持 preset/clone/design 三种模式)
             save_path: 保存路径
-            emotion: 情感标签（预留参数，当前版本暂不使用）
+            emotion: 情感标签，支持 "平静"/"愤怒"/"悲伤"/"激动"/"恐惧"
         """
-        # TODO: [CineCast 2.0 预留] 当前 Qwen3-TTS 暂不支持细粒度情感参数
-        # 未来接入 CosyVoice/ChatTTS 时，将 emotion 传入模型 prompt
-        # current_prompt = f"<{emotion}> {content}"
         if os.path.exists(save_path):
             logger.debug(f"⏭️  文件已存在，跳过渲染: {save_path}")
             return True # 🌟 断点续传核心：已存在则直接跳过！
@@ -178,9 +203,15 @@ class MLXRenderEngine:
             render_text = re.sub(r'[~～]+', '。', render_text)     # 波浪号
             # 清洗所有内部换行和异常空白
             render_text = re.sub(r'\s+', ' ', render_text).strip()
-            # 强制防卡死长度截断
+            # 智能防卡死截断：绝不生硬腰斩单词，而是寻找最近的标点
             if len(render_text) > self.max_chars:
-                render_text = render_text[:self.max_chars] + "。"
+                safe_text = render_text[:self.max_chars]
+                # 匹配常见中英文断句标点，从后往前找最后一个
+                match = re.search(r'[。！？；.,!?;]', safe_text)
+                if match:
+                    render_text = safe_text[:match.end()]
+                else:
+                    render_text = safe_text + "。"
             
             if not re.search(r'[。！？；.!?;]$', render_text):
                 render_text += "。"
@@ -188,9 +219,17 @@ class MLXRenderEngine:
             # 🌟 绝杀防御：检查清理后是否只剩下标点符号（无实际文字）
             pure_text = re.sub(r'[。，！？；、\u201c\u201d\u2018\u2019（）《》,.!?;:\'\"()\s-]', '', render_text)
             if not pure_text:
-                logger.warning(f"⚠️ 切片无有效文字，跳过大模型渲染，生成 0.5s 空白音频: {save_path}")
-                # 强行生成 0.5 秒的静音，避免后续混音时找不到文件报错
-                audio_data = np.zeros(int(self.sample_rate * 0.5), dtype=np.float32)
+                # 根据残留的标点符号类型，动态决定静音时长
+                original_text = content.strip()
+                if "…" in original_text or "..." in original_text:
+                    duration = 0.6  # 省略号长停顿
+                elif "—" in original_text or "-" in original_text:
+                    duration = 0.3  # 破折号中等停顿
+                else:
+                    duration = 0.15  # 逗号等其他残留短停顿
+
+                logger.warning(f"⚠️ 切片无有效文字，生成 {duration}s 动态空白音频: {save_path}")
+                audio_data = np.zeros(int(self.sample_rate * duration), dtype=np.float32)
                 sf.write(save_path, audio_data, self.sample_rate, format='WAV')
                 return True
 
@@ -198,40 +237,53 @@ class MLXRenderEngine:
             
             # 🌟 根据 voice_cfg 中的 mode 字段选择渲染策略
             mode = voice_cfg.get("mode", "preset")
-            self._load_mode(mode)
 
-            if mode == "clone":
-                # 克隆模式：使用用户上传的参考音频
-                results = list(self.model.generate(
-                    text=render_text,
-                    ref_audio=voice_cfg["ref_audio"],
-                    ref_text=voice_cfg.get("ref_text", "")
-                ))
-            elif mode == "design":
-                # 设计模式：使用文字描述驱动音色
-                results = list(self.model.generate(
-                    text=render_text,
-                    instruct=voice_cfg["instruct"]
-                ))
-            else:
-                # 传统 Preset 模式 (兼容旧版)
+            # 💡 情感朗读：如果带有非平静情感且配置了 instruct，强制劫持到 design 模式
+            if emotion != "平静" and "instruct" in voice_cfg:
+                mode = "design"
+                base_instruct = voice_cfg["instruct"]
+                emotion_modifier = self.EMOTION_PROMPTS.get(emotion, "")
                 generate_kwargs = {
                     "text": render_text,
-                    "ref_audio": voice_cfg["audio"],
-                    "ref_text": voice_cfg["text"],
+                    "instruct": f"{base_instruct}. {emotion_modifier}".strip()
                 }
-                # 如果 voice_cfg 包含 speaker 字段 (CustomVoice 内置角色,
-                # 如 "Male_01", "Female_03" 等 Qwen3-TTS 预设角色 ID)
-                if "speaker" in voice_cfg:
-                    generate_kwargs["speaker"] = voice_cfg["speaker"]
+                self._load_mode(mode)
                 results = list(self.model.generate(**generate_kwargs))
+            else:
+                self._load_mode(mode)
+
+                if mode == "clone":
+                    # 克隆模式：使用用户上传的参考音频
+                    results = list(self.model.generate(
+                        text=render_text,
+                        ref_audio=voice_cfg["ref_audio"],
+                        ref_text=voice_cfg.get("ref_text", "")
+                    ))
+                elif mode == "design":
+                    # 设计模式：使用文字描述驱动音色
+                    results = list(self.model.generate(
+                        text=render_text,
+                        instruct=voice_cfg["instruct"]
+                    ))
+                else:
+                    # 传统 Preset 模式 (兼容旧版)
+                    generate_kwargs = {
+                        "text": render_text,
+                        "ref_audio": voice_cfg["audio"],
+                        "ref_text": voice_cfg["text"],
+                    }
+                    # 如果 voice_cfg 包含 speaker 字段 (CustomVoice 内置角色,
+                    # 如 "Male_01", "Female_03" 等 Qwen3-TTS 预设角色 ID)
+                    if "speaker" in voice_cfg:
+                        generate_kwargs["speaker"] = voice_cfg["speaker"]
+                    results = list(self.model.generate(**generate_kwargs))
             
             audio_array = results[0].audio
             mx.eval(audio_array) # 强制执行
             audio_data = np.array(audio_array)
             
-            # 直接写入磁盘，绝不在内存中积压
-            sf.write(save_path, audio_data, self.sample_rate, format='WAV')
+            # 异步写入磁盘，避免阻塞下一句的推理
+            self.io_executor.submit(self._async_write_wav, save_path, audio_data.copy(), self.sample_rate)
             logger.debug(f"✅ 干音渲染完成: {save_path}")
             return True
             
