@@ -25,19 +25,36 @@ sys.path.insert(0, str(project_root))
 
 from modules.asset_manager import AssetManager
 from modules.llm_director import LLMScriptDirector, atomic_json_write
+from modules.llm_director_qwen_simple import QwenScriptDirector
+from modules.llm_director_qwen import QwenScriptDirector as QwenLegacyDirector
 from modules.mlx_tts_engine import MLXRenderEngine, group_indices_by_voice_type
 from modules.cinematic_packager import CinematicPackager
+from logging.handlers import RotatingFileHandler
 
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('cinecast.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
+# 配置日志 - 使用轮转处理器防止日志文件无限增长
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# 控制台处理器
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(console_formatter)
+
+# 文件轮转处理器 - 每个文件最大 10MB，保留 5 个备份文件
+file_handler = RotatingFileHandler(
+    'cinecast.log',
+    encoding='utf-8',
+    maxBytes=10 * 1024 * 1024,  # 10MB
+    backupCount=5
+)
+file_handler.setLevel(logging.INFO)
+file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(file_formatter)
+
+# 添加处理器
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 # 渲染超时阈值（秒）。
 # 冷启动阈值：引擎刚初始化时，MLX 需要 JIT 编译 Metal 着色器，首次推理耗时较长。
@@ -59,7 +76,21 @@ class CineCastProducer:
         self.cache_dir = os.path.join(self.config["output_dir"], "temp_wav_cache")
         os.makedirs(self.script_dir, exist_ok=True)
         os.makedirs(self.cache_dir, exist_ok=True)
-    
+
+    def _create_tts_engine(self):
+        """创建 MLX TTS 引擎，支持 1.7B Model Pool 配置
+        
+        Returns:
+            MLXRenderEngine: 配置好的 TTS 引擎实例
+        """
+        engine_config = {}
+        for key in ("model_path_base", "model_path_design",
+                    "model_path_custom", "model_path_fallback"):
+            val = self.config.get(key)
+            if val:
+                engine_config[key] = val
+        return MLXRenderEngine(self.config["model_path"], config=engine_config)
+
     def _get_default_config(self):
         """获取默认配置"""
         return {
@@ -613,7 +644,7 @@ class CineCastProducer:
             if val:
                 engine_config[key] = val
 
-        engine = MLXRenderEngine(self.config["model_path"], config=engine_config)
+        engine = self._create_tts_engine()
 
         voice_groups = group_indices_by_voice_type(micro_script)
         for voice_key, indices in voice_groups.items():
@@ -665,7 +696,7 @@ class CineCastProducer:
             if val:
                 engine_config[key] = val
 
-        engine = MLXRenderEngine(self.config["model_path"], config=engine_config)
+        engine = self._create_tts_engine()
 
         # 🔥 预热：在渲染开始前预加载模型，利用 M4 统一内存带宽优势
         warmup_modes = ["preset"]
@@ -740,10 +771,13 @@ class CineCastProducer:
                         del engine
                         gc.collect()
                         logger.info("✨ 内存已清空，正在重新加载 MLX TTS 引擎...")
-                        engine = MLXRenderEngine(self.config["model_path"], config=engine_config)
+                        engine = self._create_tts_engine()
                         logger.info("✅ 引擎热重启完成，恢复生产！")
                         # 重启后的下一个片段又将面临 JIT 编译，重置为冷启动状态
                         is_cold_start = True
+                        # 跳过当前失败片段的进度计数，重新渲染
+                        rendered_chunks -= 1
+                        continue
                     else:
                         # 渲染在阈值内平稳度过，引擎热身完毕，切换为严苛状态
                         is_cold_start = False

@@ -182,12 +182,27 @@ def process_master_json(master_json_str):
 
     try:
         master_data = json.loads(master_json_str)
+        
+        # 验证必需的根节点字段
+        if "characters" not in master_data:
+            return {}, {}, False, "❌ 外脑 JSON 缺少必需的 'characters' 字段"
+        if "recaps" not in master_data:
+            return {}, {}, False, "❌ 外脑 JSON 缺少必需的 'recaps' 字段"
+        
+        # 验证字段类型
+        if not isinstance(master_data["characters"], dict):
+            return {}, {}, False, "❌ 'characters' 必须是字典格式"
+        if not isinstance(master_data["recaps"], dict):
+            return {}, {}, False, "❌ 'recaps' 必须是字典格式"
+        
         # 提取两个核心字典
-        global_cast = master_data.get("characters", {})
-        custom_recaps = master_data.get("recaps", {})
+        global_cast = master_data["characters"]
+        custom_recaps = master_data["recaps"]
         return global_cast, custom_recaps, True, "✅ 外脑数据解析成功"
-    except json.JSONDecodeError:
-        return {}, {}, False, "❌ 外脑 JSON 格式错误，请检查是否有遗漏的逗号或引号。"
+    except json.JSONDecodeError as e:
+        return {}, {}, False, f"❌ 外脑 JSON 格式错误：{str(e)}"
+    except Exception as e:
+        return {}, {}, False, f"❌ 解析失败：{str(e)}"
 
 
 # --- 核心逻辑封装 ---
@@ -257,7 +272,7 @@ theme = gr.themes.Soft(primary_hue="indigo", secondary_hue="blue")
 # 🌟 启动前加载上次存档
 last_state = load_workspace()
 
-with gr.Blocks(theme=theme, title="CineCast Pro 3.0") as ui:
+with gr.Blocks(title="CineCast Pro 3.0") as ui:
     gr.Markdown("# 🎬 CineCast Pro 电影级有声书制片厂")
     gr.Markdown("上传你的小说，定义你的声场，一键压制具备沉浸式体验的电影级有声书。")
 
@@ -379,4 +394,4 @@ with gr.Blocks(theme=theme, title="CineCast Pro 3.0") as ui:
     )
 
 if __name__ == "__main__":
-    ui.launch(inbrowser=True, server_name="127.0.0.1", server_port=7860)
+    ui.launch(inbrowser=True, server_name="127.0.0.1", server_port=7860, theme=theme)

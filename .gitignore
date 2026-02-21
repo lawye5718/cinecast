@@ -1,4 +1,4 @@
-# Python缓存文件
+# Python 缓存文件
 __pycache__/
 *.py[cod]
 *$py.class
@@ -9,10 +9,14 @@ venv/
 env/
 ENV/
 .venv
+cinecast_venv/
+alexandria_venv/
 
 # 测试输出文件
 test_output/
 output/
+debug_test_output/
+fish_test_output/
 
 # 音频文件
 *.mp3
@@ -46,3 +50,31 @@ workspace/
 assets/voices/
 assets/ambient/
 assets/transitions/
+
+# 测试归档目录
+test_archive_*/
+
+# 报告和文档生成文件
+*_report.json
+*_report.md
+*_REPORT.md
+
+# 诊断和调试脚本
+debug_*.py
+diagnostic_*.py
+fix_*.py
+glm_*.py
+*_diagnostics.py
+
+# 监控脚本
+monitor_*.py
+analyze_*.py
+view_*.py
+
+# 临时测试文件
+test_*.py
+phase*_test.py
+simple_*.py
+optimized_*.py
+comprehensive_*.py
+temporary_fix.py
