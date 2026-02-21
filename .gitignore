@@ -71,10 +71,10 @@ monitor_*.py
 analyze_*.py
 view_*.py
 
-# 临时测试文件
-test_*.py
-phase*_test.py
-simple_*.py
-optimized_*.py
-comprehensive_*.py
+# 临时测试文件（仅根目录，不影响 tests/ 目录）
+/test_*.py
+/phase*_test.py
+/simple_*.py
+/optimized_*.py
+/comprehensive_*.py
 temporary_fix.py
