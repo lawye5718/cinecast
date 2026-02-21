@@ -97,7 +97,7 @@ class TestAntiSummarizationPrompt:
 # ---------------------------------------------------------------------------
 
 class TestWordCountAlignmentRetry:
-    """Test that the old retry/degradation logic has been removed (GLM-4.7-Flash upgrade)."""
+    """Test that the old retry/degradation logic has been removed (Qwen-Flash upgrade)."""
 
     def test_no_retry_degradation_logic(self):
         """Verify old retry logic components have been removed from main_producer.py."""
@@ -131,7 +131,7 @@ class TestWordCountAlignmentRetry:
 # ---------------------------------------------------------------------------
 
 class TestGlobalAdaptiveLogic:
-    """Test that global adaptive max_length logic has been removed (GLM-4.7-Flash upgrade)."""
+    """Test that global adaptive max_length logic has been removed (Qwen-Flash upgrade)."""
 
     def test_no_global_adaptive_logic(self):
         """main_producer.py should no longer contain the global adaptive logic."""
@@ -146,7 +146,7 @@ class TestGlobalAdaptiveLogic:
         assert "recent_needed_reduction" not in source
 
     def test_glm_direct_call_with_4000(self):
-        """Uses reduced max_length=4000 for fine-grained TPM-safe chunking."""
+        """Uses reduced max_length=4000 for fine-grained TPM-safe chunking (Qwen-Flash)."""
         source_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "main_producer.py",

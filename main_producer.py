@@ -25,8 +25,6 @@ sys.path.insert(0, str(project_root))
 
 from modules.asset_manager import AssetManager
 from modules.llm_director import LLMScriptDirector, atomic_json_write
-from modules.llm_director_qwen_simple import QwenScriptDirector
-from modules.llm_director_qwen import QwenScriptDirector as QwenLegacyDirector
 from modules.mlx_tts_engine import MLXRenderEngine, group_indices_by_voice_type
 from modules.cinematic_packager import CinematicPackager
 from logging.handlers import RotatingFileHandler
@@ -237,33 +235,33 @@ class CineCastProducer:
         return chapters
     
     def check_api_connectivity(self):
-        """前置检查：验证云端 API 连通性 (取代原有 Ollama 检查)"""
-        api_key = os.environ.get("ZHIPU_API_KEY", "")
+        """前置检查：验证云端 API 连通性 (DashScope Qwen-Flash)"""
+        api_key = os.environ.get("DASHSCOPE_API_KEY", "")
         if not api_key:
-            logger.error("❌ 未设置 ZHIPU_API_KEY 环境变量，无法使用 GLM API。")
+            logger.error("❌ 未设置 DASHSCOPE_API_KEY 环境变量，无法使用 Qwen API。")
             return False
         try:
             response = requests.post(
-                "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+                "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
                 headers={
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {api_key}",
                 },
                 json={
-                    "model": "glm-4.7-flash",
+                    "model": "qwen-flash",
                     "messages": [{"role": "user", "content": "ping"}],
                     "max_tokens": 8,
                 },
                 timeout=10,
             )
             if response.status_code == 200:
-                logger.info("✅ GLM API 服务前置检查通过")
+                logger.info("✅ Qwen API 服务前置检查通过")
                 return True
             else:
-                logger.error(f"❌ GLM API 服务响应异常 (HTTP {response.status_code})")
+                logger.error(f"❌ Qwen API 服务响应异常 (HTTP {response.status_code})")
                 return False
         except Exception as e:
-            logger.error(f"❌ GLM API 服务不可达: {e}")
+            logger.error(f"❌ Qwen API 服务不可达: {e}")
             return False
 
     # ==========================================
@@ -322,20 +320,20 @@ class CineCastProducer:
     # 🎬 阶段一：剧本化与微切片 (Script & Micro-chunking)
     # ==========================================
     def phase_1_generate_scripts(self, input_source, max_chapters=None, is_preview=False):
-        """阶段一：编剧期 (GLM API) - 生成包含chunk_id和停顿时间的微切片剧本
+        """阶段一：编剧期 (Qwen API) - 生成包含chunk_id和停顿时间的微切片剧本
 
         Args:
             input_source: EPUB文件路径或TXT目录路径
             max_chapters: 最多处理的章节数（None表示全部，试听模式传1）
             is_preview: 是否为试听模式（强制注入摘要、截断前10句）
         """
-        logger.info("\n" + "="*50 + "\n🎬 [阶段一] 编剧期 (GLM API)\n" + "="*50)
+        logger.info("\n" + "="*50 + "\n🎬 [阶段一] 编剧期 (Qwen API)\n" + "="*50)
         
         pure_mode = self.config.get("pure_narrator_mode", False)
 
-        # 🌟 前置检查：纯净模式下不需要 GLM API 服务
+        # 🌟 前置检查：纯净模式下不需要 Qwen API 服务
         if not pure_mode and not self.check_api_connectivity():
-            logger.error("❌ GLM API 服务不可用，阶段一中止。请检查 ZHIPU_API_KEY 是否已配置。")
+            logger.error("❌ Qwen API 服务不可用，阶段一中止。请检查 DASHSCOPE_API_KEY 是否已配置。")
             return False
 
         # 支持EPUB和TXT两种输入格式
@@ -434,14 +432,14 @@ class CineCastProducer:
                 prev_chapter_content = content
                 continue
                 
-            logger.info(f"✍️ 正在调用 GLM-4.7 解析剧本: {chapter_name} (字数: {len(content)})")
+            logger.info(f"✍️ 正在调用 Qwen-Flash 解析剧本: {chapter_name} (字数: {len(content)})")
             try:
                 # 🌟 核心双轨制分流：纯净模式 或 非正文内容，直接走纯净旁白模式（免 LLM）
                 if pure_mode or not is_main_text:
                     logger.info(f"⚡ {'纯净旁白模式' if pure_mode else '检测到附属文本(序言/版权)'}，启用免LLM规则解析: {chapter_name}")
                     micro_script = director.generate_pure_narrator_script(content, chapter_prefix=chapter_name)
                 else:
-                    # 🌟 GLM-4.7-Flash 整章直出，无需碎步快跑和降级重试
+                    # 🌟 Qwen-Flash 整章直出，无需碎步快跑和降级重试
                     micro_script = director.parse_and_micro_chunk(
                         content, chapter_prefix=chapter_name,
                         max_length=4000  # 🌟 减小分块大小，分散 TPM 压力
@@ -555,7 +553,7 @@ class CineCastProducer:
                 failed_chapters.append(chapter_name)
                 continue
                 
-        # 阶段一完成（GLM API 无需释放本地内存）
+        # 阶段一完成（Qwen API 无需释放本地内存）
 
         if failed_chapters:
             logger.warning(f"⚠️ 以下章节处理失败: {', '.join(failed_chapters)}")
