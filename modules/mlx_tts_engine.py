@@ -258,29 +258,42 @@ class MLXRenderEngine:
                 self._load_mode(mode)
 
                 if mode == "clone":
-                    # 克隆模式：使用用户上传的参考音频
-                    results = list(self.model.generate(
-                        text=render_text,
-                        ref_audio=voice_cfg["ref_audio"],
-                        ref_text=voice_cfg.get("ref_text", "")
-                    ))
+                    # 克隆模式：通常使用 Base 模型
+                    generate_kwargs = {
+                        "text": render_text,
+                        "ref_audio": voice_cfg.get("ref_audio", voice_cfg.get("audio", "")),
+                        "ref_text": voice_cfg.get("ref_text", voice_cfg.get("text", ""))
+                    }
+                    # 防御性追加：以防错误地用 CustomVoice 模型跑 clone 模式
+                    if "speaker" in voice_cfg or "voice" in voice_cfg:
+                        generate_kwargs["voice"] = voice_cfg.get("voice", voice_cfg.get("speaker", "Ethan"))
+                    
+                    results = list(self.model.generate(**generate_kwargs))
+
                 elif mode == "design":
                     # 设计模式：使用文字描述驱动音色
                     results = list(self.model.generate(
                         text=render_text,
                         instruct=voice_cfg["instruct"]
                     ))
+
                 else:
-                    # 传统 Preset 模式 (兼容旧版)
+                    # 传统 Preset / CustomVoice 模式
                     generate_kwargs = {
                         "text": render_text,
-                        "ref_audio": voice_cfg["audio"],
-                        "ref_text": voice_cfg["text"],
                     }
-                    # 如果 voice_cfg 包含 speaker 字段 (CustomVoice 内置角色,
-                    # 如 "Male_01", "Female_03" 等 Qwen3-TTS 预设角色 ID)
-                    if "speaker" in voice_cfg:
-                        generate_kwargs["speaker"] = voice_cfg["speaker"]
+                    
+                    # 🌟 核心修复：强制提取 voice 参数，兼容旧版 speaker 字段
+                    # 如果都没有提供，则默认使用 'Ethan' 作为安全兜底，防止引擎崩溃
+                    target_voice = voice_cfg.get("voice", voice_cfg.get("speaker", "Ethan"))
+                    generate_kwargs["voice"] = target_voice
+                    
+                    # 如果配置里带了参考音频（基于基底音色做微调克隆）
+                    if "audio" in voice_cfg and voice_cfg["audio"]:
+                        generate_kwargs["ref_audio"] = voice_cfg["audio"]
+                    if "text" in voice_cfg and voice_cfg["text"]:
+                        generate_kwargs["ref_text"] = voice_cfg["text"]
+
                     results = list(self.model.generate(**generate_kwargs))
             
             audio_array = results[0].audio
