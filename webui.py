@@ -20,6 +20,11 @@ QWEN_PRESET_VOICES = [
     "Aiden", "Dylan", "Ono_anna", "Ryan", "Sohee", "Uncle_fu", "Vivian",
 ]
 
+# 🌟 弃用名单：eric 和 serena 默认不使用，除非用户主动选择（且仅当次有效）
+DEPRECATED_VOICES = {"eric", "serena"}
+# 优先分配的默认音色顺序（排除 eric/serena）
+DEFAULT_VOICE_ORDER = ["aiden", "dylan", "ryan", "uncle_fu", "ono_anna", "sohee", "vivian"]
+
 
 # --- 新增：大模型连接测试 ---
 def test_llm_connection(model_name, base_url, api_key):
@@ -44,7 +49,8 @@ def test_llm_connection(model_name, base_url, api_key):
         )
 
         if response.status_code == 200:
-            return f"✅ 连接成功！已成功握手 {model_name}。"
+            save_llm_config(model_name, base_url, api_key)
+            return f"✅ 连接成功！已成功握手 {model_name}。配置已保存到本地。"
         else:
             return (
                 f"❌ 测试失败 (HTTP {response.status_code}): {response.text}\n"
@@ -59,6 +65,28 @@ def test_llm_connection(model_name, base_url, api_key):
 # --- 🌟 新增：工作区状态持久化 ---
 WORKSPACE_FILE = "./.cinecast_workspace.json"
 ROLE_VOICE_FILE = "./.cinecast_role_voices.json"
+LLM_CONFIG_FILE = "./.cinecast_llm_config.json"
+
+
+def load_llm_config():
+    """读取本地保存的大模型 API 配置"""
+    if os.path.exists(LLM_CONFIG_FILE):
+        try:
+            with open(LLM_CONFIG_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"model_name": "qwen-plus", "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1", "api_key": ""}
+
+
+def save_llm_config(model_name, base_url, api_key):
+    """将大模型 API 配置保存到本地文件"""
+    config = {"model_name": model_name, "base_url": base_url, "api_key": api_key}
+    try:
+        with open(LLM_CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"⚠️ 大模型配置保存失败: {e}")
 
 
 def load_role_voices():
@@ -69,12 +97,20 @@ def load_role_voices():
                 return json.load(f)
         except Exception:
             pass
-    return {"narrator": {"mode": "preset", "voice": "eric"}}
+    # 🌟 默认使用 aiden 而非 eric（eric/serena 已弃用）
+    return {"narrator": {"mode": "preset", "voice": "aiden"}}
 
 
 def save_role_voice(role, voice_cfg):
-    """保存用户为特定身份锁定的音色"""
+    """保存用户为特定身份锁定的音色。
+
+    eric/serena 为弃用音色，仅允许当次使用，不写入持久化配置。
+    """
     if role not in ["m1", "f1", "m2", "f2", "narrator"]:
+        return
+    # 🌟 eric/serena 单次使用，不持久化
+    voice_id = voice_cfg.get("voice", "")
+    if isinstance(voice_id, str) and voice_id.lower() in DEPRECATED_VOICES:
         return
     voices = load_role_voices()
     voices[role] = voice_cfg
@@ -213,6 +249,60 @@ BRAIN_PROMPT_TEMPLATE = """\
 }"""
 
 
+# --- 🌟 新增：极速试听 首章前10句提取 ---
+def extract_preview_sentences(book_file, num_sentences=10):
+    """从小说文件中提取首章前N句，用于极速试听文本展示。
+
+    支持 EPUB 和 TXT 格式。返回提取的句子文本（一行一句）。
+
+    Args:
+        book_file: 文件路径或带有 .name 属性的 Gradio 文件对象。
+        num_sentences: 提取的句子数，默认10。
+
+    Returns:
+        str: 提取的句子文本（每行一句），失败时返回错误提示。
+    """
+    import re as _re
+
+    if book_file is None:
+        return "❌ 请先上传小说文件。"
+
+    file_path = book_file.name if hasattr(book_file, "name") else book_file
+    if not os.path.exists(file_path):
+        return "❌ 文件不存在。"
+
+    text = ""
+    try:
+        if file_path.lower().endswith(".epub"):
+            import ebooklib
+            from ebooklib import epub
+            from bs4 import BeautifulSoup
+
+            book = epub.read_epub(file_path)
+            for item in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
+                soup = BeautifulSoup(item.get_body_content(), "html.parser")
+                chapter_text = soup.get_text(separator="\n").strip()
+                if len(chapter_text) > 100:
+                    text = chapter_text
+                    break
+        elif file_path.lower().endswith((".txt", ".md")):
+            with open(file_path, "r", encoding="utf-8") as f:
+                text = f.read()
+        else:
+            return "❌ 不支持的文件格式。"
+    except Exception as e:
+        return f"❌ 文件读取失败：{e}"
+
+    if not text.strip():
+        return "❌ 未能从文件中提取有效文本。"
+
+    # 按中英文标点分句
+    sentences = _re.split(r'(?<=[。！？!?\n])', text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+    selected = sentences[:num_sentences]
+    return "\n".join(selected)
+
+
 # --- 辅助函数：保存用户上传的资产 ---
 def save_uploaded_asset(file_obj, target_filename, folder):
     """将用户上传的音频文件复制到 assets 目录的指定子文件夹
@@ -299,13 +389,21 @@ def parse_json_to_cast_state(json_str):
 
     cast_state = {}
     role_voices = load_role_voices()
+    # 🌟 用于未在配置中找到的角色，按顺序分配非弃用音色
+    voice_idx = 0
 
     for char_name, char_info in characters.items():
         if not isinstance(char_info, dict):
             continue
 
         role = char_info.get("role", "extra")
-        default_voice = role_voices.get(role, {"mode": "preset", "voice": "eric"})
+        if role in role_voices:
+            default_voice = role_voices[role]
+        else:
+            # 未配置的角色从 DEFAULT_VOICE_ORDER 中依次分配
+            assigned_voice = DEFAULT_VOICE_ORDER[voice_idx % len(DEFAULT_VOICE_ORDER)]
+            voice_idx += 1
+            default_voice = {"mode": "preset", "voice": assigned_voice}
 
         cast_state[char_name] = {
             "role": role,
@@ -329,10 +427,10 @@ def build_voice_cfg_from_ui(mode, preset_voice, clone_file, design_text):
     Returns:
         dict: 引擎可用的 voice_cfg
     """
-    voice_cfg = {"mode": "preset", "voice": "eric"}
+    voice_cfg = {"mode": "preset", "voice": "aiden"}
 
     if mode == "预设基底":
-        voice_id = preset_voice.split(" ")[0].lower() if preset_voice else "eric"
+        voice_id = preset_voice.split(" ")[0].lower() if preset_voice else "aiden"
         voice_cfg = {"mode": "preset", "voice": voice_id}
     elif mode == "声音克隆" and clone_file is not None:
         ref_path = clone_file if isinstance(clone_file, str) else getattr(clone_file, "name", "")
@@ -434,7 +532,7 @@ def run_cinecast(epub_file, mode_choice,
                  master_json_str, character_voice_files,
                  preset_voice_selection,
                  narrator_file, ambient_file, chime_file,
-                 is_preview=False, cast_state=None):
+                 is_preview=False, cast_state=None, preview_text=None):
     """统一处理入口：试听 / 全本压制"""
     if epub_file is None:
         return None, "❌ 请先上传小说文件"
@@ -457,7 +555,7 @@ def run_cinecast(epub_file, mode_choice,
             save_uploaded_asset(file_obj, None, "voices")
 
     # 3. 提取用户选择的基底音色 ID
-    base_voice_id = preset_voice_selection.split(" ")[0].lower() if preset_voice_selection and isinstance(preset_voice_selection, str) else "eric"
+    base_voice_id = preset_voice_selection.split(" ")[0].lower() if preset_voice_selection and isinstance(preset_voice_selection, str) else "aiden"
 
     # 如果外脑 JSON 有旁白角色但未配音色，强制指定基底音色
     if global_cast and isinstance(global_cast.get("旁白"), dict):
@@ -489,7 +587,7 @@ def run_cinecast(epub_file, mode_choice,
     try:
         producer = CineCastProducer(config=config)
         if is_preview:
-            mp3 = producer.run_preview_mode(epub_file.name)
+            mp3 = producer.run_preview_mode(epub_file.name, preview_text=preview_text)
             return mp3, "✅ 试听生成成功！(已应用全局外脑设定)"
         else:
             if producer.phase_1_generate_scripts(epub_file.name):
@@ -508,6 +606,7 @@ theme = gr.themes.Soft(primary_hue="indigo", secondary_hue="blue")
 
 # 🌟 启动前加载上次存档
 last_state = load_workspace()
+saved_llm = load_llm_config()
 
 with gr.Blocks(title="CineCast Pro 3.0") as ui:
     gr.Markdown("# 🎬 CineCast Pro 电影级有声书制片厂")
@@ -543,9 +642,9 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                 with gr.Group():
                     gr.Markdown("#### 🔌 Custom LLM 在线剧本分析")
                     with gr.Row():
-                        llm_model = gr.Textbox(label="模型名称 (如 qwen3.5-plus)", value="qwen-plus", scale=1)
-                        llm_baseurl = gr.Textbox(label="Base URL (包含 /v1)", value="https://dashscope.aliyuncs.com/compatible-mode/v1", scale=2)
-                        llm_apikey = gr.Textbox(label="API Key", type="password", placeholder="sk-...", scale=2)
+                        llm_model = gr.Textbox(label="模型名称 (如 qwen3.5-plus)", value=saved_llm.get("model_name", "qwen-plus"), scale=1)
+                        llm_baseurl = gr.Textbox(label="Base URL (包含 /v1)", value=saved_llm.get("base_url", "https://dashscope.aliyuncs.com/compatible-mode/v1"), scale=2)
+                        llm_apikey = gr.Textbox(label="API Key", type="password", value=saved_llm.get("api_key", ""), placeholder="sk-...", scale=2)
 
                     btn_test_llm = gr.Button("🔄 测试大模型连接", variant="secondary")
                     llm_status = gr.Textbox(label="测试结果", interactive=False, lines=1)
@@ -631,7 +730,7 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
 
                                     preset_dropdown = gr.Dropdown(
                                         choices=QWEN_PRESET_VOICES,
-                                        value="Eric (默认男声)",
+                                        value="Aiden",
                                         label="选择无口音预设",
                                         interactive=not locked,
                                     )
@@ -710,12 +809,29 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                     preset_voice_dropdown = gr.Dropdown(
                         label="默认旁白基底音色 (Qwen3-TTS Preset)",
                         choices=QWEN_PRESET_VOICES,
-                        value="Eric (默认男声)",
+                        value="Aiden",
                     )
                     narrator_audio = gr.Audio(label="或上传旁白克隆音 (Narrator)", type="filepath")
                 with gr.Row():
                     ambient_audio = gr.Audio(label="环境音 (Ambient)", type="filepath")
                     chime_audio = gr.Audio(label="转场音 (Chime)", type="filepath")
+
+            # 🌟 极速试听：首章前10句预览与编辑
+            with gr.Accordion("🎧 极速试听 (首章前10句预览)", open=True):
+                gr.Markdown("点击「提取」自动获取首章前10句，可自由编辑后再生成试听音频。")
+                with gr.Row():
+                    btn_extract_preview = gr.Button("📖 提取首章前10句", variant="secondary")
+                preview_text = gr.Textbox(
+                    label="试听文本 (可自由编辑)",
+                    lines=8,
+                    placeholder="点击上方「提取」按钮或手动输入试听文本...",
+                )
+
+                btn_extract_preview.click(
+                    fn=extract_preview_sentences,
+                    inputs=[book_file],
+                    outputs=[preview_text],
+                )
 
             with gr.Row():
                 btn_preview = gr.Button(
@@ -770,8 +886,8 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
     ]
 
     btn_preview.click(
-        fn=lambda *args: run_cinecast(*args[:-1], is_preview=True, cast_state=args[-1]),
-        inputs=inputs_list + [cast_state],
+        fn=lambda *args: run_cinecast(*args[:-2], is_preview=True, cast_state=args[-2], preview_text=args[-1]),
+        inputs=inputs_list + [cast_state, preview_text],
         outputs=[audio_player, status_box],
     )
 
