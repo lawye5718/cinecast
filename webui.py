@@ -254,9 +254,13 @@ def process_master_json(master_json_str):
 def parse_json_to_cast_state(json_str):
     """解析 Master JSON，提取角色列表并初始化 cast_state。
 
+    Args:
+        json_str: Master JSON 字符串，需包含 "characters" 根节点。
+
     Returns:
         dict: 角色状态字典，格式为
               {"角色名": {"gender": ..., "emotion": ..., "locked": False, "voice_cfg": {...}}, ...}
+              解析失败时返回空字典。
     """
     try:
         data = json.loads(json_str)
@@ -311,6 +315,17 @@ def test_single_voice(char_name, mode, preset_voice, clone_file, design_text, te
 
     组装 voice_cfg 并调用底层 MLXRenderEngine.render_dry_chunk，
     绕过复杂的剧本切片逻辑，仅返回一个 WAV 文件路径。
+
+    Args:
+        char_name: 角色名称（用于日志，不影响音色选择）。
+        mode: 音色模式，"预设基底" | "声音克隆" | "文本设计"。
+        preset_voice: 预设音色下拉值（如 "Eric (默认男声)"）。
+        clone_file: 上传的克隆参考音频路径或文件对象。
+        design_text: 音色设计提示词。
+        test_text: 试听文本内容。
+
+    Returns:
+        str or None: 生成的 WAV 文件路径，失败时返回 None。
     """
     voice_cfg = build_voice_cfg_from_ui(mode, preset_voice, clone_file, design_text)
 
@@ -336,8 +351,16 @@ def test_single_voice(char_name, mode, preset_voice, clone_file, design_text, te
 def update_cast_voice_cfg(cast_state, char_name, mode, preset_voice, clone_file, design_text):
     """锁定角色音色：将用户确认的配置写入 cast_state 并标记为 locked。
 
+    Args:
+        cast_state: 全局角色状态字典。
+        char_name: 要锁定的角色名称。
+        mode: 音色模式，"预设基底" | "声音克隆" | "文本设计"。
+        preset_voice: 预设音色下拉值。
+        clone_file: 克隆参考音频路径或文件对象。
+        design_text: 音色设计提示词。
+
     Returns:
-        更新后的 cast_state（Gradio State 需要返回新值）。
+        dict: 更新后的 cast_state（Gradio State 需要返回新值）。
     """
     if not cast_state or char_name not in cast_state:
         return cast_state
@@ -352,6 +375,13 @@ def inject_cast_state_into_global_cast(global_cast, cast_state):
     """将用户逐个试听并锁定的 voice_cfg 注入 global_cast，供全本压制使用。
 
     仅覆盖已锁定的角色配置。
+
+    Args:
+        global_cast: 从 Master JSON 解析出的角色字典。
+        cast_state: 用户在选角控制台中维护的角色状态字典。
+
+    Returns:
+        dict: 注入了已锁定角色音色配置的 global_cast。
     """
     if not cast_state:
         return global_cast
@@ -624,10 +654,10 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                                     )
 
                                     # 锁定逻辑：更新 cast_state 并让按钮置灰
-                                    def _lock_voice(state, _name=char_name, *args):
+                                    def _lock_voice(state, locked_char=char_name, *args):
                                         mode_val, preset_val, clone_val, design_val = args
                                         state = update_cast_voice_cfg(
-                                            state, _name, mode_val, preset_val, clone_val, design_val
+                                            state, locked_char, mode_val, preset_val, clone_val, design_val
                                         )
                                         return state, gr.update(value="🔒 已锁定", interactive=False)
 
