@@ -110,7 +110,7 @@ class CineCastProducer:
             "global_cast": {},  # 🌟 外脑全局角色设定集（Character Bible）
             "custom_recaps": {},  # 🌟 外脑前情提要字典 {Chapter_NNN: recap_text}
             "enable_auto_recap": True,  # 🌟 是否启用本地LLM自动生成摘要
-            "default_narrator_voice": "eric",  # 🌟 默认旁白基底音色 (Qwen3-TTS Preset)
+            "default_narrator_voice": "aiden",  # 🌟 默认旁白基底音色 (Qwen3-TTS Preset)
         }
     
     def _initialize_components(self):
@@ -567,8 +567,11 @@ class CineCastProducer:
     # ==========================================
     # 🎧 试听模式：极速通道，只处理前 10 句话
     # ==========================================
-    def run_preview_mode(self, input_source: str) -> str:
+    def run_preview_mode(self, input_source: str, preview_text: str = None) -> str:
         """🌟 专属的试听模式：极速通道，测试外脑连通性，只处理前 10 句话
+
+        当 preview_text 非空时，跳过阶段一（LLM 切片），直接使用用户在网页
+        上编辑的试听文本构建微切片剧本。
 
         流程：先完成第一阶段微切片，再从第一章剧本中截取前 10 句，
         写入独立的临时剧本文件（不覆盖原始剧本），直接渲染并压制。
@@ -595,20 +598,40 @@ class CineCastProducer:
         preview_script_path = os.path.join(self.script_dir, "_preview_temp_micro.json")
 
         try:
-            # ── 第一阶段：微切片（仅处理第一章，传入 is_preview 标识）──
-            self.phase_1_generate_scripts(input_source, is_preview=True)
+            # 🌟 如果用户提供了编辑后的试听文本，直接构建微切片，跳过 LLM
+            if preview_text and preview_text.strip():
+                sentences = re.split(r'(?<=[。！？!?])', preview_text)
+                expanded = []
+                for s in sentences:
+                    expanded.extend(s.split('\n'))
+                sentences = [s.strip() for s in expanded if s.strip()]
+                preview_script = []
+                for i, sent in enumerate(sentences[:10]):
+                    preview_script.append({
+                        "chunk_id": f"preview_{i:03d}",
+                        "type": "narration",
+                        "speaker": "narrator",
+                        "gender": "unknown",
+                        "emotion": "平静",
+                        "content": sent,
+                        "pause_ms": 300,
+                    })
+                logger.info(f"🎧 使用用户编辑的试听文本（{len(preview_script)} 句）")
+            else:
+                # ── 第一阶段：微切片（仅处理第一章，传入 is_preview 标识）──
+                self.phase_1_generate_scripts(input_source, is_preview=True)
 
-            # 找到第一个生成的剧本
-            script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])
-            if not script_files:
-                raise Exception(f"未找到剧本，请检查阶段一是否成功 (script_dir={self.script_dir})")
+                # 找到第一个生成的剧本
+                script_files = sorted([f for f in os.listdir(self.script_dir) if f.endswith('_micro.json')])
+                if not script_files:
+                    raise Exception(f"未找到剧本，请检查阶段一是否成功 (script_dir={self.script_dir})")
 
-            first_script_path = os.path.join(self.script_dir, script_files[0])
-            with open(first_script_path, 'r', encoding='utf-8') as f:
-                micro_script = json.load(f)
+                first_script_path = os.path.join(self.script_dir, script_files[0])
+                with open(first_script_path, 'r', encoding='utf-8') as f:
+                    micro_script = json.load(f)
 
-            # 🌟 核心截断：只取前 10 句！
-            preview_script = micro_script[:10]
+                # 🌟 核心截断：只取前 10 句！
+                preview_script = micro_script[:10]
 
             # 🌟 写入独立的临时预览剧本，不覆盖原始剧本（保护全本压制的断点续传）
             with open(preview_script_path, 'w', encoding='utf-8') as f:
