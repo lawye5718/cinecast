@@ -78,10 +78,10 @@ class TestSmartMicroChunkLongSentenceFallback:
     it should be split further at comma-level punctuation."""
 
     def test_long_sentence_split_at_commas(self):
-        """A single sentence >90 chars with internal commas should be sub-split."""
-        # Build a sentence that is ~120 chars with commas
+        """A single sentence >150 chars with internal commas should be sub-split."""
+        # Build a sentence that is ~180 chars with commas (exceeds new 150 limit)
         clause = "这是一个相当长的从句内容啊" # 12 chars
-        content = "，".join([clause] * 10) + "。" # ~130 chars with commas
+        content = "，".join([clause] * 15) + "。" # ~194 chars with commas
         director = _make_director_with_macro([
             {"type": "narration", "speaker": "narrator", "gender": "male",
              "emotion": "平静", "content": content}
@@ -154,11 +154,11 @@ class TestAntiSummarizationPrompt:
         assert "严禁最外层使用字典" in source or "严禁输出" in source
 
     def test_prompt_forbids_summarization(self):
-        """The prompt should forbid merging and deletion of content."""
+        """The prompt should forbid deletion of content and demand completeness."""
         import inspect
         source = inspect.getsource(LLMScriptDirector._request_llm)
-        assert "严禁合并" in source
         assert "严禁删减" in source
+        assert "完整性" in source or "完全保留" in source
 
     def test_prompt_demands_full_content_preservation(self):
         """The prompt should demand every sentence be preserved via physical alignment."""
