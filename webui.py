@@ -9,8 +9,51 @@ CineCast Web UI
 import os
 import json
 import shutil
+import requests
 import gradio as gr
 from main_producer import CineCastProducer
+
+# Qwen3-TTS 官方支持的预设音色列表
+QWEN_PRESET_VOICES = [
+    "Eric (默认男声)", "Serena (默认女声)",
+    "Aiden", "Dylan", "Ono_anna", "Ryan", "Sohee", "Uncle_fu", "Vivian",
+]
+
+
+# --- 新增：大模型连接测试 ---
+def test_llm_connection(model_name, base_url, api_key):
+    """测试兼容 OpenAI API 格式的大模型连接"""
+    if not all([model_name, base_url, api_key]):
+        return "❌ 请完整填写大模型名称、Base URL 和 API Key！"
+
+    try:
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": model_name,
+            "messages": [{"role": "user", "content": "测试连接，请只回复1个字"}],
+            "max_tokens": 10,
+        }
+        api_endpoint = f"{base_url.rstrip('/')}/chat/completions"
+
+        response = requests.post(
+            api_endpoint, json=payload, headers=headers, timeout=10
+        )
+
+        if response.status_code == 200:
+            return f"✅ 连接成功！已成功握手 {model_name}。"
+        else:
+            return (
+                f"❌ 测试失败 (HTTP {response.status_code}): {response.text}\n"
+                "请检查各项参数。"
+            )
+    except Exception as e:
+        return (
+            f"❌ 请求异常：{str(e)}\n"
+            "请检查网络和 Base URL 格式（例如需包含 /v1）。"
+        )
 
 # --- 🌟 新增：工作区状态持久化 ---
 WORKSPACE_FILE = "./.cinecast_workspace.json"
@@ -208,6 +251,7 @@ def process_master_json(master_json_str):
 # --- 核心逻辑封装 ---
 def run_cinecast(epub_file, mode_choice,
                  master_json_str, character_voice_files,
+                 preset_voice_selection,
                  narrator_file, ambient_file, chime_file,
                  is_preview=False):
     """统一处理入口：试听 / 全本压制"""
@@ -231,7 +275,14 @@ def run_cinecast(epub_file, mode_choice,
         for file_obj in character_voice_files:
             save_uploaded_asset(file_obj, None, "voices")
 
-    # 3. 组装配置，将拆解后的数据分别注入
+    # 3. 提取用户选择的基底音色 ID
+    base_voice_id = preset_voice_selection.split(" ")[0].lower() if preset_voice_selection else "eric"
+
+    # 如果外脑 JSON 有旁白角色但未配音色，强制指定基底音色
+    if global_cast and "旁白" in global_cast:
+        global_cast["旁白"]["voice"] = base_voice_id
+
+    # 4. 组装配置，将拆解后的数据分别注入
     is_pure = "纯净" in mode_choice
     config = {
         "assets_dir": "./assets",
@@ -247,6 +298,7 @@ def run_cinecast(epub_file, mode_choice,
         "enable_auto_recap": False,        # 默认关闭本地摘要，彻底依赖外脑
         "enable_recap": bool(custom_recaps),  # 有摘要数据时自动启用
         "user_recaps": None,               # 兼容旧版配置
+        "default_narrator_voice": base_voice_id,  # 🌟 注入底层 TTS 引擎
     }
 
     try:
@@ -300,12 +352,29 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
             # 🌟 大一统外脑控制台（根据上次保存的模式动态设置可见性）
             init_brain_visible = "智能配音" in last_state.get("mode", "")
             with gr.Accordion("🧠 第二步：云端外脑控制台 (Brain Node)", open=True, visible=init_brain_visible) as brain_panel:
-                gr.Markdown("将全书扔给外部大模型（如 Kimi / Claude），一次性生成**全书选角设定**与**各章前情提要**，粘贴至下方即可实现全局接管。")
+                gr.Markdown("您可以粘贴 Master JSON，**或者**直接配置大模型 API 让系统自动呼叫。")
+
+                # --- 新增：大模型直连配置区 ---
+                with gr.Group():
+                    gr.Markdown("#### 🔌 Custom LLM 在线剧本分析")
+                    with gr.Row():
+                        llm_model = gr.Textbox(label="模型名称 (如 qwen3.5-plus)", value="qwen-plus", scale=1)
+                        llm_baseurl = gr.Textbox(label="Base URL (包含 /v1)", value="https://dashscope.aliyuncs.com/compatible-mode/v1", scale=2)
+                        llm_apikey = gr.Textbox(label="API Key", type="password", placeholder="sk-...", scale=2)
+
+                    btn_test_llm = gr.Button("🔄 测试大模型连接", variant="secondary")
+                    llm_status = gr.Textbox(label="测试结果", interactive=False, lines=1)
+
+                    btn_test_llm.click(
+                        fn=test_llm_connection,
+                        inputs=[llm_model, llm_baseurl, llm_apikey],
+                        outputs=[llm_status],
+                    )
 
                 with gr.Row():
                     with gr.Column(scale=1):
                         master_json = gr.Textbox(
-                            label="在此粘贴外脑返回的 Master JSON",
+                            label="或者手动粘贴 Master JSON (若配置了上方LLM，可留空由程序自动生成)",
                             placeholder='{\n  "characters": {...},\n  "recaps": {...}\n}',
                             lines=10,
                             value=last_state.get("master_json", ""),
@@ -327,7 +396,13 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
 
             with gr.Accordion("🎛️ 第三步：通用声场与旁白", open=False):
                 with gr.Row():
-                    narrator_audio = gr.Audio(label="旁白音色 (Narrator)", type="filepath")
+                    preset_voice_dropdown = gr.Dropdown(
+                        label="默认旁白基底音色 (Qwen3-TTS Preset)",
+                        choices=QWEN_PRESET_VOICES,
+                        value="Eric (默认男声)",
+                    )
+                    narrator_audio = gr.Audio(label="或上传旁白克隆音 (Narrator)", type="filepath")
+                with gr.Row():
                     ambient_audio = gr.Audio(label="环境音 (Ambient)", type="filepath")
                     chime_audio = gr.Audio(label="转场音 (Chime)", type="filepath")
 
@@ -376,6 +451,7 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
         mode_selector,
         master_json,
         char_voice_files,
+        preset_voice_dropdown,
         narrator_audio,
         ambient_audio,
         chime_audio,

@@ -72,6 +72,7 @@ class MLXRenderEngine:
         """
         logger.info("🚀 启动 MLX 纯净干音渲染引擎...")
         self.config = config or {}
+        self.default_voice = self.config.get("default_narrator_voice", "eric")
         self.current_mode = None
         self.model = None
         # 创建专门用于磁盘写入的单线程池，避免阻塞推理
@@ -266,7 +267,7 @@ class MLXRenderEngine:
                     }
                     # 防御性追加：以防错误地用 CustomVoice 模型跑 clone 模式
                     if "speaker" in voice_cfg or "voice" in voice_cfg:
-                        generate_kwargs["voice"] = voice_cfg.get("voice", voice_cfg.get("speaker", "eric"))
+                        generate_kwargs["voice"] = voice_cfg.get("voice", voice_cfg.get("speaker", self.default_voice))
                     
                     results = list(self.model.generate(**generate_kwargs))
 
@@ -284,8 +285,8 @@ class MLXRenderEngine:
                     }
                     
                     # 🌟 核心修复：强制提取 voice 参数，兼容旧版 speaker 字段
-                    # 如果都没有提供，则默认使用 'eric' 作为安全兜底，防止引擎崩溃
-                    target_voice = voice_cfg.get("voice", voice_cfg.get("speaker", "eric"))
+                    # 如果都没有提供，则使用配置的 default_voice 作为安全兜底，防止引擎崩溃
+                    target_voice = voice_cfg.get("voice", voice_cfg.get("speaker", self.default_voice))
                     generate_kwargs["voice"] = target_voice
                     
                     # 如果配置里带了参考音频（基于基底音色做微调克隆）
