@@ -747,8 +747,21 @@ class CineCastProducer:
 
                     try:
                         success = engine.render_dry_chunk(item["content"], group_voice_cfg, save_path)
+                        if not success:
+                            logger.error(
+                                f"🔇 渲染返回失败: chunk_id={item.get('chunk_id')}, "
+                                f"speaker={item.get('speaker')}, "
+                                f"content='{item['content'][:50]}...'"
+                            )
                     except Exception as e:
-                        logger.error(f"渲染异常: {e}")
+                        import traceback
+                        logger.error(
+                            f"❌ 渲染异常: chunk_id={item.get('chunk_id')}, "
+                            f"speaker={item.get('speaker')}, "
+                            f"content='{item['content'][:50]}...', "
+                            f"error={e}"
+                        )
+                        logger.error(f"📋 异常堆栈:\n{traceback.format_exc()}")
                         success = False
 
                     elapsed_time = time.time() - start_time

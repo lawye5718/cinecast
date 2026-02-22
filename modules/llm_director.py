@@ -311,9 +311,12 @@ class LLMScriptDirector:
         return chunks
 
     def verify_integrity(self, original_text: str, script_list: List[Dict]) -> bool:
-        """🌟 内容完整性校验：检测 LLM 解析是否严重丢失内容
+        """🌟 内容完整性全面监控：对比原文与剧本字数，分级预警
 
-        对比原文总字数与剧本 content 总字数，如果丢失超过 10% 则报错。
+        分级策略：
+        - 保留率 < 90%：严重丢失，记录详细差异，返回 False（触发旁白回退）
+        - 保留率 < 99%：轻微偏差，记录详细差异到日志，返回 True
+        - 保留率 >= 99%：完全达标，静默通过
 
         Args:
             original_text: 原始输入文本
@@ -328,15 +331,48 @@ class LLMScriptDirector:
         original_len = len(original_text.strip())
         if original_len == 0:
             return True
-        ratio = len(content_text) / original_len
+        content_len = len(content_text)
+        ratio = content_len / original_len
+        diff_chars = original_len - content_len
+
         if ratio < 0.9:
             logger.error(
                 f"🚨 内容丢失严重！原文{original_len}字，"
-                f"解析后仅{len(content_text)}字 (保留率{ratio:.1%})"
+                f"解析后仅{content_len}字 (保留率{ratio:.1%})"
             )
+            logger.error(
+                f"📊 详细差异: 原文字数={original_len}, 剧本字数={content_len}, "
+                f"缺失字数={diff_chars}, 保留率={ratio:.2%}"
+            )
+            self._log_content_diff(original_text.strip(), content_text)
             return False
+
+        if ratio < 0.99:
+            logger.warning(
+                f"⚠️ 内容差异检测: 原文{original_len}字，剧本{content_len}字 "
+                f"(保留率{ratio:.2%}, 缺失{diff_chars}字)"
+            )
+            self._log_content_diff(original_text.strip(), content_text)
+
         logger.info(f"✅ 内容完整性校验通过 (保留率{ratio:.1%})")
         return True
+
+    def _log_content_diff(self, original_text: str, script_text: str) -> None:
+        """将原文与剧本的段落级差异写入日志，便于定位丢失内容。"""
+        orig_paras = [p.strip() for p in original_text.split('\n') if p.strip()]
+        if not orig_paras:
+            return
+        missing_paras = []
+        for i, para in enumerate(orig_paras):
+            check_prefix = para[:20] if len(para) > 20 else para
+            if check_prefix and check_prefix not in script_text:
+                missing_paras.append((i + 1, para[:80]))
+        if missing_paras:
+            logger.warning(f"📝 疑似缺失段落 ({len(missing_paras)}/{len(orig_paras)}段):")
+            for para_num, preview in missing_paras[:10]:
+                logger.warning(f"   第{para_num}段: {preview}...")
+            if len(missing_paras) > 10:
+                logger.warning(f"   ... 及其余 {len(missing_paras) - 10} 段")
     
     def generate_pure_narrator_script(self, text: str, chapter_prefix: str = "chunk") -> List[Dict]:
         """
@@ -440,6 +476,19 @@ class LLMScriptDirector:
         """
         # 第一步：生成宏观剧本
         macro_script = self.parse_text_to_script(text, max_length=max_length)
+
+        # 🛡️ 剧本监控：内容差异超过90%时，自动回退旁白模式渲染原文
+        content_text = "".join(item.get("content", "") for item in macro_script)
+        original_len = len(text.strip())
+        if original_len > 0:
+            ratio = len(content_text) / original_len
+            if ratio < 0.9:
+                logger.warning(
+                    f"🛡️ 剧本内容保留率过低 ({ratio:.1%})，"
+                    f"自动切换旁白模式渲染原文: {chapter_prefix}"
+                )
+                return self.generate_pure_narrator_script(text, chapter_prefix=chapter_prefix)
+
         micro_script = []
         chunk_id = 1
         
