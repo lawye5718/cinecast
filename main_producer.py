@@ -238,33 +238,36 @@ class CineCastProducer:
         return chapters
     
     def check_api_connectivity(self):
-        """前置检查：验证云端 API 连通性 (DashScope Qwen-Flash)"""
-        api_key = os.environ.get("DASHSCOPE_API_KEY", "")
+        """前置检查：验证云端 API 连通性，优先使用用户配置的 LLM 参数"""
+        api_key = self.config.get("llm_api_key") or os.environ.get("DASHSCOPE_API_KEY", "")
+        base_url = self.config.get("llm_base_url") or "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        model_name = self.config.get("llm_model_name") or "qwen-flash"
         if not api_key:
-            logger.error("❌ 未设置 DASHSCOPE_API_KEY 环境变量，无法使用 Qwen API。")
+            logger.error("❌ 未设置 API Key，无法使用大模型服务。请在 WebUI 中配置或设置 DASHSCOPE_API_KEY 环境变量。")
             return False
         try:
+            api_endpoint = f"{base_url.rstrip('/')}/chat/completions"
             response = requests.post(
-                "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+                api_endpoint,
                 headers={
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {api_key}",
                 },
                 json={
-                    "model": "qwen-flash",
-                    "messages": [{"role": "user", "content": "ping"}],
-                    "max_tokens": 8,
+                    "model": model_name,
+                    "messages": [{"role": "user", "content": "请回复\u201c连接正常\u201d四个字。"}],
+                    "max_tokens": 16,
                 },
                 timeout=30,
             )
             if response.status_code == 200:
-                logger.info("✅ Qwen API 服务前置检查通过")
+                logger.info("✅ LLM API 服务前置检查通过")
                 return True
             else:
-                logger.error(f"❌ Qwen API 服务响应异常 (HTTP {response.status_code})")
+                logger.error(f"❌ LLM API 服务响应异常 (HTTP {response.status_code})")
                 return False
         except Exception as e:
-            logger.error(f"❌ Qwen API 服务不可达: {e}")
+            logger.error(f"❌ LLM API 服务不可达: {e}")
             return False
 
     # ==========================================
@@ -387,6 +390,9 @@ class CineCastProducer:
         cast_db_path = os.path.join("workspace", f"{project_name}_cast.json")
 
         director = LLMScriptDirector(
+            api_key=self.config.get("llm_api_key"),
+            model_name=self.config.get("llm_model_name"),
+            base_url=self.config.get("llm_base_url"),
             global_cast=self.config.get("global_cast", {}),
             cast_db_path=cast_db_path,
         )

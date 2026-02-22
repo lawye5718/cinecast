@@ -75,7 +75,7 @@ class TestSimplifiedSystemPrompt:
         """System prompt should enforce flat JSON array output."""
         source = inspect.getsource(LLMScriptDirector._request_llm)
         assert "JSON 数组" in source
-        assert "严禁输出" in source or "严禁最外层使用字典" in source
+        assert "标准的 JSON 数组" in source or "最外层为数组" in source
 
 
 # ---------------------------------------------------------------------------

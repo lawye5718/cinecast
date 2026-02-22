@@ -163,16 +163,17 @@ class LLMScriptDirector:
         "innocent": "Bright, high-pitched, energetic and innocent, clear enunciation.",
     }
 
-    def __init__(self, api_key=None, global_cast=None, cast_db_path=None, **kwargs):
+    def __init__(self, api_key=None, model_name=None, base_url=None, global_cast=None, cast_db_path=None, **kwargs):
         if kwargs:
             logger.warning(f"⚠️ LLMScriptDirector 收到未识别的参数（已忽略）: {list(kwargs.keys())}")
         self.api_key = api_key or os.environ.get("DASHSCOPE_API_KEY", "")
-        self.model_name = "qwen-flash"
+        self.model_name = model_name or "qwen-flash"
+        self.base_url = base_url or "https://dashscope.aliyuncs.com/compatible-mode/v1"
         
-        # 🌟 优化：使用标准 OpenAI SDK 客户端连接阿里云百炼
+        # 🌟 优化：使用标准 OpenAI SDK 客户端，支持用户自定义 LLM 配置
         self.client = OpenAI(
             api_key=self.api_key,
-            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            base_url=self.base_url,
             timeout=120.0,
         )
         
@@ -266,20 +267,20 @@ class LLMScriptDirector:
         logger.info("♻️ 检测到故事边界，导演引擎已重置上下文。")
 
     def _test_api_connection(self):
-        """测试 Qwen API 服务连接"""
+        """测试 LLM API 服务连接"""
         if not self.api_key:
-            logger.warning("⚠️ 未设置 DASHSCOPE_API_KEY，智能配音模式将无法使用 Qwen API。")
+            logger.warning("⚠️ 未设置 API Key，智能配音模式将无法使用大模型服务。")
             return False
         try:
             self.client.chat.completions.create(
                 model=self.model_name,
-                messages=[{"role": "user", "content": "ping"}],
-                max_tokens=8,
+                messages=[{"role": "user", "content": "请回复\u201c连接正常\u201d四个字。"}],
+                max_tokens=16,
             )
-            logger.info("✅ Qwen API 服务连接正常")
+            logger.info("✅ LLM API 服务连接正常")
             return True
         except Exception as e:
-            logger.warning(f"❌ 无法连接到 Qwen API 服务: {e}")
+            logger.warning(f"❌ 无法连接到 LLM API 服务: {e}")
             return False
     
     def _chunk_text_for_llm(self, text: str, max_length: int = 8000) -> List[str]:
@@ -849,11 +850,11 @@ class LLMScriptDirector:
 
         # 🌟 Qwen API 使用 1M 上下文窗口，最大输出 32K token
 
-        # 🌟 防幻觉加固：结构化 User Prompt
-        user_content = f"【指令：将以下文本转换为平铺的 JSON 数组，严禁最外层使用字典】\n\n"
+        # 🌟 防幻觉加固：结构化 User Prompt（使用温和的任务描述，避免触发内容安全过滤）
+        user_content = "请将以下小说文本转换为标准 JSON 数组格式（最外层为数组），用于有声书制作。\n\n"
 
         if context:
-            user_content += f"【上下文参考】\n{context}\n\n"
+            user_content += f"上下文参考：\n{context}\n\n"
 
         user_content += f"待处理原文：\n{text_chunk}"
 
