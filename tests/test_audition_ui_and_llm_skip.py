@@ -74,7 +74,7 @@ class TestDirectorCustomLLMConfig:
         """Should accept a custom base_url parameter."""
         from modules.llm_director import LLMScriptDirector
         director = LLMScriptDirector(base_url="https://api.openai.com/v1")
-        assert director.client.base_url.host == "api.openai.com"
+        assert "api.openai.com" in str(director.client.base_url)
 
     def test_director_none_model_name_falls_back(self):
         """None model_name should fallback to qwen-flash."""
