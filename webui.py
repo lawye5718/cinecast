@@ -276,10 +276,10 @@ def run_cinecast(epub_file, mode_choice,
             save_uploaded_asset(file_obj, None, "voices")
 
     # 3. 提取用户选择的基底音色 ID
-    base_voice_id = preset_voice_selection.split(" ")[0].lower() if preset_voice_selection else "eric"
+    base_voice_id = preset_voice_selection.split(" ")[0].lower() if preset_voice_selection and isinstance(preset_voice_selection, str) else "eric"
 
     # 如果外脑 JSON 有旁白角色但未配音色，强制指定基底音色
-    if global_cast and "旁白" in global_cast:
+    if global_cast and isinstance(global_cast.get("旁白"), dict):
         global_cast["旁白"]["voice"] = base_voice_id
 
     # 4. 组装配置，将拆解后的数据分别注入

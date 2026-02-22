@@ -301,8 +301,9 @@ class TestWebuiSourceStructure:
         assert "default_narrator_voice" in webui_source
 
     def test_global_cast_narrator_voice_injection(self, webui_source):
-        """Should inject voice into global_cast narrator."""
+        """Should inject voice into global_cast narrator with type check."""
         assert 'global_cast["旁白"]["voice"] = base_voice_id' in webui_source
+        assert 'isinstance(global_cast.get("旁白"), dict)' in webui_source
 
 
 # ---------------------------------------------------------------------------

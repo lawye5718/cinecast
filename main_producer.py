@@ -133,12 +133,12 @@ class CineCastProducer:
                 model_path = os.path.join(project_root.parent, model_path)
             
             # 构建引擎配置（支持 1.7B Model Pool）
+            _path_keys = {"model_path_base", "model_path_design",
+                          "model_path_custom", "model_path_fallback"}
             engine_config = {}
-            for key in ("model_path_base", "model_path_design",
-                        "model_path_custom", "model_path_fallback",
-                        "default_narrator_voice"):
+            for key in (*_path_keys, "default_narrator_voice"):
                 val = self.config.get(key)
-                if val and key != "default_narrator_voice" and not os.path.isabs(val):
+                if val and key in _path_keys and not os.path.isabs(val):
                     val = os.path.join(project_root.parent, val)
                 if val:
                     engine_config[key] = val
