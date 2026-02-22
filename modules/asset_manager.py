@@ -14,6 +14,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Pre-compiled pattern for matching mN/fN voice role names (e.g., m1, f2, m3)
+_ROLE_NAME_PATTERN = re.compile(r'^(m|f)(\d+)$', re.IGNORECASE)
+
 class AssetManager:
     def __init__(self, asset_dir="./assets"):
         self.asset_dir = asset_dir
@@ -376,7 +379,7 @@ class AssetManager:
                 continue
 
             # 动态解析 mN / fN 模式：m 前缀 → male_pool，f 前缀 → female_pool
-            match = re.match(r'^(m|f)(\d+)$', role_name, re.IGNORECASE)
+            match = _ROLE_NAME_PATTERN.match(role_name)
             if not match:
                 logger.warning(f"⚠️ 未知角色名: {role_name}，跳过")
                 continue
