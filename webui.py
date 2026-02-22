@@ -570,6 +570,9 @@ def run_cinecast(epub_file, mode_choice,
 
     # 4. 组装配置，将拆解后的数据分别注入
     is_pure = "纯净" in mode_choice
+
+    # 🌟 读取用户配置的大模型 API（如有），用于后续剧本编辑
+    llm_cfg = load_llm_config()
     config = {
         "assets_dir": "./assets",
         "output_dir": "./output/Preview" if is_preview else "./output/Audiobooks",
@@ -585,6 +588,9 @@ def run_cinecast(epub_file, mode_choice,
         "enable_recap": bool(custom_recaps),  # 有摘要数据时自动启用
         "user_recaps": None,               # 兼容旧版配置
         "default_narrator_voice": base_voice_id,  # 🌟 注入底层 TTS 引擎
+        "llm_model_name": llm_cfg.get("model_name", ""),  # 🌟 用户配置的大模型
+        "llm_base_url": llm_cfg.get("base_url", ""),
+        "llm_api_key": llm_cfg.get("api_key", ""),
     }
 
     try:
@@ -836,10 +842,14 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                     outputs=[preview_text],
                 )
 
+                with gr.Row():
+                    btn_preview = gr.Button(
+                        "🎧 极速试听 (首章前10句)", variant="secondary", size="lg"
+                    )
+                preview_audio_player = gr.Audio(label="试听结果", interactive=False)
+                preview_status = gr.Textbox(label="试听状态", interactive=False, lines=2)
+
             with gr.Row():
-                btn_preview = gr.Button(
-                    "🎧 极速试听 (首章前10句)", variant="secondary", size="lg"
-                )
                 btn_full = gr.Button(
                     "🚀 全本压制", variant="primary", size="lg"
                 )
@@ -891,7 +901,7 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
     btn_preview.click(
         fn=lambda *args: run_cinecast(*args[:-2], is_preview=True, cast_state=args[-2], preview_text=args[-1]),
         inputs=inputs_list + [cast_state, preview_text],
-        outputs=[audio_player, status_box],
+        outputs=[preview_audio_player, preview_status],
     )
 
     btn_full.click(

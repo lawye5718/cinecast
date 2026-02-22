@@ -163,16 +163,19 @@ class LLMScriptDirector:
         "innocent": "Bright, high-pitched, energetic and innocent, clear enunciation.",
     }
 
-    def __init__(self, api_key=None, global_cast=None, cast_db_path=None, **kwargs):
+    def __init__(self, api_key=None, model_name=None, base_url=None,
+                 global_cast=None, cast_db_path=None, **kwargs):
         if kwargs:
             logger.warning(f"⚠️ LLMScriptDirector 收到未识别的参数（已忽略）: {list(kwargs.keys())}")
+        # 🌟 优先使用用户配置的大模型 API，回退到环境变量 DashScope
         self.api_key = api_key or os.environ.get("DASHSCOPE_API_KEY", "")
-        self.model_name = "qwen-flash"
+        self.model_name = model_name or "qwen-flash"
+        user_base_url = base_url or "https://dashscope.aliyuncs.com/compatible-mode/v1"
         
-        # 🌟 优化：使用标准 OpenAI SDK 客户端连接阿里云百炼
+        # 🌟 优化：使用标准 OpenAI SDK 客户端连接（支持用户自定义大模型）
         self.client = OpenAI(
             api_key=self.api_key,
-            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            base_url=user_base_url,
         )
         
         self.max_chars_per_chunk = 150 # 🎯 修改点：微切片红线调整为 150 字

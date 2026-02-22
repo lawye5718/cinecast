@@ -111,6 +111,9 @@ class CineCastProducer:
             "custom_recaps": {},  # 🌟 外脑前情提要字典 {Chapter_NNN: recap_text}
             "enable_auto_recap": True,  # 🌟 是否启用本地LLM自动生成摘要
             "default_narrator_voice": "aiden",  # 🌟 默认旁白基底音色 (Qwen3-TTS Preset)
+            "llm_model_name": "",  # 🌟 用户配置的大模型名称
+            "llm_base_url": "",    # 🌟 用户配置的大模型 Base URL
+            "llm_api_key": "",     # 🌟 用户配置的大模型 API Key
         }
     
     def _initialize_components(self):
@@ -238,10 +241,46 @@ class CineCastProducer:
         return chapters
     
     def check_api_connectivity(self):
-        """前置检查：验证云端 API 连通性 (DashScope Qwen-Flash)"""
+        """前置检查：验证云端 API 连通性
+
+        优先使用用户在 WebUI 中配置的大模型 API，
+        若未配置则回退到环境变量 DASHSCOPE_API_KEY (DashScope Qwen-Flash)。
+        """
+        # 🌟 优先使用用户配置的大模型 API
+        llm_base_url = self.config.get("llm_base_url", "")
+        llm_api_key = self.config.get("llm_api_key", "")
+        llm_model = self.config.get("llm_model_name", "")
+
+        if llm_base_url and llm_api_key and llm_model:
+            try:
+                api_endpoint = f"{llm_base_url.rstrip('/')}/chat/completions"
+                response = requests.post(
+                    api_endpoint,
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {llm_api_key}",
+                    },
+                    json={
+                        "model": llm_model,
+                        "messages": [{"role": "user", "content": "ping"}],
+                        "max_tokens": 8,
+                    },
+                    timeout=10,
+                )
+                if response.status_code == 200:
+                    logger.info(f"✅ 用户配置的大模型 API ({llm_model}) 前置检查通过")
+                    return True
+                else:
+                    logger.error(f"❌ 用户配置的大模型 API 响应异常 (HTTP {response.status_code})")
+                    return False
+            except Exception as e:
+                logger.error(f"❌ 用户配置的大模型 API 不可达: {e}")
+                return False
+
+        # 回退：使用默认 DashScope Qwen-Flash
         api_key = os.environ.get("DASHSCOPE_API_KEY", "")
         if not api_key:
-            logger.error("❌ 未设置 DASHSCOPE_API_KEY 环境变量，无法使用 Qwen API。")
+            logger.error("❌ 未设置 DASHSCOPE_API_KEY 环境变量，也未配置自定义大模型 API，无法使用 LLM 服务。")
             return False
         try:
             response = requests.post(
@@ -386,7 +425,11 @@ class CineCastProducer:
         project_name = os.path.splitext(os.path.basename(input_source))[0]
         cast_db_path = os.path.join("workspace", f"{project_name}_cast.json")
 
+        # 🌟 优先使用用户在 WebUI 中配置的大模型 API
         director = LLMScriptDirector(
+            api_key=self.config.get("llm_api_key") or None,
+            model_name=self.config.get("llm_model_name") or None,
+            base_url=self.config.get("llm_base_url") or None,
             global_cast=self.config.get("global_cast", {}),
             cast_db_path=cast_db_path,
         )
