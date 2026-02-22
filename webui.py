@@ -58,6 +58,31 @@ def test_llm_connection(model_name, base_url, api_key):
 
 # --- 🌟 新增：工作区状态持久化 ---
 WORKSPACE_FILE = "./.cinecast_workspace.json"
+ROLE_VOICE_FILE = "./.cinecast_role_voices.json"
+
+
+def load_role_voices():
+    """读取全局固化的身份音色配置"""
+    if os.path.exists(ROLE_VOICE_FILE):
+        try:
+            with open(ROLE_VOICE_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"narrator": {"mode": "preset", "voice": "eric"}}
+
+
+def save_role_voice(role, voice_cfg):
+    """保存用户为特定身份锁定的音色"""
+    if role not in ["m1", "f1", "m2", "f2", "narrator"]:
+        return
+    voices = load_role_voices()
+    voices[role] = voice_cfg
+    try:
+        with open(ROLE_VOICE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(voices, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"⚠️ 全局身份音色存档失败: {e}")
 
 
 def load_workspace():
@@ -153,14 +178,19 @@ def run_headless_qc(output_dir, sensitivity=0.4):
 # 🌟 终极"云端外脑" Prompt 规范（供用户复制给 Kimi、豆包或 Claude 等长文本大模型）
 BRAIN_PROMPT_TEMPLATE = """\
 你是一位顶级的有声书"总导演兼剧本编审"。我已经上传了一本小说的全本文件。
-请你通读全书，完成【角色选角】与【前情提要】两项核心任务，并严格按要求的 JSON 格式输出。
+请你通读全书，完成【角色选角】与【前情提要】两项核心任务，并按 JSON 格式输出。
 
-【任务一：建立全局角色设定集 (Character Bible)】
-1. 提取所有有台词的角色，将他们同一个人的不同称呼统一为一个【标准名】（如"老李"统一为"李局长"）。
-2. 推断角色的性别（male/female）和声音特质情感（如：沉稳、沧桑、活泼、阴冷等）。
-3. 必须包含一个名为 "路人" 的特殊角色，用于兜底那些只有一两句台词的群演。
+【任务一：建立全局角色设定集】
+1. 提取所有有台词的角色，统一【标准名】。
+2. 必须为每个角色分配一个【身份标签(role)】，只能从以下选择：
+   - m1 (男主/核心男配)
+   - f1 (女主/核心女配)
+   - m2 (男配)
+   - f2 (女配)
+   - extra (路人或龙套)
+3. 推断性别(gender)和情感(emotion)。包含名为"路人"的默认角色。
 
-【任务二：撰写各章前情提要 (Recaps)】
+【任务二：撰写各章前情提要】
 1. 为**除第一章以外**的每一章，生成一段用于片头播报的前情提要（80-120字）。
 2. 语言必须高度凝练，具有美剧片头的电影感。
 3. 最后一句必须是一个引出本章内容的"悬念钩子"。
@@ -172,10 +202,9 @@ BRAIN_PROMPT_TEMPLATE = """\
 【输出格式示例】
 {
   "characters": {
-    "旁白": {"gender": "male", "emotion": "平静"},
-    "老渔夫": {"gender": "male", "emotion": "沧桑"},
-    "艾米莉": {"gender": "female", "emotion": "活泼"},
-    "路人": {"gender": "unknown", "emotion": "平淡"}
+    "老渔夫": {"role": "m1", "gender": "male", "emotion": "沧桑"},
+    "艾米莉": {"role": "f1", "gender": "female", "emotion": "活泼"},
+    "路人": {"role": "extra", "gender": "unknown", "emotion": "平淡"}
   },
   "recaps": {
     "Chapter_002": "上一章中，老渔夫在暴风雪中带回了一个神秘的黑匣子……然而他没意识到，危险才刚刚降临。",
@@ -259,7 +288,7 @@ def parse_json_to_cast_state(json_str):
 
     Returns:
         dict: 角色状态字典，格式为
-              {"角色名": {"gender": ..., "emotion": ..., "locked": False, "voice_cfg": {...}}, ...}
+              {"角色名": {"role": ..., "gender": ..., "emotion": ..., "locked": False, "voice_cfg": {...}}, ...}
               解析失败时返回空字典。
     """
     try:
@@ -269,17 +298,21 @@ def parse_json_to_cast_state(json_str):
         return {}
 
     cast_state = {}
+    role_voices = load_role_voices()
+
     for char_name, char_info in characters.items():
         if not isinstance(char_info, dict):
             continue
+
+        role = char_info.get("role", "extra")
+        default_voice = role_voices.get(role, {"mode": "preset", "voice": "eric"})
+
         cast_state[char_name] = {
+            "role": role,
             "gender": char_info.get("gender", "unknown"),
             "emotion": char_info.get("emotion", "平静"),
             "locked": False,
-            "voice_cfg": {
-                "mode": "preset",
-                "voice": "eric",
-            },
+            "voice_cfg": default_voice,
         }
     return cast_state
 
@@ -368,6 +401,11 @@ def update_cast_voice_cfg(cast_state, char_name, mode, preset_voice, clone_file,
     voice_cfg = build_voice_cfg_from_ui(mode, preset_voice, clone_file, design_text)
     cast_state[char_name]["voice_cfg"] = voice_cfg
     cast_state[char_name]["locked"] = True
+
+    # 🎯 触发核心功能：当用户点击锁定时，如果他是男女主，立刻将其音色跨书籍全局固化
+    role = cast_state[char_name].get("role", "extra")
+    save_role_voice(role, voice_cfg)
+
     return cast_state
 
 

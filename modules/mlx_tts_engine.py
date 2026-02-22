@@ -91,14 +91,14 @@ class MLXRenderEngine:
             default_path = self._model_paths.get("preset") or model_path
             self._do_load(default_path, mode="preset")
             self.sample_rate = 24000  # Qwen3-TTS 1.7B 高保真采样率
-            self.max_chars = 60  # 微切片安全长度上限
+            self.max_chars = 150  # 🎯 修改点：适配 M4 24G 的 1.7B 甜点长度
             logger.info("✅ MLX渲染引擎初始化成功")
         except Exception as e:
             logger.warning(f"⚠️ 首选模型加载失败 ({e})，尝试回退到 0.6B...")
             try:
                 self._do_load(self._fallback_path, mode="preset")
                 self.sample_rate = 22050  # 0.6B 模型使用旧采样率
-                self.max_chars = 60
+                self.max_chars = 150  # 🎯 修改点：回退模式同样放宽
                 logger.info("✅ MLX渲染引擎初始化成功 (回退到 0.6B)")
             except Exception as e2:
                 logger.error(f"❌ MLX渲染引擎初始化失败: {e2}")
