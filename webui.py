@@ -570,6 +570,8 @@ def run_cinecast(epub_file, mode_choice,
 
     # 4. 组装配置，将拆解后的数据分别注入
     is_pure = "纯净" in mode_choice
+    # 🌟 加载用户保存的 LLM 配置，确保编剧阶段使用用户测试成功的大模型
+    saved_llm_cfg = load_llm_config()
     config = {
         "assets_dir": "./assets",
         "output_dir": "./output/Preview" if is_preview else "./output/Audiobooks",
@@ -585,6 +587,9 @@ def run_cinecast(epub_file, mode_choice,
         "enable_recap": bool(custom_recaps),  # 有摘要数据时自动启用
         "user_recaps": None,               # 兼容旧版配置
         "default_narrator_voice": base_voice_id,  # 🌟 注入底层 TTS 引擎
+        "llm_model_name": saved_llm_cfg.get("model_name"),  # 🌟 用户配置的大模型名称
+        "llm_base_url": saved_llm_cfg.get("base_url"),      # 🌟 用户配置的 Base URL
+        "llm_api_key": saved_llm_cfg.get("api_key"),         # 🌟 用户配置的 API Key
     }
 
     try:

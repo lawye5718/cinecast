@@ -8,10 +8,14 @@ import hashlib
 import os
 import json
 import random
+import re
 from pydub import AudioSegment
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Pre-compiled pattern for matching mN/fN voice role names (e.g., m1, f2, m3)
+_ROLE_NAME_PATTERN = re.compile(r'^(m|f)(\d+)$', re.IGNORECASE)
 
 class AssetManager:
     def __init__(self, asset_dir="./assets"):
@@ -350,48 +354,58 @@ class AssetManager:
     def set_custom_role_voices(self, role_voices):
         """根据角色名称设置用户上传的自定义音色。
 
-        在电影配音模式下，用户可上传 narrator / f1 / m1 / f2 / m2 五个角色的
-        音色文件。本方法将用户提供的音色覆盖到对应位置，未提供的角色保持默认。
+        支持 narrator / m1 / m2 / f1 / f2 以及动态扩展的 m3, m4, f3, f4 等。
+        m 前缀为男声（加入 male_pool），f 前缀为女声（加入 female_pool）。
+        用户配置的音色作为默认使用，除非用户主动更改。
 
         Args:
-            role_voices: dict, key 为角色名 (narrator/f1/m1/f2/m2),
+            role_voices: dict, key 为角色名 (narrator/f1/m1/f2/m2/m3/f3...),
                          value 为音频文件路径。值为 None 时跳过该角色。
         """
         if not role_voices:
             return
 
-        # 角色名到 voices 结构的映射
-        role_map = {
-            "narrator": ("narrator", None),
-            "m1": ("male_pool", 0),
-            "m2": ("male_pool", 1),
-            "f1": ("female_pool", 0),
-            "f2": ("female_pool", 1),
-        }
-
         for role_name, file_path in role_voices.items():
             if file_path is None or not os.path.exists(file_path):
                 continue
-            if role_name not in role_map:
-                logger.warning(f"⚠️ 未知角色名: {role_name}，跳过")
-                continue
 
-            target_key, pool_idx = role_map[role_name]
-
-            if pool_idx is None:
+            if role_name == "narrator":
                 # narrator: 同步更新所有使用 narrator 音频的角色
                 self.voices["narrator"]["audio"] = file_path
                 self.voices["narration"]["audio"] = file_path
                 self.voices["title"]["audio"] = file_path
                 self.voices["subtitle"]["audio"] = file_path
                 logger.info(f"✅ 已设置旁白音色: {file_path}")
+                continue
+
+            # 动态解析 mN / fN 模式：m 前缀 → male_pool，f 前缀 → female_pool
+            match = _ROLE_NAME_PATTERN.match(role_name)
+            if not match:
+                logger.warning(f"⚠️ 未知角色名: {role_name}，跳过")
+                continue
+
+            gender_prefix = match.group(1).lower()
+            pool_index = int(match.group(2)) - 1  # m1 → index 0, m2 → index 1, etc.
+
+            if gender_prefix == "m":
+                target_key = "male_pool"
+                label = f"男声{pool_index + 1}"
             else:
-                pool = self.voices[target_key]
-                if pool_idx < len(pool):
-                    pool[pool_idx]["audio"] = file_path
-                    logger.info(f"✅ 已设置角色 {role_name} 音色: {file_path}")
-                else:
-                    logger.warning(f"⚠️ 音色池 {target_key} 槽位不足 (需要索引 {pool_idx})，跳过 {role_name}")
+                target_key = "female_pool"
+                label = f"女声{pool_index + 1}"
+
+            pool = self.voices[target_key]
+
+            # 如果池中已有该槽位，直接覆盖；否则扩展池到所需大小
+            while len(pool) <= pool_index:
+                pool.append({
+                    "audio": self.voices["narrator"]["audio"],
+                    "text": f"{label}",
+                    "speed": 1.0
+                })
+
+            pool[pool_index]["audio"] = file_path
+            logger.info(f"✅ 已设置角色 {role_name} 音色: {file_path}")
 
 if __name__ == "__main__":
     # 测试代码

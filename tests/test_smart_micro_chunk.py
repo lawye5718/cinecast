@@ -149,9 +149,9 @@ class TestAntiSummarizationPrompt:
         import inspect
         source = inspect.getsource(LLMScriptDirector._request_llm)
         # Must demand flat array output
-        assert "平铺的 JSON 数组" in source or "JSON 数组" in source
-        # Must forbid dict output
-        assert "严禁最外层使用字典" in source or "严禁输出" in source
+        assert "JSON 数组" in source
+        # Must enforce array as outermost structure
+        assert "标准的 JSON 数组" in source or "最外层为数组" in source
 
     def test_prompt_forbids_summarization(self):
         """The prompt should forbid deletion of content and demand completeness."""
