@@ -9,6 +9,7 @@ CineCast Web UI
 import os
 import json
 import shutil
+import uuid
 import requests
 import gradio as gr
 from main_producer import CineCastProducer
@@ -248,12 +249,154 @@ def process_master_json(master_json_str):
         return {}, {}, False, f"❌ 解析失败：{str(e)}"
 
 
+# --- 🌟 新增：角色试音与定妆室 后端函数 ---
+
+def parse_json_to_cast_state(json_str):
+    """解析 Master JSON，提取角色列表并初始化 cast_state。
+
+    Args:
+        json_str: Master JSON 字符串，需包含 "characters" 根节点。
+
+    Returns:
+        dict: 角色状态字典，格式为
+              {"角色名": {"gender": ..., "emotion": ..., "locked": False, "voice_cfg": {...}}, ...}
+              解析失败时返回空字典。
+    """
+    try:
+        data = json.loads(json_str)
+        characters = data.get("characters", {})
+    except Exception:
+        return {}
+
+    cast_state = {}
+    for char_name, char_info in characters.items():
+        if not isinstance(char_info, dict):
+            continue
+        cast_state[char_name] = {
+            "gender": char_info.get("gender", "unknown"),
+            "emotion": char_info.get("emotion", "平静"),
+            "locked": False,
+            "voice_cfg": {
+                "mode": "preset",
+                "voice": "eric",
+            },
+        }
+    return cast_state
+
+
+def build_voice_cfg_from_ui(mode, preset_voice, clone_file, design_text):
+    """根据用户在角色卡片中的选择，组装 voice_cfg 字典。
+
+    Args:
+        mode: "预设基底" | "声音克隆" | "文本设计"
+        preset_voice: 预设音色下拉值（如 "Eric (默认男声)"）
+        clone_file: 上传的克隆参考音频路径
+        design_text: 音色设计提示词
+
+    Returns:
+        dict: 引擎可用的 voice_cfg
+    """
+    voice_cfg = {"mode": "preset", "voice": "eric"}
+
+    if mode == "预设基底":
+        voice_id = preset_voice.split(" ")[0].lower() if preset_voice else "eric"
+        voice_cfg = {"mode": "preset", "voice": voice_id}
+    elif mode == "声音克隆" and clone_file is not None:
+        ref_path = clone_file if isinstance(clone_file, str) else getattr(clone_file, "name", "")
+        voice_cfg = {"mode": "clone", "ref_audio": ref_path, "ref_text": ""}
+    elif mode == "文本设计" and design_text:
+        voice_cfg = {"mode": "design", "instruct": design_text}
+
+    return voice_cfg
+
+
+def test_single_voice(char_name, mode, preset_voice, clone_file, design_text, test_text):
+    """为单个角色生成试听音频。
+
+    组装 voice_cfg 并调用底层 MLXRenderEngine.render_dry_chunk，
+    绕过复杂的剧本切片逻辑，仅返回一个 WAV 文件路径。
+
+    Args:
+        char_name: 角色名称（用于日志，不影响音色选择）。
+        mode: 音色模式，"预设基底" | "声音克隆" | "文本设计"。
+        preset_voice: 预设音色下拉值（如 "Eric (默认男声)"）。
+        clone_file: 上传的克隆参考音频路径或文件对象。
+        design_text: 音色设计提示词。
+        test_text: 试听文本内容。
+
+    Returns:
+        str or None: 生成的 WAV 文件路径，失败时返回 None。
+    """
+    voice_cfg = build_voice_cfg_from_ui(mode, preset_voice, clone_file, design_text)
+
+    if not test_text or not test_text.strip():
+        test_text = "这是一段录音，请确认是否可以。"
+
+    temp_save_path = os.path.join(
+        "./output/Preview", f"test_{uuid.uuid4().hex[:8]}.wav"
+    )
+    os.makedirs(os.path.dirname(temp_save_path), exist_ok=True)
+
+    try:
+        from modules.mlx_tts_engine import MLXRenderEngine
+
+        engine = MLXRenderEngine()
+        engine.render_dry_chunk(test_text, voice_cfg, temp_save_path)
+        engine.destroy()
+        return temp_save_path
+    except Exception as e:
+        return None
+
+
+def update_cast_voice_cfg(cast_state, char_name, mode, preset_voice, clone_file, design_text):
+    """锁定角色音色：将用户确认的配置写入 cast_state 并标记为 locked。
+
+    Args:
+        cast_state: 全局角色状态字典。
+        char_name: 要锁定的角色名称。
+        mode: 音色模式，"预设基底" | "声音克隆" | "文本设计"。
+        preset_voice: 预设音色下拉值。
+        clone_file: 克隆参考音频路径或文件对象。
+        design_text: 音色设计提示词。
+
+    Returns:
+        dict: 更新后的 cast_state（Gradio State 需要返回新值）。
+    """
+    if not cast_state or char_name not in cast_state:
+        return cast_state
+
+    voice_cfg = build_voice_cfg_from_ui(mode, preset_voice, clone_file, design_text)
+    cast_state[char_name]["voice_cfg"] = voice_cfg
+    cast_state[char_name]["locked"] = True
+    return cast_state
+
+
+def inject_cast_state_into_global_cast(global_cast, cast_state):
+    """将用户逐个试听并锁定的 voice_cfg 注入 global_cast，供全本压制使用。
+
+    仅覆盖已锁定的角色配置。
+
+    Args:
+        global_cast: 从 Master JSON 解析出的角色字典。
+        cast_state: 用户在选角控制台中维护的角色状态字典。
+
+    Returns:
+        dict: 注入了已锁定角色音色配置的 global_cast。
+    """
+    if not cast_state:
+        return global_cast
+    for char_name, info in cast_state.items():
+        if info.get("locked") and char_name in global_cast:
+            global_cast[char_name]["voice_cfg"] = info["voice_cfg"]
+    return global_cast
+
+
 # --- 核心逻辑封装 ---
 def run_cinecast(epub_file, mode_choice,
                  master_json_str, character_voice_files,
                  preset_voice_selection,
                  narrator_file, ambient_file, chime_file,
-                 is_preview=False):
+                 is_preview=False, cast_state=None):
     """统一处理入口：试听 / 全本压制"""
     if epub_file is None:
         return None, "❌ 请先上传小说文件"
@@ -281,6 +424,10 @@ def run_cinecast(epub_file, mode_choice,
     # 如果外脑 JSON 有旁白角色但未配音色，强制指定基底音色
     if global_cast and isinstance(global_cast.get("旁白"), dict):
         global_cast["旁白"]["voice"] = base_voice_id
+
+    # 🌟 注入用户在选角控制台中锁定的角色音色配置
+    if cast_state:
+        global_cast = inject_cast_state_into_global_cast(global_cast, cast_state)
 
     # 4. 组装配置，将拆解后的数据分别注入
     is_pure = "纯净" in mode_choice
@@ -394,6 +541,132 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                         language="markdown",
                     )
 
+            # 🌟 角色试音与定妆室：存放当前所有角色状态的全局变量
+            cast_state = gr.State({})
+
+            with gr.Accordion("🎭 角色试音与定妆室 (选角控制台)", open=True, visible=init_brain_visible) as audition_panel:
+                gr.Markdown("解析 Master JSON 后，可为每个角色独立试听、切换音色模式、确认锁定。所有角色锁定后方可全本压制。")
+
+                with gr.Row():
+                    btn_parse_cast = gr.Button("🔍 解析角色列表", variant="secondary")
+                    cast_parse_status = gr.Textbox(label="解析状态", interactive=False, scale=2)
+
+                def _parse_and_update(json_str):
+                    state = parse_json_to_cast_state(json_str)
+                    if state:
+                        names = ", ".join(state.keys())
+                        return state, f"✅ 已解析 {len(state)} 个角色：{names}"
+                    return {}, "❌ 解析失败，请检查 Master JSON 格式。"
+
+                btn_parse_cast.click(
+                    fn=_parse_and_update,
+                    inputs=master_json,
+                    outputs=[cast_state, cast_parse_status],
+                )
+
+                # 🌟 核心：使用 @gr.render 动态生成角色调音卡片
+                @gr.render(inputs=cast_state)
+                def render_character_cards(characters):
+                    if not characters:
+                        gr.Markdown("*暂无角色，请先在上方粘贴 Master JSON 并点击「解析角色列表」。*")
+                        return
+
+                    for char_name, char_info in characters.items():
+                        with gr.Group():
+                            with gr.Row():
+                                locked = char_info.get("locked", False)
+                                lock_icon = "🔒" if locked else "🗣️"
+                                gr.Markdown(f"### {lock_icon} {char_name}")
+                                gr.Markdown(
+                                    f"*设定：{char_info.get('gender', '未知')} / {char_info.get('emotion', '无')}*"
+                                )
+
+                            with gr.Row():
+                                # --- 左侧：音色调优参数 ---
+                                with gr.Column(scale=2):
+                                    mode_radio = gr.Radio(
+                                        ["预设基底", "声音克隆", "文本设计"],
+                                        value="预设基底",
+                                        label="音色生成模式",
+                                        interactive=not locked,
+                                    )
+
+                                    preset_dropdown = gr.Dropdown(
+                                        choices=QWEN_PRESET_VOICES,
+                                        value="Eric (默认男声)",
+                                        label="选择无口音预设",
+                                        interactive=not locked,
+                                    )
+                                    clone_upload = gr.File(
+                                        label="上传参考干音 (.wav)",
+                                        visible=False,
+                                        file_types=[".wav"],
+                                        interactive=not locked,
+                                    )
+                                    design_prompt = gr.Textbox(
+                                        label="音色设计提示词 (英/中)",
+                                        visible=False,
+                                        interactive=not locked,
+                                    )
+
+                                    def toggle_mode(m):
+                                        return [
+                                            gr.update(visible=(m == "预设基底")),
+                                            gr.update(visible=(m == "声音克隆")),
+                                            gr.update(visible=(m == "文本设计")),
+                                        ]
+
+                                    mode_radio.change(
+                                        toggle_mode,
+                                        inputs=mode_radio,
+                                        outputs=[preset_dropdown, clone_upload, design_prompt],
+                                    )
+
+                                # --- 右侧：独立试听沙盒 ---
+                                with gr.Column(scale=3):
+                                    test_text = gr.Textbox(
+                                        value="这是一段录音，请确认是否可以。",
+                                        label="试听文本 (可自由编辑)",
+                                        interactive=not locked,
+                                    )
+                                    with gr.Row():
+                                        btn_test = gr.Button("🎧 生成试听", variant="secondary", interactive=not locked)
+                                        btn_lock = gr.Button(
+                                            "🔒 已锁定" if locked else "✅ 确认使用此音色",
+                                            variant="primary",
+                                            interactive=not locked,
+                                        )
+
+                                    card_audio_player = gr.Audio(label="试听结果", interactive=False)
+
+                                    # 绑定试听逻辑
+                                    btn_test.click(
+                                        fn=test_single_voice,
+                                        inputs=[
+                                            gr.State(char_name),
+                                            mode_radio,
+                                            preset_dropdown,
+                                            clone_upload,
+                                            design_prompt,
+                                            test_text,
+                                        ],
+                                        outputs=card_audio_player,
+                                    )
+
+                                    # 锁定逻辑：更新 cast_state 并让按钮置灰
+                                    def _lock_voice(state, locked_char=char_name, *args):
+                                        mode_val, preset_val, clone_val, design_val = args
+                                        state = update_cast_voice_cfg(
+                                            state, locked_char, mode_val, preset_val, clone_val, design_val
+                                        )
+                                        return state, gr.update(value="🔒 已锁定", interactive=False)
+
+                                    btn_lock.click(
+                                        fn=_lock_voice,
+                                        inputs=[cast_state, mode_radio, preset_dropdown, clone_upload, design_prompt],
+                                        outputs=[cast_state, btn_lock],
+                                    )
+
             with gr.Accordion("🎛️ 第三步：通用声场与旁白", open=False):
                 with gr.Row():
                     preset_voice_dropdown = gr.Dropdown(
@@ -433,17 +706,18 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
             ### 💡 操作指南：
             1. **纯净旁白模式**：完全绕过大模型，按标点切分，速度极快，适合严肃文学和网文。
             2. **智能配音模式**：将全书发给外部大模型，一次性获取角色设定与前情提要的 Master JSON，粘贴即可。
-            3. **试听功能**：强烈建议在全本压制前，先点击【极速试听】确认音色与混音比例。
-            4. **断点续传**：如果在压制途中停止，再次点击全本压制，系统会自动跳过已生成的音频。
+            3. **选角控制台**：解析 JSON 后，可为每个角色独立试听三种音色模式（预设/克隆/设计），确认后锁定。
+            4. **试听功能**：强烈建议在全本压制前，先点击【极速试听】确认音色与混音比例。
+            5. **断点续传**：如果在压制途中停止，再次点击全本压制，系统会自动跳过已生成的音频。
             """
             )
 
     # --- 动态交互逻辑 ---
     def on_mode_change(mode):
         is_cast_mode = "智能配音" in mode
-        return gr.update(visible=is_cast_mode)
+        return gr.update(visible=is_cast_mode), gr.update(visible=is_cast_mode)
 
-    mode_selector.change(on_mode_change, mode_selector, brain_panel)
+    mode_selector.change(on_mode_change, mode_selector, [brain_panel, audition_panel])
 
     # --- 按钮绑定 ---
     inputs_list = [
@@ -458,14 +732,14 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
     ]
 
     btn_preview.click(
-        fn=lambda *args: run_cinecast(*args, is_preview=True),
-        inputs=inputs_list,
+        fn=lambda *args: run_cinecast(*args[:-1], is_preview=True, cast_state=args[-1]),
+        inputs=inputs_list + [cast_state],
         outputs=[audio_player, status_box],
     )
 
     btn_full.click(
-        fn=lambda *args: run_cinecast(*args, is_preview=False),
-        inputs=inputs_list,
+        fn=lambda *args: run_cinecast(*args[:-1], is_preview=False, cast_state=args[-1]),
+        inputs=inputs_list + [cast_state],
         outputs=[audio_player, status_box],
     )
 
