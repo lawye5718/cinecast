@@ -47,7 +47,7 @@ def _test_llm_connection(model_name, base_url, api_key):
         api_endpoint = f"{base_url.rstrip('/')}/chat/completions"
 
         response = _requests.post(
-            api_endpoint, json=payload, headers=headers, timeout=10
+            api_endpoint, json=payload, headers=headers, timeout=30
         )
 
         if response.status_code == 200:

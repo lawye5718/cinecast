@@ -255,7 +255,7 @@ class CineCastProducer:
                     "messages": [{"role": "user", "content": "ping"}],
                     "max_tokens": 8,
                 },
-                timeout=10,
+                timeout=30,
             )
             if response.status_code == 200:
                 logger.info("✅ Qwen API 服务前置检查通过")

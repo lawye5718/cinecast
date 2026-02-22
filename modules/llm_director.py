@@ -173,6 +173,7 @@ class LLMScriptDirector:
         self.client = OpenAI(
             api_key=self.api_key,
             base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            timeout=120.0,
         )
         
         self.max_chars_per_chunk = 150 # 🎯 修改点：微切片红线调整为 150 字
