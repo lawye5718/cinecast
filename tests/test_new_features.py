@@ -202,11 +202,14 @@ class TestExtractPreviewSentences:
             "第九句话。第十句话。第十一句话不该出现。",
             encoding="utf-8",
         )
-        import re as _re
+        import re
         with open(str(txt_file), "r", encoding="utf-8") as f:
             text = f.read()
-        sentences = _re.split(r'(?<=[。！？!?\n])', text)
-        sentences = [s.strip() for s in sentences if s.strip()]
+        sentences = re.split(r'(?<=[。！？!?])', text)
+        expanded = []
+        for s in sentences:
+            expanded.extend(s.split('\n'))
+        sentences = [s.strip() for s in expanded if s.strip()]
         selected = sentences[:10]
         assert len(selected) == 10
         assert "第十一句话" not in "\n".join(selected)

@@ -8,6 +8,7 @@ CineCast Web UI
 
 import os
 import json
+import re
 import shutil
 import uuid
 import requests
@@ -74,8 +75,8 @@ def load_llm_config():
         try:
             with open(LLM_CONFIG_FILE, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"⚠️ 大模型配置读取失败，使用默认设置: {e}")
     return {"model_name": "qwen-plus", "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1", "api_key": ""}
 
 
@@ -262,8 +263,6 @@ def extract_preview_sentences(book_file, num_sentences=10):
     Returns:
         str: 提取的句子文本（每行一句），失败时返回错误提示。
     """
-    import re as _re
-
     if book_file is None:
         return "❌ 请先上传小说文件。"
 
@@ -297,8 +296,12 @@ def extract_preview_sentences(book_file, num_sentences=10):
         return "❌ 未能从文件中提取有效文本。"
 
     # 按中英文标点分句
-    sentences = _re.split(r'(?<=[。！？!?\n])', text)
-    sentences = [s.strip() for s in sentences if s.strip()]
+    sentences = re.split(r'(?<=[。！？!?])', text)
+    # 同时按换行拆分
+    expanded = []
+    for s in sentences:
+        expanded.extend(s.split('\n'))
+    sentences = [s.strip() for s in expanded if s.strip()]
     selected = sentences[:num_sentences]
     return "\n".join(selected)
 

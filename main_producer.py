@@ -600,9 +600,11 @@ class CineCastProducer:
         try:
             # 🌟 如果用户提供了编辑后的试听文本，直接构建微切片，跳过 LLM
             if preview_text and preview_text.strip():
-                import re as _re
-                sentences = _re.split(r'(?<=[。！？!?\n])', preview_text)
-                sentences = [s.strip() for s in sentences if s.strip()]
+                sentences = re.split(r'(?<=[。！？!?])', preview_text)
+                expanded = []
+                for s in sentences:
+                    expanded.extend(s.split('\n'))
+                sentences = [s.strip() for s in expanded if s.strip()]
                 preview_script = []
                 for i, sent in enumerate(sentences[:10]):
                     preview_script.append({
