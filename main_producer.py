@@ -83,7 +83,8 @@ class CineCastProducer:
         """
         engine_config = {}
         for key in ("model_path_base", "model_path_design",
-                    "model_path_custom", "model_path_fallback"):
+                    "model_path_custom", "model_path_fallback",
+                    "default_narrator_voice"):
             val = self.config.get(key)
             if val:
                 engine_config[key] = val
@@ -109,6 +110,7 @@ class CineCastProducer:
             "global_cast": {},  # 🌟 外脑全局角色设定集（Character Bible）
             "custom_recaps": {},  # 🌟 外脑前情提要字典 {Chapter_NNN: recap_text}
             "enable_auto_recap": True,  # 🌟 是否启用本地LLM自动生成摘要
+            "default_narrator_voice": "eric",  # 🌟 默认旁白基底音色 (Qwen3-TTS Preset)
         }
     
     def _initialize_components(self):
@@ -131,11 +133,12 @@ class CineCastProducer:
                 model_path = os.path.join(project_root.parent, model_path)
             
             # 构建引擎配置（支持 1.7B Model Pool）
+            _path_keys = {"model_path_base", "model_path_design",
+                          "model_path_custom", "model_path_fallback"}
             engine_config = {}
-            for key in ("model_path_base", "model_path_design",
-                        "model_path_custom", "model_path_fallback"):
+            for key in (*_path_keys, "default_narrator_voice"):
                 val = self.config.get(key)
-                if val and not os.path.isabs(val):
+                if val and key in _path_keys and not os.path.isabs(val):
                     val = os.path.join(project_root.parent, val)
                 if val:
                     engine_config[key] = val
