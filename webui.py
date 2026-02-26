@@ -601,9 +601,12 @@ def run_cinecast(epub_file, mode_choice,
     is_pure = "纯净" in mode_choice
     # 🌟 优先使用 UI 界面当前值，回退到本地持久化配置，确保编剧阶段使用用户最新的大模型设置
     saved_llm_cfg = load_llm_config()
-    active_llm_model = llm_model_name.strip() if llm_model_name and llm_model_name.strip() else saved_llm_cfg.get("model_name")
-    active_llm_base_url = llm_base_url.strip() if llm_base_url and llm_base_url.strip() else saved_llm_cfg.get("base_url")
-    active_llm_api_key = llm_api_key.strip() if llm_api_key and llm_api_key.strip() else saved_llm_cfg.get("api_key")
+    ui_model = (llm_model_name or "").strip()
+    ui_base_url = (llm_base_url or "").strip()
+    ui_api_key = (llm_api_key or "").strip()
+    active_llm_model = ui_model or saved_llm_cfg.get("model_name", "")
+    active_llm_base_url = ui_base_url or saved_llm_cfg.get("base_url", "")
+    active_llm_api_key = ui_api_key or saved_llm_cfg.get("api_key", "")
     # 🌟 同步持久化最新的 LLM 配置，保证下次启动时也能读到
     if active_llm_model and active_llm_base_url and active_llm_api_key:
         save_llm_config(active_llm_model, active_llm_base_url, active_llm_api_key)
