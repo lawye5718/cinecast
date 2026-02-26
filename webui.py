@@ -482,6 +482,29 @@ def test_single_voice(char_name, mode, preset_voice, clone_file, design_text, te
         return None
 
 
+def _persist_clone_ref_audio(voice_cfg, role):
+    """将克隆模式的参考音频复制到持久化目录，防止 Gradio 临时文件丢失。
+
+    如果 voice_cfg 为克隆模式且 ref_audio 存在，则拷贝到
+    ``assets/voices/role_<role>.wav``，并原地更新 voice_cfg 中的路径。
+
+    Args:
+        voice_cfg: 音色配置字典（会被原地修改）。
+        role: 角色身份标签（如 m1, f1, narrator）。
+    """
+    if voice_cfg.get("mode") != "clone":
+        return
+    ref_audio = voice_cfg.get("ref_audio", "")
+    if not ref_audio or not os.path.exists(ref_audio):
+        return
+    persistent_dir = os.path.join("./assets", "voices")
+    os.makedirs(persistent_dir, exist_ok=True)
+    ext = os.path.splitext(ref_audio)[1] or ".wav"
+    persistent_path = os.path.join(persistent_dir, f"role_{role}{ext}")
+    shutil.copy(ref_audio, persistent_path)
+    voice_cfg["ref_audio"] = persistent_path
+
+
 def update_cast_voice_cfg(cast_state, char_name, mode, preset_voice, clone_file, design_text):
     """锁定角色音色：将用户确认的配置写入 cast_state 并标记为 locked。
 
@@ -500,11 +523,16 @@ def update_cast_voice_cfg(cast_state, char_name, mode, preset_voice, clone_file,
         return cast_state
 
     voice_cfg = build_voice_cfg_from_ui(mode, preset_voice, clone_file, design_text)
-    cast_state[char_name]["voice_cfg"] = voice_cfg
-    cast_state[char_name]["locked"] = True
 
     # 🎯 触发核心功能：当用户点击锁定时，如果他是男女主，立刻将其音色跨书籍全局固化
     role = cast_state[char_name].get("role", "extra")
+
+    # 🌟 克隆模式：将参考音频持久化到 assets/voices/，防止临时文件丢失
+    _persist_clone_ref_audio(voice_cfg, role)
+
+    cast_state[char_name]["voice_cfg"] = voice_cfg
+    cast_state[char_name]["locked"] = True
+
     save_role_voice(role, voice_cfg)
 
     return cast_state
@@ -535,6 +563,7 @@ def run_cinecast(epub_file, mode_choice,
                  master_json_str, character_voice_files,
                  preset_voice_selection,
                  narrator_file, ambient_file, chime_file,
+                 llm_model_name="", llm_base_url="", llm_api_key="",
                  is_preview=False, cast_state=None, preview_text=None):
     """统一处理入口：试听 / 全本压制"""
     if epub_file is None:
@@ -570,8 +599,14 @@ def run_cinecast(epub_file, mode_choice,
 
     # 4. 组装配置，将拆解后的数据分别注入
     is_pure = "纯净" in mode_choice
-    # 🌟 加载用户保存的 LLM 配置，确保编剧阶段使用用户测试成功的大模型
+    # 🌟 优先使用 UI 界面当前值，回退到本地持久化配置，确保编剧阶段使用用户最新的大模型设置
     saved_llm_cfg = load_llm_config()
+    active_llm_model = llm_model_name.strip() if llm_model_name and llm_model_name.strip() else saved_llm_cfg.get("model_name")
+    active_llm_base_url = llm_base_url.strip() if llm_base_url and llm_base_url.strip() else saved_llm_cfg.get("base_url")
+    active_llm_api_key = llm_api_key.strip() if llm_api_key and llm_api_key.strip() else saved_llm_cfg.get("api_key")
+    # 🌟 同步持久化最新的 LLM 配置，保证下次启动时也能读到
+    if active_llm_model and active_llm_base_url and active_llm_api_key:
+        save_llm_config(active_llm_model, active_llm_base_url, active_llm_api_key)
     config = {
         "assets_dir": "./assets",
         "output_dir": "./output/Preview" if is_preview else "./output/Audiobooks",
@@ -587,9 +622,9 @@ def run_cinecast(epub_file, mode_choice,
         "enable_recap": bool(custom_recaps),  # 有摘要数据时自动启用
         "user_recaps": None,               # 兼容旧版配置
         "default_narrator_voice": base_voice_id,  # 🌟 注入底层 TTS 引擎
-        "llm_model_name": saved_llm_cfg.get("model_name"),  # 🌟 用户配置的大模型名称
-        "llm_base_url": saved_llm_cfg.get("base_url"),      # 🌟 用户配置的 Base URL
-        "llm_api_key": saved_llm_cfg.get("api_key"),         # 🌟 用户配置的 API Key
+        "llm_model_name": active_llm_model,       # 🌟 用户配置的大模型名称（UI 实时值优先）
+        "llm_base_url": active_llm_base_url,      # 🌟 用户配置的 Base URL（UI 实时值优先）
+        "llm_api_key": active_llm_api_key,         # 🌟 用户配置的 API Key（UI 实时值优先）
     }
 
     try:
@@ -891,6 +926,9 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
         narrator_audio,
         ambient_audio,
         chime_audio,
+        llm_model,
+        llm_baseurl,
+        llm_apikey,
     ]
 
     btn_preview.click(
