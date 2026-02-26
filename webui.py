@@ -837,8 +837,7 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                                     )
 
                                     # 锁定逻辑：更新 cast_state 并让按钮置灰
-                                    def _lock_voice(state, locked_char=char_name, *args):
-                                        mode_val, preset_val, clone_val, design_val = args
+                                    def _lock_voice(state, locked_char, mode_val, preset_val, clone_val, design_val):
                                         state = update_cast_voice_cfg(
                                             state, locked_char, mode_val, preset_val, clone_val, design_val
                                         )
@@ -846,7 +845,7 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
 
                                     btn_lock.click(
                                         fn=_lock_voice,
-                                        inputs=[cast_state, mode_radio, preset_dropdown, clone_upload, design_prompt],
+                                        inputs=[cast_state, gr.State(char_name), mode_radio, preset_dropdown, clone_upload, design_prompt],
                                         outputs=[cast_state, btn_lock],
                                     )
 
