@@ -538,6 +538,23 @@ def update_cast_voice_cfg(cast_state, char_name, mode, preset_voice, clone_file,
     return cast_state
 
 
+def unlock_cast_voice_cfg(cast_state, char_name):
+    """解锁角色音色：将已锁定的角色标记为未锁定，允许用户继续修改。
+
+    Args:
+        cast_state: 全局角色状态字典。
+        char_name: 要解锁的角色名称。
+
+    Returns:
+        dict: 更新后的 cast_state（Gradio State 需要返回新值）。
+    """
+    if not cast_state or char_name not in cast_state:
+        return cast_state
+
+    cast_state[char_name]["locked"] = False
+    return cast_state
+
+
 def inject_cast_state_into_global_cast(global_cast, cast_state):
     """将用户逐个试听并锁定的 voice_cfg 注入 global_cast，供全本压制使用。
 
@@ -755,9 +772,35 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                         return
 
                     for char_name, char_info in characters.items():
+                        locked = char_info.get("locked", False)
+                        voice_cfg = char_info.get("voice_cfg", {})
+                        saved_mode = voice_cfg.get("mode", "preset")
+
+                        # 🌟 根据已保存的 voice_cfg 还原 UI 显示值
+                        if saved_mode == "clone":
+                            mode_default = "声音克隆"
+                        elif saved_mode == "design":
+                            mode_default = "文本设计"
+                        else:
+                            mode_default = "预设基底"
+
+                        # 还原预设音色下拉值
+                        preset_default = "Aiden"
+                        if saved_mode == "preset":
+                            saved_voice_id = voice_cfg.get("voice", "aiden")
+                            for v in QWEN_PRESET_VOICES:
+                                if v.split(" ")[0].lower() == saved_voice_id.lower():
+                                    preset_default = v
+                                    break
+
+                        # 还原克隆参考音频路径
+                        clone_default = voice_cfg.get("ref_audio", None) if saved_mode == "clone" else None
+
+                        # 还原音色设计提示词
+                        design_default = voice_cfg.get("instruct", "") if saved_mode == "design" else ""
+
                         with gr.Group():
                             with gr.Row():
-                                locked = char_info.get("locked", False)
                                 lock_icon = "🔒" if locked else "🗣️"
                                 gr.Markdown(f"### {lock_icon} {char_name}")
                                 gr.Markdown(
@@ -769,27 +812,26 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                                 with gr.Column(scale=2):
                                     mode_radio = gr.Radio(
                                         ["预设基底", "声音克隆", "文本设计"],
-                                        value="预设基底",
+                                        value=mode_default,
                                         label="音色生成模式",
-                                        interactive=not locked,
                                     )
 
                                     preset_dropdown = gr.Dropdown(
                                         choices=QWEN_PRESET_VOICES,
-                                        value="Aiden",
+                                        value=preset_default,
                                         label="选择无口音预设",
-                                        interactive=not locked,
+                                        visible=(mode_default == "预设基底"),
                                     )
                                     clone_upload = gr.File(
                                         label="上传参考干音 (.wav)",
-                                        visible=False,
+                                        visible=(mode_default == "声音克隆"),
                                         file_types=[".wav"],
-                                        interactive=not locked,
+                                        value=clone_default,
                                     )
                                     design_prompt = gr.Textbox(
                                         label="音色设计提示词 (英/中)",
-                                        visible=False,
-                                        interactive=not locked,
+                                        visible=(mode_default == "文本设计"),
+                                        value=design_default,
                                     )
 
                                     def toggle_mode(m):
@@ -810,14 +852,12 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                                     test_text = gr.Textbox(
                                         value="这是一段录音，请确认是否可以。",
                                         label="试听文本 (可自由编辑)",
-                                        interactive=not locked,
                                     )
                                     with gr.Row():
-                                        btn_test = gr.Button("🎧 生成试听", variant="secondary", interactive=not locked)
+                                        btn_test = gr.Button("🎧 生成试听", variant="secondary")
                                         btn_lock = gr.Button(
-                                            "🔒 已锁定" if locked else "✅ 确认使用此音色",
+                                            "🔓 解锁修改" if locked else "✅ 确认使用此音色",
                                             variant="primary",
-                                            interactive=not locked,
                                         )
 
                                     card_audio_player = gr.Audio(label="试听结果", interactive=False)
@@ -836,17 +876,22 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                                         outputs=card_audio_player,
                                     )
 
-                                    # 锁定逻辑：更新 cast_state 并让按钮置灰
-                                    def _lock_voice(state, locked_char, mode_val, preset_val, clone_val, design_val):
-                                        state = update_cast_voice_cfg(
-                                            state, locked_char, mode_val, preset_val, clone_val, design_val
-                                        )
-                                        return state, gr.update(value="🔒 已锁定", interactive=False)
+                                    # 🌟 锁定/解锁切换逻辑
+                                    def _toggle_lock(state, locked_char, mode_val, preset_val, clone_val, design_val):
+                                        if state.get(locked_char, {}).get("locked", False):
+                                            # 当前已锁定 → 解锁，允许用户继续修改
+                                            state = unlock_cast_voice_cfg(state, locked_char)
+                                        else:
+                                            # 当前未锁定 → 锁定并保存配置
+                                            state = update_cast_voice_cfg(
+                                                state, locked_char, mode_val, preset_val, clone_val, design_val
+                                            )
+                                        return state
 
                                     btn_lock.click(
-                                        fn=_lock_voice,
+                                        fn=_toggle_lock,
                                         inputs=[cast_state, gr.State(char_name), mode_radio, preset_dropdown, clone_upload, design_prompt],
-                                        outputs=[cast_state, btn_lock],
+                                        outputs=[cast_state],
                                     )
 
             with gr.Accordion("🎛️ 第三步：通用声场与旁白", open=False):

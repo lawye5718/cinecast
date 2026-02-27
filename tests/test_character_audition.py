@@ -75,6 +75,15 @@ def update_cast_voice_cfg(cast_state, char_name, mode, preset_voice, clone_file,
     return cast_state
 
 
+def unlock_cast_voice_cfg(cast_state, char_name):
+    """Standalone copy matching webui.py implementation."""
+    if not cast_state or char_name not in cast_state:
+        return cast_state
+
+    cast_state[char_name]["locked"] = False
+    return cast_state
+
+
 def inject_cast_state_into_global_cast(global_cast, cast_state):
     """Standalone copy matching webui.py implementation."""
     if not cast_state:
@@ -261,6 +270,71 @@ class TestUpdateCastVoiceCfg:
 
 
 # ---------------------------------------------------------------------------
+# Tests: unlock_cast_voice_cfg
+# ---------------------------------------------------------------------------
+
+class TestUnlockCastVoiceCfg:
+    def _make_locked_state(self):
+        return {
+            "老渔夫": {
+                "gender": "male", "emotion": "沧桑",
+                "locked": True,
+                "voice_cfg": {"mode": "preset", "voice": "ryan"},
+            }
+        }
+
+    def test_unlocks_character(self):
+        """Should set locked=False for the character."""
+        state = self._make_locked_state()
+        updated = unlock_cast_voice_cfg(state, "老渔夫")
+        assert updated["老渔夫"]["locked"] is False
+
+    def test_preserves_voice_cfg_after_unlock(self):
+        """Should preserve voice_cfg when unlocking."""
+        state = self._make_locked_state()
+        updated = unlock_cast_voice_cfg(state, "老渔夫")
+        assert updated["老渔夫"]["voice_cfg"]["voice"] == "ryan"
+
+    def test_unlock_then_relock(self):
+        """Should allow re-locking with different voice after unlock."""
+        state = self._make_locked_state()
+        state = unlock_cast_voice_cfg(state, "老渔夫")
+        assert state["老渔夫"]["locked"] is False
+        state = update_cast_voice_cfg(state, "老渔夫", "预设基底", "Serena (默认女声)", None, "")
+        assert state["老渔夫"]["locked"] is True
+        assert state["老渔夫"]["voice_cfg"]["voice"] == "serena"
+
+    def test_unlock_clone_voice_preserves_ref_audio(self):
+        """Should preserve clone ref_audio path after unlock."""
+        state = {
+            "角色A": {
+                "gender": "female", "emotion": "活泼",
+                "locked": True,
+                "voice_cfg": {"mode": "clone", "ref_audio": "/path/to/voice.wav", "ref_text": ""},
+            }
+        }
+        updated = unlock_cast_voice_cfg(state, "角色A")
+        assert updated["角色A"]["locked"] is False
+        assert updated["角色A"]["voice_cfg"]["ref_audio"] == "/path/to/voice.wav"
+
+    def test_unknown_character_no_change(self):
+        """Should not crash when character not in state."""
+        state = self._make_locked_state()
+        updated = unlock_cast_voice_cfg(state, "不存在的角色")
+        assert updated == state
+
+    def test_empty_state_no_crash(self):
+        """Should handle empty state gracefully."""
+        updated = unlock_cast_voice_cfg({}, "角色")
+        assert updated == {}
+
+    def test_none_state_no_crash(self):
+        """Should handle None state gracefully."""
+        updated = unlock_cast_voice_cfg(None, "角色")
+        assert updated is None
+
+
+# ---------------------------------------------------------------------------
 # Tests: inject_cast_state_into_global_cast
 # ---------------------------------------------------------------------------
 
@@ -388,3 +462,21 @@ class TestAuditionConsoleSourceStructure:
     def test_uuid_import(self, webui_source):
         """webui.py should import uuid for test audio filename generation."""
         assert "import uuid" in webui_source
+
+    def test_unlock_cast_voice_cfg_defined(self, webui_source):
+        """unlock_cast_voice_cfg function should be defined."""
+        assert "def unlock_cast_voice_cfg(" in webui_source
+
+    def test_unlock_button_text_exists(self, webui_source):
+        """Unlock button text should exist in the UI for locked characters."""
+        assert "解锁修改" in webui_source
+
+    def test_toggle_lock_logic_exists(self, webui_source):
+        """Toggle lock/unlock logic should exist in the UI."""
+        assert "_toggle_lock" in webui_source
+
+    def test_voice_cfg_restored_in_render(self, webui_source):
+        """Render should restore voice_cfg values for display."""
+        assert "saved_mode" in webui_source
+        assert "mode_default" in webui_source
+        assert "preset_default" in webui_source
