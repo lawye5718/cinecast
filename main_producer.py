@@ -123,7 +123,12 @@ class CineCastProducer:
             logger.info("✅ 资产管理系统初始化完成")
             
             # 2. 初始化LLM剧本导演
-            self.director = LLMScriptDirector()
+            self.director = LLMScriptDirector(
+                api_key=self.config.get("llm_api_key"),
+                model_name=self.config.get("llm_model_name"),
+                base_url=self.config.get("llm_base_url"),
+                global_cast=self.config.get("global_cast", {}),
+            )
             logger.info("✅ LLM剧本导演初始化完成")
             
             # 3. 初始化MLX渲染引擎

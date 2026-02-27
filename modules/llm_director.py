@@ -633,9 +633,9 @@ class LLMScriptDirector:
             text: 待处理的章节文本
             max_length: LLM 单次处理的最大字符数上限，默认8000
         """
-        logger.info(f"🚀 启动 Qwen-Flash 剧本解析，当前章节字数: {len(text)}")
+        logger.info(f"🚀 启动 {self.model_name} 剧本解析，当前章节字数: {len(text)}")
 
-        # 🌟 Qwen-Flash 拥有 1M 超大上下文，整章直出，仅超长章节才切分
+        # 🌟 利用大模型超大上下文，整章直出，仅超长章节才切分
         text_chunks = self._chunk_text_for_llm(text, max_length=max_length)
         full_script = []
         
@@ -713,9 +713,9 @@ class LLMScriptDirector:
         if not text:
             return ""
 
-        logger.info(f"🚀 启动 Qwen-Flash 前情摘要生成，上一章字数: {len(text)}")
+        logger.info(f"🚀 启动 {self.model_name} 前情摘要生成，上一章字数: {len(text)}")
 
-        # 直接生成终极摘要 + 悬念钩子（Qwen 1M 上下文足以容纳整章内容）
+        # 直接生成终极摘要 + 悬念钩子（利用大模型上下文容纳整章内容）
         reduce_prompt = (
             '你是一位顶级的有声书剧本编辑和悬疑大师。'
             '请根据提供的上一章内容，写一段不超过100字的\u201c前情摘要\u201d。'
@@ -863,7 +863,7 @@ class LLMScriptDirector:
             {"role": "user", "content": user_content}
         ]
 
-        logger.info(f"🚀 发起 Qwen-Flash 解析请求 | 原文字数: {len(text_chunk)}")
+        logger.info(f"🚀 发起 {self.model_name} 解析请求 | 原文字数: {len(text_chunk)}")
 
         max_retries = 3
 

@@ -247,3 +247,25 @@ class TestBenignLLMCallWording:
         source = inspect.getsource(LLMScriptDirector._request_llm)
         assert "有声书剧本转换" in source
         assert "JSON 数组" in source
+
+    def test_log_messages_use_dynamic_model_name(self):
+        """Log messages should use self.model_name, not hardcoded 'Qwen-Flash'."""
+        for method_name in ('_request_llm', 'parse_text_to_script', 'generate_chapter_recap'):
+            source = inspect.getsource(getattr(LLMScriptDirector, method_name))
+            # Check that logger.info calls don't contain hardcoded 'Qwen-Flash'
+            for line in source.splitlines():
+                if 'logger.info' in line:
+                    assert 'Qwen-Flash' not in line, (
+                        f"{method_name} has hardcoded 'Qwen-Flash' in log: {line.strip()}"
+                    )
+
+    def test_initialize_components_passes_llm_config(self):
+        """_initialize_components should pass user LLM config to LLMScriptDirector."""
+        try:
+            from main_producer import CineCastProducer
+        except ImportError:
+            pytest.skip("main_producer requires mlx (macOS-only)")
+        source = inspect.getsource(CineCastProducer._initialize_components)
+        assert "llm_api_key" in source or "llm_model_name" in source, (
+            "_initialize_components should pass user config to LLMScriptDirector"
+        )
