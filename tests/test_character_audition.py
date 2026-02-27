@@ -411,8 +411,16 @@ class TestToggleLockDeepCopy:
     def test_lock_preserves_other_characters(self):
         """Toggle should preserve other characters in state."""
         state = {
-            "老渔夫": {"gender": "male", "emotion": "沧桑", "locked": False, "voice_cfg": {"mode": "preset", "voice": "aiden"}},
-            "旁白": {"gender": "male", "emotion": "平静", "locked": True, "voice_cfg": {"mode": "preset", "voice": "eric"}},
+            "老渔夫": {
+                "gender": "male", "emotion": "沧桑",
+                "locked": False,
+                "voice_cfg": {"mode": "preset", "voice": "aiden"},
+            },
+            "旁白": {
+                "gender": "male", "emotion": "平静",
+                "locked": True,
+                "voice_cfg": {"mode": "preset", "voice": "eric"},
+            },
         }
         result = _toggle_lock(state, "老渔夫", "预设基底", "Ryan", None, "")
         assert result["旁白"]["locked"] is True
