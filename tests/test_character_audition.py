@@ -480,3 +480,10 @@ class TestAuditionConsoleSourceStructure:
         assert "saved_mode" in webui_source
         assert "mode_default" in webui_source
         assert "preset_default" in webui_source
+
+    def test_interactive_param_on_rendered_components(self, webui_source):
+        """Input components inside @gr.render should set interactive=(not locked)."""
+        # Ensure the fix for the "cannot modify even without lock" bug is present:
+        # mode_radio, preset_dropdown, clone_upload, design_prompt, test_text
+        # must all have interactive=(not locked) so they are editable when unlocked.
+        assert "interactive=(not locked)" in webui_source

@@ -814,6 +814,7 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                                         ["预设基底", "声音克隆", "文本设计"],
                                         value=mode_default,
                                         label="音色生成模式",
+                                        interactive=(not locked),
                                     )
 
                                     preset_dropdown = gr.Dropdown(
@@ -821,17 +822,20 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                                         value=preset_default,
                                         label="选择无口音预设",
                                         visible=(mode_default == "预设基底"),
+                                        interactive=(not locked),
                                     )
                                     clone_upload = gr.File(
                                         label="上传参考干音 (.wav)",
                                         visible=(mode_default == "声音克隆"),
                                         file_types=[".wav"],
                                         value=clone_default,
+                                        interactive=(not locked),
                                     )
                                     design_prompt = gr.Textbox(
                                         label="音色设计提示词 (英/中)",
                                         visible=(mode_default == "文本设计"),
                                         value=design_default,
+                                        interactive=(not locked),
                                     )
 
                                     def toggle_mode(m):
@@ -852,6 +856,7 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
                                     test_text = gr.Textbox(
                                         value="这是一段录音，请确认是否可以。",
                                         label="试听文本 (可自由编辑)",
+                                        interactive=(not locked),
                                     )
                                     with gr.Row():
                                         btn_test = gr.Button("🎧 生成试听", variant="secondary")
