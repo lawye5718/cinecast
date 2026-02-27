@@ -6,6 +6,7 @@ CineCast Web UI
 包含：工作区断点记忆与自动恢复功能、实时制片日志流式展示、自动质检
 """
 
+import copy
 import os
 import json
 import re
@@ -883,6 +884,8 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
 
                                     # 🌟 锁定/解锁切换逻辑
                                     def _toggle_lock(state, locked_char, mode_val, preset_val, clone_val, design_val):
+                                        # 深拷贝 state，确保返回新对象以触发 @gr.render 重新渲染
+                                        state = copy.deepcopy(state)
                                         if state.get(locked_char, {}).get("locked", False):
                                             # 当前已锁定 → 解锁，允许用户继续修改
                                             state = unlock_cast_voice_cfg(state, locked_char)

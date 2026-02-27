@@ -10,6 +10,7 @@ Covers:
 - WebUI source structure: audition panel, @gr.render, cast_state
 """
 
+import copy
 import json
 import os
 import sys
@@ -92,6 +93,18 @@ def inject_cast_state_into_global_cast(global_cast, cast_state):
         if info.get("locked") and char_name in global_cast:
             global_cast[char_name]["voice_cfg"] = info["voice_cfg"]
     return global_cast
+
+
+def _toggle_lock(state, locked_char, mode_val, preset_val, clone_val, design_val):
+    """Standalone copy matching webui.py _toggle_lock (with deep copy fix)."""
+    state = copy.deepcopy(state)
+    if state.get(locked_char, {}).get("locked", False):
+        state = unlock_cast_voice_cfg(state, locked_char)
+    else:
+        state = update_cast_voice_cfg(
+            state, locked_char, mode_val, preset_val, clone_val, design_val
+        )
+    return state
 
 
 # ---------------------------------------------------------------------------
@@ -335,6 +348,86 @@ class TestUnlockCastVoiceCfg:
 
 
 # ---------------------------------------------------------------------------
+# Tests: _toggle_lock (deep copy ensures @gr.render re-renders)
+# ---------------------------------------------------------------------------
+
+class TestToggleLockDeepCopy:
+    """Verify _toggle_lock returns a new dict to trigger @gr.render re-render."""
+
+    def _make_unlocked_state(self):
+        return {
+            "老渔夫": {
+                "gender": "male", "emotion": "沧桑",
+                "locked": False,
+                "voice_cfg": {"mode": "preset", "voice": "aiden"},
+            }
+        }
+
+    def _make_locked_state(self):
+        return {
+            "老渔夫": {
+                "gender": "male", "emotion": "沧桑",
+                "locked": True,
+                "voice_cfg": {"mode": "preset", "voice": "ryan"},
+            }
+        }
+
+    def test_lock_returns_new_dict_reference(self):
+        """Locking should return a new dict (not same reference) for @gr.render."""
+        original = self._make_unlocked_state()
+        result = _toggle_lock(original, "老渔夫", "预设基底", "Ryan", None, "")
+        assert result is not original
+        assert result["老渔夫"]["locked"] is True
+
+    def test_unlock_returns_new_dict_reference(self):
+        """Unlocking should return a new dict (not same reference) for @gr.render."""
+        original = self._make_locked_state()
+        result = _toggle_lock(original, "老渔夫", "预设基底", "Ryan", None, "")
+        assert result is not original
+        assert result["老渔夫"]["locked"] is False
+
+    def test_lock_does_not_mutate_original(self):
+        """Locking should not mutate the original state dict."""
+        original = self._make_unlocked_state()
+        _toggle_lock(original, "老渔夫", "预设基底", "Ryan", None, "")
+        assert original["老渔夫"]["locked"] is False
+
+    def test_unlock_does_not_mutate_original(self):
+        """Unlocking should not mutate the original state dict."""
+        original = self._make_locked_state()
+        _toggle_lock(original, "老渔夫", "预设基底", "Ryan", None, "")
+        assert original["老渔夫"]["locked"] is True
+
+    def test_lock_unlock_roundtrip_returns_new_refs(self):
+        """Lock then unlock should both return new references."""
+        state = self._make_unlocked_state()
+        locked = _toggle_lock(state, "老渔夫", "预设基底", "Ryan", None, "")
+        assert locked is not state
+        assert locked["老渔夫"]["locked"] is True
+        unlocked = _toggle_lock(locked, "老渔夫", "预设基底", "Ryan", None, "")
+        assert unlocked is not locked
+        assert unlocked["老渔夫"]["locked"] is False
+
+    def test_lock_preserves_other_characters(self):
+        """Toggle should preserve other characters in state."""
+        state = {
+            "老渔夫": {
+                "gender": "male", "emotion": "沧桑",
+                "locked": False,
+                "voice_cfg": {"mode": "preset", "voice": "aiden"},
+            },
+            "旁白": {
+                "gender": "male", "emotion": "平静",
+                "locked": True,
+                "voice_cfg": {"mode": "preset", "voice": "eric"},
+            },
+        }
+        result = _toggle_lock(state, "老渔夫", "预设基底", "Ryan", None, "")
+        assert result["旁白"]["locked"] is True
+        assert result["旁白"]["voice_cfg"]["voice"] == "eric"
+
+
+# ---------------------------------------------------------------------------
 # Tests: inject_cast_state_into_global_cast
 # ---------------------------------------------------------------------------
 
@@ -490,4 +583,14 @@ class TestAuditionConsoleSourceStructure:
         count = webui_source.count("interactive=(not locked)")
         assert count >= 5, (
             f"Expected at least 5 components with interactive=(not locked), found {count}"
+        )
+
+    def test_toggle_lock_uses_deep_copy(self, webui_source):
+        """_toggle_lock must deep copy state to ensure @gr.render detects changes."""
+        assert "import copy" in webui_source
+        # Find _toggle_lock function body and verify it uses copy.deepcopy
+        func_start = webui_source.index("def _toggle_lock(")
+        func_body = webui_source[func_start:func_start + 500]
+        assert "copy.deepcopy(state)" in func_body, (
+            "_toggle_lock must deep copy state so @gr.render re-renders on lock/unlock"
         )
