@@ -16,6 +16,7 @@ import concurrent.futures
 import gc
 import os
 import re
+import threading  # 🚨 引入线程锁
 import warnings
 
 # 拦截 Tokenizer 正则警告，保持终端日志纯净
@@ -77,6 +78,7 @@ class MLXRenderEngine:
         self.model = None
         # 创建专门用于磁盘写入的单线程池，避免阻塞推理
         self.io_executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        self._gpu_lock = threading.Lock()  # 🚨 引擎内部持有一把全局互斥锁
         # 严格映射本地模型，避免意外降级
         self._model_paths = {
             "preset": self.config.get("model_path_custom", "./models/Qwen3-TTS-12Hz-1.7B-CustomVoice-4bit"),
@@ -582,23 +584,28 @@ class CinecastMLXEngine:
                 if "voice" in feature:
                     voice_cfg["voice"] = feature["voice"]
         
-        # 直接在内存中生成音频，避免磁盘I/O阻塞
-        try:
-            # 加载模型并生成
-            engine._load_mode(voice_cfg["mode"])
-            results = list(engine.model.generate(text=text, **{k: v for k, v in voice_cfg.items() if k != "mode"}))
-            
-            if results:
-                audio_array = results[0].audio
-                mx.eval(audio_array)  # 强制执行计算
-                audio_data = np.array(audio_array)
-                return audio_data
-            else:
-                raise RuntimeError("音频生成失败：无输出结果")
+        # 🚨 所有推理行为必须进入引擎锁
+        with engine._gpu_lock:
+            try:
+                # 直接在内存中生成音频，避免磁盘I/O阻塞
+                # 加载模型并生成
+                engine._load_mode(voice_cfg["mode"])
+                results = list(engine.model.generate(text=text, **{k: v for k, v in voice_cfg.items() if k != "mode"}))
                 
-        except Exception as e:
-            logger.error(f"音频生成过程中出错: {e}")
-            raise
+                if results:
+                    audio_array = results[0].audio
+                    mx.eval(audio_array)  # 强制执行计算
+                    audio_data = np.array(audio_array)
+                    return audio_data
+                else:
+                    raise RuntimeError("音频生成失败：无输出结果")
+                    
+            except Exception as e:
+                logger.error(f"音频生成过程中出错: {e}")
+                raise
+            finally:
+                # 无论成功还是异常，释放锁前必定清理显存
+                mx.metal.clear_cache()
     
     def unload_model(self):
         """卸载模型，释放统一内存。

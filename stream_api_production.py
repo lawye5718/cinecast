@@ -23,7 +23,6 @@ import io
 import logging
 import time
 import re
-import threading  # 🚨 引入线程锁解决并发
 import warnings   # 🚨 引入警告控制
 
 # 屏蔽 Tokenizer 无意义的正则表达式警告
@@ -31,9 +30,6 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", module="tiktoken")
 
 from pydub import AudioSegment
-
-# 🚨 全局 GPU 锁，防止多请求同时争抢 Metal 导致进程崩溃
-gpu_lock = threading.Lock()
 
 # 导入项目模块
 from modules.mlx_tts_engine import CinecastMLXEngine as MLXTTSEngine
@@ -196,38 +192,37 @@ def generate_mp3_chunks(text: str, voice_name: str):
                 
             logger.info(f"🎵 正在生成第 {i+1}/{len(merged_sentences)} 句: {sentence[:20]}...")
             
-            # 🚨🚨🚨 核心修复：加锁！任何对 MLX 的调用必须在锁内！
-            with gpu_lock:
-                try:
-                    # 🌟 架构回归：调用原本封装好的 generate_with_feature，它原生支持克隆和预设！
-                    audio_data = voice_context.engine.generate_with_feature(
-                        sentence, 
-                        feature, 
-                        language="zh"
+            # 🌟 架构回归：调用原本封装好的 generate_with_feature，它原生支持克隆和预设！
+            # 🚨 注意：引擎内部已有锁保护，此处无需再加锁
+            try:
+                audio_data = voice_context.engine.generate_with_feature(
+                    sentence, 
+                    feature, 
+                    language="zh"
+                )
+                
+                if audio_data is not None and audio_data.size > 0:
+                    # 🚨 新增防御：截断一切异常尖峰，防止 int16 溢出导致的刺耳爆音
+                    audio_data = np.clip(audio_data, -1.0, 1.0)
+                    
+                    # 将PCM转换为MP3帧
+                    audio_segment = AudioSegment(
+                        (audio_data * 32767).astype(np.int16).tobytes(),
+                        frame_rate=24000, sample_width=2, channels=1
                     )
                     
-                    if audio_data is not None and audio_data.size > 0:
-                        # 将PCM转换为MP3帧
-                        audio_segment = AudioSegment(
-                            (audio_data * 32767).astype(np.int16).tobytes(),
-                            frame_rate=24000, sample_width=2, channels=1
-                        )
-                        
-                        mp3_buf = io.BytesIO()
-                        audio_segment.export(mp3_buf, format="mp3", parameters=["-write_xing", "0"])
-                        mp3_bytes = mp3_buf.getvalue()
-                        
-                        logger.info(f"✅ 第 {i+1} 句MP3生成完成 ({len(mp3_bytes)} bytes)")
-                        yield mp3_bytes
-                    else:
-                        logger.warning(f"⚠️ 生成音频为空，跳过第 {i+1} 句")
-                        
-                except Exception as ex:
-                    logger.error(f"❌ 当前句子生成异常: {ex}")
-                    continue
-                finally:
-                    # 在锁内进行清理，确保下一个请求拿到干净的显存
-                    mx.metal.clear_cache()
+                    mp3_buf = io.BytesIO()
+                    audio_segment.export(mp3_buf, format="mp3", parameters=["-write_xing", "0"])
+                    mp3_bytes = mp3_buf.getvalue()
+                    
+                    logger.info(f"✅ 第 {i+1} 句MP3生成完成 ({len(mp3_bytes)} bytes)")
+                    yield mp3_bytes
+                else:
+                    logger.warning(f"⚠️ 生成音频为空，跳过第 {i+1} 句")
+                    
+            except Exception as ex:
+                logger.error(f"❌ 当前句子生成异常: {ex}")
+                continue
             
             # 在锁外释放 CPU 资源片刻，防止阻塞其他线程抢锁
             import gc
