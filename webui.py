@@ -1139,7 +1139,7 @@ with gr.Blocks(title="CineCast 流式朗读API") as stream_ui:
                 interactive=False,
                 autoplay=True
             )
-            stream_progress = gr.Progress(label="生成进度")
+            stream_progress = gr.Progress()
             stream_logs = gr.Textbox(
                 label="实时日志",
                 interactive=False,
