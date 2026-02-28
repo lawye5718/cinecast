@@ -23,13 +23,18 @@ import io
 import logging
 import time
 import re
-import warnings   # 🚨 引入警告控制
+import asyncio  # 🚨 新增：用于异步线程管控
+import warnings
 
-# 屏蔽 Tokenizer 无意义的正则表达式警告
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", module="tiktoken")
 
 from pydub import AudioSegment
+import numpy as np
+import mlx.core as mx
+
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import Response  # 🚨 替换 StreamingResponse
 
 # 导入项目模块
 from modules.mlx_tts_engine import CinecastMLXEngine as MLXTTSEngine
@@ -41,6 +46,26 @@ logger = logging.getLogger(__name__)
 
 # 创建 FastAPI 应用
 app = FastAPI(title="CineCast Streaming TTS API - Production Ready")
+
+# =====================================================================
+# 🌟 修复一：无缝集成原有 Gradio WebUI，共用模型与显存
+# =====================================================================
+try:
+    import gradio as gr
+    # 拦截旧版网页中的 demo.launch() 防止阻塞 API 服务器
+    _original_launch = gr.Blocks.launch
+    gr.Blocks.launch = lambda self, *args, **kwargs: None
+    
+    import webui  # 导入您原项目中的网页端代码
+    
+    gr.Blocks.launch = _original_launch # 恢复原方法
+    
+    if hasattr(webui, 'demo'):
+        # 将原网页挂载到 /webui 路径
+        app = gr.mount_gradio_app(app, webui.demo, path="/webui")
+        logger.info("✅ 原有 Cinecast 网页端已成功挂载！您可以通过 http://localhost:8888/webui 访问操作！")
+except Exception as e:
+    logger.error(f"⚠️ 挂载原有网页端失败，但 API 将继续运行: {e}")
 
 # CORS 配置
 app.add_middleware(
@@ -155,100 +180,82 @@ async def set_voice(voice_name: str = Form(...)):
         logger.error(f"❌ 设置音色失败: {e}")
         return {"error": str(e)}
 
-def generate_mp3_chunks(text: str, voice_name: str):
-    """生成MP3音频块的生成器函数（加锁防崩溃 + 支持克隆）"""
+
+
+# =====================================================================
+# 🌟 修复二：专为 Anxreader 等阅读 App 设计的单头整段响应架构
+# =====================================================================
+@app.post("/v1/audio/speech")
+async def openai_compatible_tts(request: Request, body: OpenAITTSRequest):
     if not voice_context.is_ready:
-        raise RuntimeError("Service not ready")
+        raise HTTPException(status_code=503, detail="TTS 服务未就绪")
     
     try:
-        # 🚨 架构回归：获取完整的音色特征（可能是预设，也可能是本地的克隆配置）
-        feature = voice_context.get_voice_feature(voice_name)
+        feature = voice_context.get_voice_feature(body.voice)
         
-        # 文本预处理 - 暴力清洗 (保留你之前的修复)
-        safe_text = re.sub(r'[…]+', '。', text)
+        # 暴力清洗特殊符号
+        safe_text = re.sub(r'[…]+', '。', body.input)
         safe_text = re.sub(r'\.{2,}', '。', safe_text)
         safe_text = re.sub(r'[—]+', '，', safe_text)
         safe_text = re.sub(r'[-]{2,}', '，', safe_text)
         safe_text = re.sub(r'[~～]+', '。', safe_text)
         safe_text = re.sub(r'\s+', ' ', safe_text).strip()
         
-        # 按句号、问号、感叹号安全分割
         sentences = [s.strip() for s in re.split(r'([。！？!?])', safe_text) if s.strip()]
-        
-        # 将句子和标点重新合并，避免标点单独成句
         merged_sentences = []
         for i in range(0, len(sentences)-1, 2):
             merged_sentences.append(sentences[i] + sentences[i+1])
         if len(sentences) % 2 != 0:
             merged_sentences.append(sentences[-1])
             
-        logger.info(f"📝 开始生成 {len(merged_sentences)} 个句子, 使用音色特征: {feature['mode']}")
+        logger.info(f"🎧 收到 App 请求，切分为 {len(merged_sentences)} 句，使用音色: {feature['mode']}")
+        
+        all_audio_chunks = []
         
         for i, sentence in enumerate(merged_sentences):
-            # 防止纯标点
+            # 🚨 极速并发防御：在生成每一句话前，检查 App 是否已经跳段或断开！
+            # 这样就能及时刹车释放 GPU，防止堵死后续的请求！
+            if await request.is_disconnected():
+                logger.warning(f"⚠️ App 客户端已断开，立即终止本段剩余生成，释放 GPU 资源。")
+                return Response(status_code=499) # 499 Client Closed Request
+                
             pure_text = re.sub(r'[。，！？；、,.!?;:\'"()\s-]', '', sentence)
             if not pure_text:
                 continue
                 
-            logger.info(f"🎵 正在生成第 {i+1}/{len(merged_sentences)} 句: {sentence[:20]}...")
-            
-            # 🌟 架构回归：调用原本封装好的 generate_with_feature，它原生支持克隆和预设！
-            # 🚨 注意：引擎内部已有锁保护，此处无需再加锁
-            try:
-                audio_data = voice_context.engine.generate_with_feature(
-                    sentence, 
-                    feature, 
-                    language="zh"
-                )
+            # 将 CPU/GPU 计算放入线程，让异步事件循环可以检测到客户端断开
+            def generate_sync():
+                return voice_context.engine.generate_with_feature(sentence, feature, language="zh")
                 
-                if audio_data is not None and audio_data.size > 0:
-                    # 🚨 新增防御：截断一切异常尖峰，防止 int16 溢出导致的刺耳爆音
-                    audio_data = np.clip(audio_data, -1.0, 1.0)
-                    
-                    # 将PCM转换为MP3帧
-                    audio_segment = AudioSegment(
-                        (audio_data * 32767).astype(np.int16).tobytes(),
-                        frame_rate=24000, sample_width=2, channels=1
-                    )
-                    
-                    mp3_buf = io.BytesIO()
-                    audio_segment.export(mp3_buf, format="mp3", parameters=["-write_xing", "0"])
-                    mp3_bytes = mp3_buf.getvalue()
-                    
-                    logger.info(f"✅ 第 {i+1} 句MP3生成完成 ({len(mp3_bytes)} bytes)")
-                    yield mp3_bytes
-                else:
-                    logger.warning(f"⚠️ 生成音频为空，跳过第 {i+1} 句")
-                    
-            except Exception as ex:
-                logger.error(f"❌ 当前句子生成异常: {ex}")
-                continue
+            logger.info(f"🎵 正在生成第 {i+1}/{len(merged_sentences)} 句...")
+            audio_data = await asyncio.to_thread(generate_sync)
             
-            # 在锁外释放 CPU 资源片刻，防止阻塞其他线程抢锁
-            import gc
-            gc.collect()
-            time.sleep(0.01) 
-                    
-    except Exception as e:
-        logger.error(f"❌ 整体音频生成流失败: {e}")
-        raise
+            if audio_data is not None and audio_data.size > 0:
+                all_audio_chunks.append(audio_data)
 
-@app.post("/v1/audio/speech")
-async def openai_compatible_tts(request: OpenAITTSRequest):
-    """符合OpenAI标准的流式TTS接口"""
-    if not request.input.strip():
-        raise HTTPException(status_code=400, detail="Input text is required")
-    
-    logger.info(f"🎧 OpenAI兼容TTS请求: {request.input[:50]}... 使用音色: {request.voice}")
-    
-    return StreamingResponse(
-        generate_mp3_chunks(request.input, request.voice),
-        media_type="audio/mpeg",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-        }
-    )
+        if not all_audio_chunks:
+            raise HTTPException(status_code=400, detail="生成音频为空")
+
+        # 🚨 核心视听修复：将分句数组在内存中无缝拼接！
+        # 抛弃 yield，一次性转为一个带有单一 MP3 头的完整音频。
+        # App 播放器会把它当成一首正常歌曲平滑播完，彻底解决只读第一句就跳过的问题！
+        final_audio = np.concatenate(all_audio_chunks)
+        final_audio = np.clip(final_audio, -1.0, 1.0) # 防爆音
+        
+        audio_segment = AudioSegment(
+            (final_audio * 32767).astype(np.int16).tobytes(),
+            frame_rate=24000, sample_width=2, channels=1
+        )
+        
+        mp3_buf = io.BytesIO()
+        audio_segment.export(mp3_buf, format="mp3", parameters=["-write_xing", "0", "-id3v2_version", "0"])
+        
+        logger.info(f"✅ 整段落音频合成完毕，发送给 App ({len(mp3_buf.getvalue())} bytes)")
+        return Response(content=mp3_buf.getvalue(), media_type="audio/mpeg")
+        
+    except Exception as e:
+        logger.error(f"❌ API 响应异常: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/read_stream")
 async def read_stream(text: str, voice: str = "aiden"):
