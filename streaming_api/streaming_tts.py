@@ -66,10 +66,35 @@ class GlobalVoiceState:
             raise HTTPException(status_code=400, detail=f"音色克隆失败: {str(e)}")
     
     def _extract_feature_from_bytes(self, audio_bytes: bytes):
-        """从音频字节中提取特征（待实现）"""
-        # 这是一个占位实现，需要根据实际的 MLX 引擎 API 来完成
-        # 示例：return self.current_voice_config["engine"].extract_feature(audio_bytes)
-        raise NotImplementedError("特征提取功能待实现")
+        """从音频字节中提取特征"""
+        if self.current_voice_config["engine"] is None:
+            raise RuntimeError("TTS 引擎尚未初始化")
+            
+        import tempfile
+        from pydub import AudioSegment
+        
+        # 将上传的字节流转为 24kHz 的 numpy 数组
+        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp:
+            tmp.write(audio_bytes)
+            tmp_path = tmp.name
+            
+        try:
+            audio_segment = AudioSegment.from_file(tmp_path)
+            audio_segment = audio_segment.set_frame_rate(24000).set_channels(1)
+            samples = np.array(audio_segment.get_array_of_samples())
+            
+            # 归一化处理
+            if audio_segment.sample_width == 2:
+                samples = samples.astype(np.float32) / 32768.0
+            elif audio_segment.sample_width == 4:
+                samples = samples.astype(np.float32) / 2147483648.0
+                
+            # 调用 MLX 引擎的提取逻辑
+            return self.current_voice_config["engine"].extract_voice_feature(samples)
+        finally:
+            import os
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
     
     async def stream_tts(self, text: str, language: str = "zh") -> AsyncGenerator[bytes, None]:
         """流式 TTS 生成"""
@@ -170,7 +195,7 @@ async def stream_tts(request: TTSRequest):
     """流式 TTS 生成接口"""
     return StreamingResponse(
         voice_state.stream_tts(request.text, request.language),
-        media_type="audio/wav",
+        media_type="audio/mpeg",
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive"

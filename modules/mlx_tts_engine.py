@@ -428,18 +428,23 @@ class CinecastMLXEngine:
             if "spk_emb" in role_feature:
                 voice_cfg["spk_emb"] = role_feature["spk_emb"]
 
-        # 使用临时文件渲染
-        import tempfile
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-            tmp_path = f.name
-
+        # 直接在内存中生成音频，避免磁盘I/O
         try:
-            engine.render_dry_chunk(text, voice_cfg, tmp_path)
-            audio_data = self._load_wav(tmp_path)
-            return audio_data, self.sample_rate
-        finally:
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
+            # 加载模型并生成
+            engine._load_mode(voice_cfg["mode"])
+            results = list(engine.model.generate(text=text, **{k: v for k, v in voice_cfg.items() if k != "mode"}))
+            
+            if results:
+                audio_array = results[0].audio
+                mx.eval(audio_array)  # 强制执行计算
+                audio_data = np.array(audio_array)
+                return audio_data, self.sample_rate
+            else:
+                raise RuntimeError("音频生成失败：无输出结果")
+                
+        except Exception as e:
+            logger.error(f"克隆音频生成过程中出错: {e}")
+            raise
 
     def _run_voice_design(self, text: str, instruct: str):
         """执行音色设计推理。"""
@@ -450,17 +455,23 @@ class CinecastMLXEngine:
             "instruct": instruct,
         }
 
-        import tempfile
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-            tmp_path = f.name
-
+        # 直接在内存中生成音频，避免磁盘I/O
         try:
-            engine.render_dry_chunk(text, voice_cfg, tmp_path)
-            audio_data = self._load_wav(tmp_path)
-            return audio_data, self.sample_rate
-        finally:
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
+            # 加载模型并生成
+            engine._load_mode(voice_cfg["mode"])
+            results = list(engine.model.generate(text=text, **{k: v for k, v in voice_cfg.items() if k != "mode"}))
+            
+            if results:
+                audio_array = results[0].audio
+                mx.eval(audio_array)  # 强制执行计算
+                audio_data = np.array(audio_array)
+                return audio_data, self.sample_rate
+            else:
+                raise RuntimeError("音频生成失败：无输出结果")
+                
+        except Exception as e:
+            logger.error(f"音色设计音频生成过程中出错: {e}")
+            raise
 
     def _run_preset(self, text: str, voice: str = None):
         """执行预设模式推理。"""
@@ -470,17 +481,23 @@ class CinecastMLXEngine:
         if voice:
             voice_cfg["voice"] = voice
 
-        import tempfile
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-            tmp_path = f.name
-
+        # 直接在内存中生成音频，避免磁盘I/O
         try:
-            engine.render_dry_chunk(text, voice_cfg, tmp_path)
-            audio_data = self._load_wav(tmp_path)
-            return audio_data, self.sample_rate
-        finally:
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
+            # 加载模型并生成
+            engine._load_mode(voice_cfg["mode"])
+            results = list(engine.model.generate(text=text, **{k: v for k, v in voice_cfg.items() if k != "mode"}))
+            
+            if results:
+                audio_array = results[0].audio
+                mx.eval(audio_array)  # 强制执行计算
+                audio_data = np.array(audio_array)
+                return audio_data, self.sample_rate
+            else:
+                raise RuntimeError("音频生成失败：无输出结果")
+                
+        except Exception as e:
+            logger.error(f"预设音频生成过程中出错: {e}")
+            raise
 
     def _run_base(self, text: str):
         """执行基础模式推理。"""

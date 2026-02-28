@@ -72,6 +72,19 @@ class GlobalVoiceContext:
             except Exception as e:
                 logger.error(f"❌ 流式API引擎初始化失败: {e}")
                 raise
+    
+    def get_active_feature(self, voice_id: str):
+        """获取活跃音色特征（实时生效核心）"""
+        # 优先级 1: 检查是否是刚上传的临时音色
+        if voice_id == "uploaded_clone" and self.current_voice_config["feature"] is not None:
+            return self.current_voice_config["feature"]
+        
+        # 优先级 2: 检查本地持久化音色库
+        try:
+            return self.asset_manager.load_role(voice_id)
+        except:
+            # 优先级 3: 最终回退到 aiden 预设
+            return self.asset_manager.load_role("aiden")
 
 # OpenAI TTS 兼容请求模型
 class OpenAITTSRequest(BaseModel):
@@ -210,19 +223,6 @@ async def set_voice(
     except Exception as e:
         logger.error(f"❌ 设置音色失败: {e}")
         raise HTTPException(status_code=500, detail=f"音色设置失败: {str(e)}")
-
-    def get_active_feature(self, voice_id: str):
-        """获取活跃音色特征（实时生效核心）"""
-        # 优先级 1: 检查是否是刚上传的临时音色
-        if voice_id == "uploaded_clone" and self.current_voice_config["feature"] is not None:
-            return self.current_voice_config["feature"]
-        
-        # 优先级 2: 检查本地持久化音色库
-        try:
-            return self.asset_manager.load_role(voice_id)
-        except:
-            # 优先级 3: 最终回退到 aiden 预设
-            return self.asset_manager.load_role("aiden")
 
 async def mp3_stream_generator(text: str, voice_id: str = "aiden") -> AsyncGenerator[bytes, None]:
     """
