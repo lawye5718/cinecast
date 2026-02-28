@@ -1,0 +1,168 @@
+[
+  {
+    "chunk_id": "Chapter_016_00001",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "猎狗突然站住，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_016_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_016_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "圣诞节来临，卡萝尔怀念童年的温馨，现实却冷清。威尔沉迷汽车与猎枪，忽视她的精神需求。她试图制造浪漫，却被视为无理取闹。礼物无法填补空虚。难道夫妻之间真的无法沟通……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_016_00002",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "还高高地举起了它的前爪。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_016_00003",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "拉斯塔德太太急匆匆地走进厨房，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_016_00004",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "吩咐女仆给肯尼科特倒牛奶。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_016_00005",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们继续驾车前行，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_016_00006",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "直到天色完全暗了下来。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_016_00007",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特夫妇离开公寓，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_016_00008",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "回到家中。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_016_00009",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特夫妇离开公寓，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_016_00010",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "回到家中。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_016_00011",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔在街上高声跟别的女人们打招呼。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_016_00012",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔放下手中的针线活儿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_016_00013",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "赶紧起身迎接客人。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_016_00014",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔微微一笑，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_016_00015",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "回答说：",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_016_00016",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特五点钟回到了家里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_016_00017",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他尽量显出彬彬有礼的样子。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_016_00018",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特五点钟回到了家里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_016_00019",
+    "type": "action",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他尽量显出彬彬有礼的样子。",
+    "pause_ms": 1000
+  }
+]

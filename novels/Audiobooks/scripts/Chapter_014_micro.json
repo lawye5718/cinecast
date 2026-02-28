@@ -1,0 +1,1512 @@
+[
+  {
+    "chunk_id": "Chapter_014_00001",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "第三章\n一\n在大草原乱云翻滚的苍穹下，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_014_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "威尔察觉卡萝尔的疏离，两人因医生同行竞争发生争执。威尔揭露小镇人际关系的虚伪。她感到窒息，却无处可逃。夜晚的争吵揭示了裂痕。难道信任已在猜忌中消磨殆尽……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_014_00002",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有一头钢铁做的庞然大物，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00003",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "飞也似的向前驰去。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00004",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "除了一阵阵拉得很长的汽笛吼声以外，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00005",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "还不断传来了令人恼火的轰隆轰隆的噪音。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00006",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "浓郁的橘子香气，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00007",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "跟没洗过澡的旅客以及破旧行李包裹散发出来的潮味混杂在一起。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00008",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "沿途经过的那些小市镇，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00009",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "市容简直可以说是杂乱无章，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00010",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "就像阁楼里乱七八糟堆放着的一些纸板箱。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00011",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "极目望去，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00012",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "庄稼地里都是残留下来的褪了色的金黄色根茬，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00013",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "偶尔可以看到绕着白色农舍和红色谷仓周围的一丛丛小柳树。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00014",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "第七次旅客列车轰隆隆地穿过明尼苏达州，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00015",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不知不觉地爬上了那从炎热的密西西比河下游一直伸展到落基山脉、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00016",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "长达一千多英里的气势磅礴的大高原。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00017",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这时正是九月间，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00018",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "天气燠热，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00019",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "尘土飞扬。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00020",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这列客车没有挂上豪华的高级卧铺车厢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00021",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "美国东部地区的普通车厢都是随便入座的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00022",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "每一排座位就有两个罩着厚绒布椅套的活动座椅，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00023",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "头靠部位包着不大干净的亚麻布毛巾。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00024",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这节车厢分成两部分，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00025",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "用一些橡木雕成的圆柱子加以隔开，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00026",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但是过道则是光秃秃、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00027",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "质地粗糙、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00028",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "沾满油污的地板。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00029",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "车厢上没有侍应生，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00030",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "没有枕头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00031",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "没有卧具。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00032",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "旅客们整天整夜都得待在这个长长的钢制箱子里——他们中间，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00033",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有种庄稼的乡巴佬，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00034",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "带着终年疲惫不堪的妻子和乍一看似乎年龄都差不多大小的孩子们；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_014_00035",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有刚找到活计、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00036",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "赶去上班的工人们；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_014_00037",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "还有头戴圆顶窄边礼帽、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00038",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "脚上穿着闪闪发亮皮鞋的推销员。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00039",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "在这水泄不通的车厢里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00040",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们口干舌燥，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00041",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "闷热难受，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00042",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "连手上的纹路里都沾满了污物。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00043",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "睡觉的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00044",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们七歪八斜地蜷缩着身子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00045",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "脑袋靠在玻璃车窗上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00046",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "或者枕着卷成一团的外衣，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00047",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "靠在座椅扶手边上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00048",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "两条大腿不客气地伸到过道中间去。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00049",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们不看书报，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00050",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "也不思考什么问题。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00051",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们只是一个劲儿在等待。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00052",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一位未老先衰、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00053",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "满脸皱纹的年轻妈妈，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00054",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "好像关节不灵便似的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00055",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "没精打采地打开一只手提箱，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00056",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "里面有皱作一团的罩衫，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00057",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一双鞋头上已经破个洞的拖鞋，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00058",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一小瓶专卖药，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00059",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一只洋铁皮杯子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00060",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "还有一本专门谈梦的平装书，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00061",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这是报贩好说歹说劝她买下来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00062",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她拿出一块粗面粉饼干喂她那个正躺在座位上号哭的小孩。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00063",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "饼干碎屑大部分都掉在座位的红色厚绒布上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00064",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那个女人叹了一口气，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00065",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "竭力想把碎屑掸掉，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00066",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "可是那些碎屑淘气地跳起来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00067",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "又落回到厚绒布上。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00068",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一对满身污垢的夫妇正在嚼三明治，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00069",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "把面包皮扔在地板上。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00070",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一个皮肤呈砖块颜色、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00071",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "腰圆膀粗的挪威人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00072",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "干脆把皮鞋脱了下来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00073",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "轻松地在嘟囔些什么，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00074",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "把他的两只穿着灰色厚袜子的脚丫子搁到前面的座位上去。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00075",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "还有一位老妇人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00076",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她那牙齿全脱落的嘴巴紧闭起来时活像淡水龟，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00077",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她的头发黄多于白，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00078",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "看上去像是发霉的亚麻布，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00079",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "稀稀朗朗的头发中间露出一小块一小块淡红色头皮。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00080",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这时，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00081",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她着急地拎起自己的皮包，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00082",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "把它打开，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00083",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "往里面瞧了一眼，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00084",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "又把它关好，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00085",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "放到座位底下。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00086",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不一会儿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00087",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她又把它拎了起来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00088",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "打开看看，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00089",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "照例又把皮包收藏起来。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00090",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那个皮包里装满了宝物和纪念品：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00091",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一个皮扣子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00092",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一张年代久远的音乐会节目单，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00093",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一些线头线脑之类的小玩意儿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00094",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "比如缎带、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00095",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "花边和丝绒带子等。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00096",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "在她身旁的过道上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00097",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有一只好像在作金刚怒目式的长颈鹦哥，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00098",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "正关在圆笼子里。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00099",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "在面对面的两排座位上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00100",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "挤满了来自斯洛文尼亚\n[1]\n的铁矿工的一家人。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00101",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "座位上皮鞋呀，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00102",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "洋娃娃呀，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00103",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "威士忌酒瓶子和用报纸包的小包包以及针线袋什么的全都乱放一气。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00104",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "老大是个男孩子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00105",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "只见他从上衣口袋里拿出一把口琴，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00106",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "揩掉上面的烟末，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00107",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "使劲地吹着《佐治亚进行曲》，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00108",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "吹得整个车厢里的人头都发疼。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00109",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这时，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00110",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "报贩走了过来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00111",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "向旅客兜售巧克力和柠檬水果糖。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00112",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有一个小女孩老是在自己的座位和用水冷却器之间走来走去。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00113",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她把厚纸袋当作杯子使用，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00114",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "每次经过的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00115",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "总是把水滴滴答答地洒在过道上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00116",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "而且照例绊倒在一个木匠的脚脖子上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00117",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "惹得那个木匠咕哝着说：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00118",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“乖乖，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00119",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你可要小心点！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00120",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_014_00121",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔摇了摇头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00122",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她那双眼睛里充满了忧虑和失望。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00123",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "威尔·肯尼科特大夫却显得很平静，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00124",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他轻轻地拍了拍她的手，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00125",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "安慰她说：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00126",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00127",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00128",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00129",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_014_00130",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔的脸红了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00131",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她轻轻地挣脱了他的怀抱。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00132",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "威尔·肯尼科特大夫却显得很平静，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00133",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他轻轻地拍了拍她的手，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00134",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "安慰她说：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00135",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00136",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00137",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00138",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_014_00139",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她凭窗眺望着呈现在眼前的那个大草原，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00140",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有时看到的是一大片一大片平畴，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00141",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有时看到的则是一长条一长条隆起的丘陵。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00142",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一个小时前，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00143",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这个如此广袤无边的大草原，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00144",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "曾经使她心旷神怡，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00145",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "现在却令她不胜惊愕。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00146",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "它一望无垠地伸展到虚无缥缈的天边，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00147",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她觉得自己一辈子都没法去了解它。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00148",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特还在埋头看他的侦探小说。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00149",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她虽置身于大庭广众之间，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00150",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "仍不免感到很寂寞，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00151",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "竭力想把刚才想到的各种问题忘掉，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00152",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以便客观地看待那个大草原。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_014_00153",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她凭窗眺望着呈现在眼前的那个大草原，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00154",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有时看到的是一大片一大片平畴，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00155",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有时看到的则是一长条一长条隆起的丘陵。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00156",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一个小时前，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00157",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这个如此广袤无边的大草原，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00158",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "曾经使她心旷神怡，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00159",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "现在却令她不胜惊愕。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00160",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "它一望无垠地伸展到虚无缥缈的天边，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00161",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她觉得自己一辈子都没法去了解它。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00162",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特还在埋头看他的侦探小说。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00163",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她虽置身于大庭广众之间，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00164",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "仍不免感到很寂寞，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00165",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "竭力想把刚才想到的各种问题忘掉，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00166",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以便客观地看待那个大草原。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_014_00167",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "萨姆开车子飞快地穿过田野和树林。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00168",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们沿着一条宽阔的公路疾驰而过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00169",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不时有几辆汽车从他们身边驶过。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00170",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "萨姆的车开得很快，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00171",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但并不危险。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00172",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他喜欢在公路上狂奔，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00173",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "好像在跟什么人赛跑似的。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_014_00174",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "萨姆开车子飞快地穿过田野和树林。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00175",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们沿着一条宽阔的公路疾驰而过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00176",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不时有几辆汽车从他们身边驶过。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00177",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "萨姆的车开得很快，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00178",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但并不危险。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00179",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他喜欢在公路上狂奔，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00180",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "好像在跟什么人赛跑似的。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_014_00181",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "萨姆开车子飞快地穿过田野和树林。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00182",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们沿着一条宽阔的公路疾驰而过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00183",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不时有几辆汽车从他们身边驶过。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00184",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "萨姆的车开得很快，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00185",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但并不危险。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_014_00186",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他喜欢在公路上狂奔，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_014_00187",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "好像在跟什么人赛跑似的。",
+    "pause_ms": 1000
+  }
+]

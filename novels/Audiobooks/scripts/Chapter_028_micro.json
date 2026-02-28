@@ -1,0 +1,288 @@
+[
+  {
+    "chunk_id": "Chapter_028_00001",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你真是那么可爱，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_028_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "女教师弗恩因丑闻被解雇，卡萝尔挺身而出却无力回天。她看到小镇对女性的残酷。她决心不再沉默。正义何在。无人回应。难道正义在偏见面前如此脆弱……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_028_00002",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "就让我跟你一块儿谈谈我想象中的苦恼吧。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_028_00003",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "让我们成立一个戏剧社，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00004",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "演一出戏，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00005",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "大家说好吗？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00006",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "今晚玩得真够痛快呀！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_028_00007",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "那好，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00008",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "下个星期我们就开会，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00009",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "成立戈镇戏剧社！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_028_00010",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你干吗急乎乎要去看业余演出的那些该死的外国戏呢？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00011",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "为什么你不肯等着看以后正儿八经的本国戏呢？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00012",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "听说有一些特别精彩的戏就要上演了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00013",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "比方说《双枪牧场上的洛蒂》和《警察与盗贼》真是地地道道的百老汇风格，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00014",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "演员阵容强大，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00015",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "全是纽约的第一流名角。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00016",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "现在你要去看的是什么破烂货呀？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00017",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "哼，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00018",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "大概就是《他怎样向她的丈夫撒谎》之类的蹩脚戏吧。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00019",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那个剧名听起来蛮不错嘛，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00020",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "似乎很生动泼辣。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00021",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "唉，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00022",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00023",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我还不如干脆去看汽车展览会。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00024",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "看看崭新型号的敞篷汽车，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00025",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这才带劲呢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00026",
+    "type": "dialogue",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_028_00027",
+    "type": "dialogue",
+    "speaker": "kenyott",
+    "gender": "male",
+    "content": "你喜欢这个吗，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00028",
+    "type": "dialogue",
+    "speaker": "kenyott",
+    "gender": "male",
+    "content": "我的太太？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_028_00029",
+    "type": "dialogue",
+    "speaker": "kenyott",
+    "gender": "male",
+    "content": "我喜欢这个吗，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_028_00030",
+    "type": "dialogue",
+    "speaker": "kenyott",
+    "gender": "male",
+    "content": "我的太太？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_028_00031",
+    "type": "dialogue",
+    "speaker": "kenyott",
+    "gender": "male",
+    "content": "那个戏一点儿都不精彩。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00032",
+    "type": "dialogue",
+    "speaker": "kenyott",
+    "gender": "male",
+    "content": "咱们就滑脚走吧？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_028_00033",
+    "type": "dialogue",
+    "speaker": "kenyott",
+    "gender": "male",
+    "content": "那个戏一点儿都不精彩。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_028_00034",
+    "type": "dialogue",
+    "speaker": "kenyott",
+    "gender": "male",
+    "content": "咱们就滑脚走吧？",
+    "pause_ms": 1000
+  }
+]

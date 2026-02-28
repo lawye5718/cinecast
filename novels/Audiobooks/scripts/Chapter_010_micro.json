@@ -1,0 +1,24 @@
+[
+  {
+    "chunk_id": "Chapter_010_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_010_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "孤独感达到顶峰，卡萝尔独自喝茶哭泣。她决定不再讨好，而是要战斗。她试图唤醒妇女读书会，却遭遇冷遇。她意识到敌人不是个人，而是陈规旧俗。难道她真的能撼动这堵平庸之墙……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_010_00001",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "路易斯对戈镇居民在社交场合的表现有非常出色的描写。",
+    "pause_ms": 1000
+  }
+]

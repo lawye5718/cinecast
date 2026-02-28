@@ -1,0 +1,80 @@
+[
+  {
+    "chunk_id": "Chapter_024_00001",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔在盖伊·波洛克的公事房里与他交谈。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_024_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_024_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "卡萝尔观察威尔的陋习，厌恶感加深。她渴望独立空间，搬入客房居住。威尔虽不解却默许。分房而居。距离产生美还是疏离？难道分居能挽救这段婚姻……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_024_00002",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔在盖伊·波洛克的公事房里与他交谈。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_024_00003",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她突然站起身来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_024_00004",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "激动地说道。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_024_00005",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她停顿了一下，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_024_00006",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "然后继续说道。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_024_00007",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她停顿了一下，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_024_00008",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "然后继续说道。",
+    "pause_ms": 1000
+  }
+]

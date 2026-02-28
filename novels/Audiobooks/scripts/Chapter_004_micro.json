@@ -1,0 +1,74 @@
+[
+  {
+    "chunk_id": "Chapter_004_00001",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "Sinclair Lewis\nMAIN STREET\n图书在版编目（CIP）数据\n大街：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_004_00002",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "上下/（美）辛克莱·路易斯著；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_004_00003",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "潘庆舲译.—北京：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_004_00004",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "人民文学出版社，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_004_00005",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "2022\n（外国文学名著丛书）\nISBN 978-7-02-016829-3\nⅠ.①大…Ⅱ.①辛…②潘…Ⅲ.①长篇小说—美国—现代Ⅳ.①I712.45\n中国版本图书馆CIP数据核字（2021）第253504号\n责任编辑\n马博 冯娅\n装帧设计\n刘静\n责任印制\n王重艺\n出版发行\n人民文学出版社\n社　　址\n北京市朝内大街166号\n邮政编码\n100705\n印　　刷\n北京盛通印刷股份有限公司\n经　　销\n全国新华书店等\n字　　数\n544千字\n开　　本\n850毫米×1168毫米 1/32\n印　　张\n25.75 插页4\n印　　数\n1—4000\n版　　次\n2022年2月北京第1版\n印　　次\n2022年2月第1次印刷\n书　　号\n978-7-02-016829-3\n定　　价\n125.00元（全二册）\n如有印装质量问题",
+    "pause_ms": 100
+  },
+  {
+    "chunk_id": "Chapter_004_00006",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_004_00007",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "请与本社图书销售中心调换。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_004_00008",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "电话：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_004_00009",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "010-65233595",
+    "pause_ms": 1000
+  }
+]

@@ -1,0 +1,938 @@
+[
+  {
+    "chunk_id": "Chapter_043_00001",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00002",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我可确实不喜欢呀！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00003",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00004",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我相信总有一天我会找到一个解决办法的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00005",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "也许我好比是一颗六角形的钉子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00006",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "解决的办法就是要找到一个六角形的洞眼。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_043_00007",
+    "type": "dialogue",
+    "speaker": "戴夫·戴尔",
+    "gender": "male",
+    "content": "我的名字，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00008",
+    "type": "dialogue",
+    "speaker": "戴夫·戴尔",
+    "gender": "male",
+    "content": "就叫‘伊丽莎白’。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00009",
+    "type": "dialogue",
+    "speaker": "戴夫·戴尔",
+    "gender": "male",
+    "content": "我是个呱呱叫的裁缝师傅，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00010",
+    "type": "dialogue",
+    "speaker": "戴夫·戴尔",
+    "gender": "male",
+    "content": "而且还很喜欢音乐。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00011",
+    "type": "dialogue",
+    "speaker": "戴夫·戴尔",
+    "gender": "male",
+    "content": "成千的女人都拜倒在我脚下。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00012",
+    "type": "dialogue",
+    "speaker": "戴夫·戴尔",
+    "gender": "male",
+    "content": "劳驾给我一点儿面包夹牛肉，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00013",
+    "type": "dialogue",
+    "speaker": "戴夫·戴尔",
+    "gender": "male",
+    "content": "好吗？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_043_00014",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "由于天气奇热，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00015",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "会众也就不拘礼仪比较随便了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00016",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "男人们的头发都梳得油光锃亮；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_043_00017",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们死劲儿刮胡子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00018",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "脸皮差一点儿都给刮破了；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_043_00019",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们一脱下外套，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00020",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "叹了一口气，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00021",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "又把他们最漂亮的笔挺的马甲解开了两个扣子。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00022",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那些胸脯丰满，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00023",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "穿着白罩衫，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00024",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "脖子间直冒热汗，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00025",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "鼻梁上还架着眼镜的老太太，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00026",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这会儿正在很合节拍地来回摇着棕榈叶扇子——她们这些“古代以色列的老妈妈\n[3]\n”，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00027",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "都是拓殖时期的教友，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00028",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "也是钱普·佩里太太的好友。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00029",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "年轻小伙子好像害臊似的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00030",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "都躲到了后座，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00031",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "正在哧哧地傻笑；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_043_00032",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "雪白粉嫩的小姑娘们却跟她们的母亲一起坐在前排，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00033",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "自己觉得怪难为情的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00034",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "所以也尽量不东张西望了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00035",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这座礼拜堂一半像谷仓，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00036",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一半像戈镇人家里的客厅。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00037",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "墙上糊着褐色条纹纸，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00038",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "上面挂着“跟我来吧”和“耶和华是我的牧者”\n[4]\n的字框，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00039",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "此外还有一份赞美诗目录和一张红红绿绿的画在浅灰色纸上的图画，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00040",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "画的是一个年轻人完全可以不费吹灰之力，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00041",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "从“欢乐之宫”和“荣耀之家”一下子坠入“永劫不复的深渊”。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00042",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00043",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那些被油漆髹得亮晃晃的橡木座椅，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00044",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "大红的新地毯，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00045",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以及讲台后面的三把大安乐椅，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00046",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "却使人顿时感到如坐摇椅一般舒适。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00047",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "今天卡萝尔格外和蔼可亲，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00048",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "人们无不啧啧称赞。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00049",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她简直笑逐颜开，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00050",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "见了熟人就微微鞠躬。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00051",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她还跟着大家在一起唱赞美诗：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00052",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "日曜之辰何光明！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00053",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "会众齐集共欢欣，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00054",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "屏绝人欲诸思想，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00055",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不使罪愆污我身。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00056",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "只听见上过浆的裙子和硬邦邦的衬衣前胸发出了一阵沙沙声，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00057",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "会众都已落座，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00058",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "开始注意听齐特雷尔牧师布道了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00059",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这位牧师是个身材瘦削、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00060",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肤色黝黑、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00061",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "为人热情的年轻人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00062",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "说话时嗓门很大。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00063",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他身上穿着一套玄色便服，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00064",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "脖子上系着一条淡紫色领带。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00065",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他使劲儿敲着讲台上那本大部头《圣经》，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00066",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "大吼一声说：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00067",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“兄弟姐妹们，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00068",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "让我们一起来思考问题吧。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00069",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”接下去，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00070",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他就向至高无上的上帝祷告，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00071",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "报告过去一周内的新闻消息，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00072",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "然后言归正传，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00073",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "方才开始思考问题。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00074",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "原来他认为美国必须亟待解决的唯一问题，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00075",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "只不过是摩门教\n[5]\n和禁酒令罢了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00076",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他说：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00077",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“有一些自高自大的家伙，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00078",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "到处想要制造麻烦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00079",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你们可不要上他们的当，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00080",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以至于觉得所有那些自作聪明的运动都很有意义，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00081",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "通过工会和农会自行决定工资和物价的办法，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00082",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "是用来扼杀我们所有的进取精神和事业心的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00083",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "任何一项运动，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00084",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "要是它缺少精神基础，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00085",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那只不过是大轰大嗡一阵子就过去了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00086",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "让我在这儿向你们提醒一下：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00087",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "当人们因为一谈到他们所谓的‘经济学’‘社会主义’‘科学’，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00088",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以及许许多多涉及伪装的无神论等等完全小题大做的问题，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00089",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "并且争吵得不可开交的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00090",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "撒旦\n[6]\n已把自己乔装打扮好，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00091",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "化身为约瑟夫·史密斯\n[7]\n、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00092",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "布里格姆·扬\n[8]",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_043_00093",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔的目光正好落在了戴夫·戴尔身上。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_043_00094",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "礼拜仪式结束后，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00095",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔站起身来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00096",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "小心翼翼地挽着肯尼科特的胳膊，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00097",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "脸上对他露出微笑。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_043_00098",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "礼拜仪式结束后，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00099",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔站起身来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00100",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "小心翼翼地挽着肯尼科特的胳膊，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00101",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "脸上对他露出微笑。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_043_00102",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔的话让弗恩感到非常高兴，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00103",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她赶紧回答说：",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_043_00104",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔的话让弗恩感到非常高兴，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00105",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她赶紧回答说：",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_043_00106",
+    "type": "dialogue",
+    "speaker": "戴夫·戴尔",
+    "gender": "male",
+    "content": "哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00107",
+    "type": "dialogue",
+    "speaker": "戴夫·戴尔",
+    "gender": "male",
+    "content": "这个恐怕值得考虑吧。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_043_00108",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "谢谢你。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00109",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "让我们试试看，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00110",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "看能不能真的成立一个戏剧社。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00111",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我说：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00112",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "今天晚上八点钟，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00113",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你上我家里来。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_043_00114",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我还要把马林斯小姐请过来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00115",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "随后我们大家就在一起谈谈吧。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_043_00116",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我的天哪，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_043_00117",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "那就是你认为的精彩结局吗？",
+    "pause_ms": 1000
+  }
+]

@@ -24,6 +24,7 @@ class AssetManager:
         self._initialize_default_voices()
         self._load_voice_config()
         self.role_voice_map = {}  # 记忆已分配角色的音色
+        self.clone_voice_features = {}  # 克隆音色特征存储
         self._scan_clone_voices()  # 扫描克隆音色目录
         
     def _normalize_audio(self, audio: AudioSegment) -> AudioSegment:
@@ -406,6 +407,51 @@ class AssetManager:
 
             pool[pool_index]["audio"] = file_path
             logger.info(f"✅ 已设置角色 {role_name} 音色: {file_path}")
+    
+    def load_role(self, role_name: str):
+        """加载预设音色特征
+
+        Args:
+            role_name: 音色名称
+
+        Returns:
+            音色特征字典
+        """
+        # 返回预设音色的基本配置
+        return {
+            "mode": "preset",
+            "voice": role_name.lower()
+        }
+    
+    def save_clone_voice(self, voice_name: str, feature):
+        """保存克隆音色特征
+
+        Args:
+            voice_name: 音色名称
+            feature: 音色特征数据
+        """
+        clone_dir = os.path.join(self.asset_dir, "clone_voices")
+        if not os.path.exists(clone_dir):
+            os.makedirs(clone_dir)
+        
+        feature_path = os.path.join(clone_dir, f"{voice_name}.npz")
+        
+        try:
+            # 保存特征
+            if isinstance(feature, dict):
+                np.savez_compressed(feature_path, **feature)
+            else:
+                np.savez_compressed(feature_path, feature=feature)
+            
+            # 如果有clone_voice_features属性，则更新它
+            if hasattr(self, 'clone_voice_features'):
+                self.clone_voice_features[voice_name] = feature
+            
+            logger.info(f"✅ 克隆音色已保存: {voice_name}")
+            
+        except Exception as e:
+            logger.error(f"❌ 保存克隆音色失败 {voice_name}: {e}")
+            raise
 
 if __name__ == "__main__":
     # 测试代码

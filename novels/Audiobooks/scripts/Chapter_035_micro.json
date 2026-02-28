@@ -1,0 +1,424 @@
+[
+  {
+    "chunk_id": "Chapter_035_00001",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "卡萝尔：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_035_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "威尔来访华盛顿，两人重温旧情。他展示小镇照片，唤起她的回忆。她犹豫是否回归。情感拉扯。内心动摇。难道故乡真的回不去了……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_035_00002",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "反正我可以起来跟她们拼搏。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00003",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "这玩意儿我太在行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00004",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "但我落到了这样的地步，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00005",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "还认为是理所当然似的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00006",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "那我可实在受不了——不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00007",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "好歹我还得忍受呀！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_035_00008",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "惠蒂尔舅舅：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00009",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "你父亲的收入是多少？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_035_00010",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "惠蒂尔舅舅：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00011",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "听说你认为戈镇应该全部拆掉，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00012",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "重新再建设起来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00013",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "这到底是怎么一回事呀？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00014",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "真不知道哪儿来这么多的新花招。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00015",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "最近，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00016",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "达科他州有很多庄稼人也在耍新玩意儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00017",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "要办合作社，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00018",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "自以为他们比商人更会做买卖！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00019",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "哼！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_035_00020",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "惠蒂尔舅舅：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00021",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "听说你认为戈镇应该全部拆掉，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00022",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "重新再建设起来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00023",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "这到底是怎么一回事呀？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00024",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "真不知道哪儿来这么多的新花招。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00025",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "最近，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00026",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "达科他州有很多庄稼人也在耍新玩意儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00027",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "要办合作社，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00028",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "自以为他们比商人更会做买卖！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00029",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "哼！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_035_00030",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "惠蒂尔舅舅：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00031",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "听说你认为戈镇应该全部拆掉，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00032",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "重新再建设起来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00033",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "这到底是怎么一回事呀？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00034",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "真不知道哪儿来这么多的新花招。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00035",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "最近，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00036",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "达科他州有很多庄稼人也在耍新玩意儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00037",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "要办合作社，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00038",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "自以为他们比商人更会做买卖！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_035_00039",
+    "type": "dialogue",
+    "speaker": "惠蒂尔舅舅",
+    "gender": "male",
+    "content": "哼！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_035_00040",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "丽塔·西蒙斯：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00041",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "有一些人也许会说丽塔很天真，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00042",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "但我知道她并不像一般的新娘子那么无知，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00043",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "当然咯，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00044",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "论医术，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00045",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "特里跟你丈夫就是要差十万八千里呢。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_035_00046",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "丽塔·西蒙斯：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00047",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "有一些人也许会说丽塔很天真，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00048",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "但我知道她并不像一般的新娘子那么无知，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00049",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "当然咯，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00050",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "论医术，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_035_00051",
+    "type": "dialogue",
+    "speaker": "丽塔·西蒙斯",
+    "gender": "female",
+    "content": "特里跟你丈夫就是要差十万八千里呢。",
+    "pause_ms": 1000
+  }
+]

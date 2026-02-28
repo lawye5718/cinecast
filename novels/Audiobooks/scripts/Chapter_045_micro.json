@@ -1,0 +1,786 @@
+[
+  {
+    "chunk_id": "Chapter_045_00001",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔心里在纳闷，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00002",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "是不是她自己的那副样子也跟斯威夫特韦特太太一样令人可笑。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00003",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她把肯尼科特最近买给她看书用的那副眼镜戴上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00004",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "看了一下杂货铺送来的账单，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00005",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "就连忙走到自己的房间照镜子去了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00006",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这时她心绪不宁，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00007",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "也有点儿自惭形秽。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00008",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不管镜子里的映像是不是十分真切，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00009",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她从镜子里看到的自己，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00010",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "恐怕就是这个样子：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00011",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "——\n戴着一副素净的无边框眼镜。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00012",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "乌黑的头发，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00013",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "乱七八糟地掖在最适合老处女戴的绛紫色草帽底下。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00014",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "两腮煞白，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00015",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "没有一点儿血色。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00016",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "瘦削的鼻子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00017",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "柔和的嘴唇和下巴颏儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00018",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一件朴素大方的、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00019",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "领口缀着花边的透明薄纱褂子。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00020",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "脸上还是透着少女般的温柔娇羞的神情——可惜一点儿都没有欢乐的表情，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00021",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不消说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00022",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "更看不出她来自大城市、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00023",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "爱好音乐和嬉笑的任何痕迹来。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00024",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“现下我已然变成了一个乡下女人了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00025",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "而且可以说是地地道道、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00026",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不折不扣的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00027",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "要谦虚呀，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00028",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "清心呀，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00029",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "庄重呀。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00030",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "生活里忌讳特别多。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00031",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "还要我摆出\n阔太太的架子",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_045_00032",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "埃里克在卡萝尔耳边低语道。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00033",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他的话音刚落，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00034",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔就仿佛被某种魔力所吸引，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00035",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她的心中涌起一股难以言喻的激动和喜悦。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00036",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她紧紧地抓住他的手，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00037",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "仿佛要永远握住它一样。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00038",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她的眼神中流露出一种深深的依恋和渴望。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00039",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她的心跳加速，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00040",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "脸庞泛起了红晕。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00041",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她知道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00042",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她已经深深地爱上了他。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_045_00043",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她没有回答。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_045_00044",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她没有回答。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_045_00045",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "嗯——你知道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00046",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "问题当然不是在于钱，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00047",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "而是休该怎么办？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_045_00048",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我老实跟你说：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00049",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我认为最好等大战结束以后再说。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00050",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "到时候我们就可以舒舒服服来一次长途旅行。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00051",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "所以说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00052",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我不赞成你现下就出门旅行去。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_045_00053",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我老实不客气地跟你说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00054",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你要知道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00055",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "默特尔之所以对你这么热乎，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00056",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "说穿了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00057",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "并不是因为她父亲厂子里正要物色一个聪明而又年轻的小伙子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00058",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你知道不，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00059",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "一旦她把你弄到手，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00060",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "归她占有以后，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00061",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "还要干些什么来着？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00062",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "嘿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00063",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你等着瞧吧，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00064",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "她准要逼着你上教堂做礼拜，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00065",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "叫你一言一行都是温文尔雅呢？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_045_00066",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "其实没有主心骨的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00067",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "还是您自己！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00068",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "尽管您会说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00069",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "会玩儿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00070",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "可是好像心里有鬼，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00071",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "总是害怕得要命。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00072",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "要是您和我都已穷愁潦倒，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00073",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我呢不得不去给人家挖阴沟——这对我来说无所谓，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00074",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "可您准受不了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00075",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我心里在想您一定会喜欢我的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00076",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "可您就是不敢承认。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00077",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "要是刚才您不讥笑默特尔和面粉厂的话，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00078",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "本来我就不该对您说这种话的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00079",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "如果说我现在不去接受像那样好的差使，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00080",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "您以为我就会心甘情愿照您的话去做一个默默无闻的裁缝吗？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00081",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "像您现在这样的态度，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00082",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "难道说就很公平吗？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_045_00083",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "这些全都是胡说八道！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00084",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我根本一点儿都不喜欢埃里克！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00085",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "不管是哪一个男人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00086",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "也都不喜欢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00087",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我要独自一个人待在一个女人的天地里——在那里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00088",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "没有大街，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00089",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "没有政客，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00090",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "没有商人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00091",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "而且没有那样的男人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00092",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "在他们眼睛里会突然闪耀着饥不择食的光芒，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00093",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "以及只有已婚的女人们最了解的那种极不真诚的神情——要是埃里克在这里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00094",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "要是他能安静地坐在这里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00095",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "跟我谈谈心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_045_00096",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "那我恐怕就会安然入睡了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00097",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我实在太累了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_045_00098",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "要是能睡着该有多好——",
+    "pause_ms": 1000
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "narrator": {
+    "mode": "preset",
+    "voice": "aiden"
+  },
+  "f2": {
+    "mode": "clone",
+    "ref_audio": "./assets/voices/role_f2.wav",
+    "ref_text": ""
+  },
+  "m2": {
+    "mode": "clone",
+    "ref_audio": "./assets/voices/role_m2.wav",
+    "ref_text": ""
+  },
+  "f1": {
+    "mode": "clone",
+    "ref_audio": "./assets/voices/role_f1.wav",
+    "ref_text": ""
+  },
+  "m1": {
+    "mode": "clone",
+    "ref_audio": "./assets/voices/role_m1.wav",
+    "ref_text": ""
+  }
+}

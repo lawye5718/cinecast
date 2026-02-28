@@ -1,0 +1,698 @@
+[
+  {
+    "chunk_id": "Chapter_054_00001",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我一直都想把戈镇变成一个神话世界。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00002",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "人们至今还用这样的古老传说来赞美自己的家乡好，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00003",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "缅怀幸福的童年，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00004",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "珍惜大学时代的友谊。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00005",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "可我们却把这一切通通都给忘了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00006",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我也忘了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00007",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "大街压根儿不觉得自己孤单可怜。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00008",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "它自以为还是上帝佑护下的人间乐土。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00009",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "现在它并没有在盼望着我回去。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00010",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "它觉得有我无我反正都是一个样。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_054_00011",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "这会儿有一个聪明的娘儿来指点俺们大老粗去建设这个小镇，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00012",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "敢情是俺们的好造化呀。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00013",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "就算她净爱找碴儿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00014",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "发牢骚，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00015",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "那也比吉姆·布劳塞强，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00016",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "要知道吉姆他夸口说要在这里开多少多少工厂，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00017",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "最后还不是一溜烟跑了吗？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00018",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00019",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "我敢打赌说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00020",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "肯尼科特太太身上尽管有点儿轻浮不踏实的毛病，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00021",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "但是个聪明人。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00022",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "看到她回来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00023",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "俺真高兴。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_054_00024",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "胡扯淡！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00025",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "他们俩一向正经得很，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00026",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "什么谈情说爱的事儿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00027",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "他们脑子里从来还没有想过呢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00028",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "他们不外乎是在一起谈谈书呀，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00029",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "还有什么一文不值的问题。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00030",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "老实告诉你，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00031",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "卡丽·肯尼科特是个非常聪明的女人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00032",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "而这些受过教育的聪明女人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00033",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "照例会有许许多多怪可笑的念头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00034",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "可是一等到她们有了三个或四个小娃娃以后，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00035",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "不消说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00036",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "早就忘得一干二净了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00037",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "你们等着瞧吧，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00038",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "过了一两天，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00039",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "她心情马上会安定下来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00040",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "就会去主日学校教书，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00041",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "而且乐于跟乡亲们应酬交际，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00042",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "热心帮忙，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00043",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "规规矩矩，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00044",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "安分守己地做人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00045",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "不会再去瞎管闲事，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00046",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "或是侈谈什么政治问题了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00047",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "我说准是这样的！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_054_00048",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "胡扯淡！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00049",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "他们俩一向正经得很，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00050",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "什么谈情说爱的事儿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00051",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "他们脑子里从来还没有想过呢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00052",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "他们不外乎是在一起谈谈书呀，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00053",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "还有什么一文不值的问题。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00054",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "老实告诉你，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00055",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "卡丽·肯尼科特是个非常聪明的女人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00056",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "而这些受过教育的聪明女人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00057",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "照例会有许许多多怪可笑的念头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00058",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "可是一等到她们有了三个或四个小娃娃以后，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00059",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "不消说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00060",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "早就忘得一干二净了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00061",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "你们等着瞧吧，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00062",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "过了一两天，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00063",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "她心情马上会安定下来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00064",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "就会去主日学校教书，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00065",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "而且乐于跟乡亲们应酬交际，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00066",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "热心帮忙，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00067",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "规规矩矩，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00068",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "安分守己地做人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00069",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "不会再去瞎管闲事，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00070",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "或是侈谈什么政治问题了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00071",
+    "type": "dialogue",
+    "speaker": "萨姆·克拉克",
+    "gender": "male",
+    "content": "我说准是这样的！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_054_00072",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "那条该死的领子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00073",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "真他妈的找不着了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00074",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "是的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00075",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我说你——亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00076",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "你刚才说的是什么呀，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00077",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "怪我走了神，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00078",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "没有听清楚。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_054_00079",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "当然咯。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00080",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "那是明摆着的事儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00081",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00082",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "得了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00083",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "祝你晚安。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00084",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "这会儿我觉得好像明天也许会下雪呢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00085",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "恐怕还得赶快给窗子安装好防风板。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_054_00086",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "喂，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_054_00087",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "你有没有看见女用人把旋凿放在哪儿呀？",
+    "pause_ms": 1000
+  }
+]

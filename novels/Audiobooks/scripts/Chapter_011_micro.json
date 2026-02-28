@@ -1,0 +1,64 @@
+[
+  {
+    "chunk_id": "Chapter_011_00001",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这是一个坐落在盛产麦黍的原野上、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_011_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_011_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "妇女读书会上，卡萝尔提议改革，却被保守派驳回。她们满足于肤浅的文化装饰。她加入委员会，试图推动图书馆变革，却因经费受阻。她满怀热情，却撞上冰冷的现实壁垒。难道知识的传播也要向吝啬低头……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_011_00002",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "掩映在牛奶房和小树丛中、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_011_00003",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "拥有几千人口的小镇——这就是美国。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_011_00004",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我们故事里讲到的这个小镇，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_011_00005",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "名叫“明尼苏达州戈弗草原镇”，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_011_00006",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但它的大街却是各地大街的延长。",
+    "pause_ms": 1000
+  }
+]

@@ -1,0 +1,674 @@
+[
+  {
+    "chunk_id": "Chapter_048_00001",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "看见您丈夫开车走了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00002",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "我实在憋不住才来看您的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00003",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "我们出去走走吧。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00004",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "我知道您怕被人看见，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00005",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "但我们不妨到郊外去，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00006",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "好不好？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00007",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "我就在谷仓那里等着您。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00008",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "别磨蹭了——哦——还是快点儿来吧！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_048_00009",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "您说得对，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00010",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "卡萝尔。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00011",
+    "type": "dialogue",
+    "speaker": "埃里克",
+    "gender": "male",
+    "content": "我们坐在这儿吧。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_048_00012",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "嘿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00013",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我说今年秋季的天气真好玩。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00014",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "十月里那么冷，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00015",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "十一月却又这么暖和，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00016",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我可一辈子都没见过。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00017",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "记得十月九号那天还下了一场大雪呢！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00018",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我觉得到本月二十一号那天为止，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00019",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "天气不用说都是暖洋洋的！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00020",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我记得在这个十一月里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00021",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "直到现在连一片雪花都没见过呢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00022",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00023",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我心里正琢磨，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00024",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "从现在开始，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00025",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "说不定随时都会下雪的。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_048_00026",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "得了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00027",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "卡丽呀，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00028",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "你最好现在就此打住吧。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00029",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "老实说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00030",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我不准备扮演一个气得吹胡子瞪眼的丈夫角色，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00031",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "叫人们笑话！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00032",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我喜欢你，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00033",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我尊敬你。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00034",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我要是一个劲儿把事情闹得满城风雨，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00035",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "人们说不定就会把我看成大傻瓜的！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00036",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00037",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我觉得现在该是你和瓦尔博格一刀两断的时候了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00038",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "要不然你就会落到弗恩·马林斯那样的下场。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_048_00039",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "unknown",
+    "content": "来掌管它。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_048_00040",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "unknown",
+    "content": "来掌管它。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_048_00041",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的卡萝尔：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00042",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我听说你不再想跟我来往了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00043",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这真是太遗憾了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00044",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我希望你能考虑一下，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00045",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "重新回到我的身边。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00046",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我保证，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00047",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以后再也不会让你受委屈了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00048",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我愿意为你做任何事情。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00049",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "请相信我，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00050",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我会好好照顾你的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00051",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "埃·瓦",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_048_00052",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的卡萝尔：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00053",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我听说你不再想跟我来往了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00054",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这真是太遗憾了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00055",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我希望你能考虑一下，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00056",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "重新回到我的身边。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00057",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我保证，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00058",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以后再也不会让你受委屈了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00059",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我愿意为你做任何事情。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00060",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "请相信我，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00061",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我会好好照顾你的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00062",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "埃·瓦",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_048_00063",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的卡萝尔：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00064",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我听说你不再想跟我来往了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00065",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这真是太遗憾了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00066",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我希望你能考虑一下，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00067",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "重新回到我的身边。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00068",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我保证，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00069",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以后再也不会让你受委屈了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00070",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我愿意为你做任何事情。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00071",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "请相信我，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00072",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我会好好照顾你的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00073",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "埃·瓦",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_048_00074",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的卡萝尔：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00075",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我听说你不再想跟我来往了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00076",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这真是太遗憾了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00077",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我希望你能考虑一下，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00078",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "重新回到我的身边。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00079",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我保证，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00080",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以后再也不会让你受委屈了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00081",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我愿意为你做任何事情。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00082",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "请相信我，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_048_00083",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我会好好照顾你的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_048_00084",
+    "type": "letter",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "埃·瓦",
+    "pause_ms": 1000
+  }
+]

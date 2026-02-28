@@ -1,0 +1,314 @@
+[
+  {
+    "chunk_id": "Chapter_046_00001",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "快躲开！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_046_00002",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我可非常喜欢你，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00003",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "别让事情全给毁了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00004",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "反正你还是我的朋友嘛。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_046_00005",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "你到底对她说过什么来着？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_046_00006",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "我听到的流言蜚语是说你跟埃里克·瓦尔博格在一起的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00007",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "你们俩好像在密谋什么。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_046_00008",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "我从前喜欢他，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00009",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "那是最光明正大不过了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00010",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "可现在要是我仍然站在他的立场上来看待事物的话，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00011",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "那也是万不得已的事——不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00012",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "我既然把他让给你，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00013",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "不用说就有权要求你务必谨小慎微，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00014",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "哪怕是有一点儿坏念头刚刚露了头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00015",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "也要尽量避免——",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_046_00016",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "我从前喜欢他，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00017",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "那是最光明正大不过了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00018",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "可现在要是我仍然站在他的立场上来看待事物的话，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00019",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "那也是万不得已的事——不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00020",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "我既然把他让给你，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00021",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "不用说就有权要求你务必谨小慎微，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00022",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "哪怕是有一点儿坏念头刚刚露了头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00023",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "也要尽量避免——",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_046_00024",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "我从前喜欢他，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00025",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "那是最光明正大不过了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00026",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "可现在要是我仍然站在他的立场上来看待事物的话，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00027",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "那也是万不得已的事——不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00028",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "我既然把他让给你，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00029",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "不用说就有权要求你务必谨小慎微，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00030",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "哪怕是有一点儿坏念头刚刚露了头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00031",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "也要尽量避免——",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_046_00032",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "我从前喜欢他，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00033",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "那是最光明正大不过了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00034",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "可现在要是我仍然站在他的立场上来看待事物的话，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00035",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "那也是万不得已的事——不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00036",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "我既然把他让给你，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00037",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "不用说就有权要求你务必谨小慎微，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00038",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "哪怕是有一点儿坏念头刚刚露了头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_046_00039",
+    "type": "dialogue",
+    "speaker": "维达",
+    "gender": "female",
+    "content": "也要尽量避免——",
+    "pause_ms": 1000
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "chunk_id": "Chapter_019_00001",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "卡萝尔点点头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_019_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_019_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "演出失败，观众只爱滑稽戏，不懂艺术。卡萝尔深受打击。伯恩斯塔姆妻儿染病去世，小镇冷漠依旧。她感到绝望，想要逃离。悲剧接连发生。难道这里真的没有希望……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_019_00002",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "她觉得维达的话很有道理。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_019_00003",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "卡萝尔点点头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_019_00004",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "她觉得维达的话很有道理。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_019_00005",
+    "type": "action",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "肯尼科特点点头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_019_00006",
+    "type": "action",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "他觉得卡萝尔的话很有道理。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_019_00007",
+    "type": "action",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "肯尼科特点点头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_019_00008",
+    "type": "action",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "他觉得卡萝尔的话很有道理。",
+    "pause_ms": 1000
+  }
+]

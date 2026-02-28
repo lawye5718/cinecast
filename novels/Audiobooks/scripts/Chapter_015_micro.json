@@ -1,0 +1,168 @@
+[
+  {
+    "chunk_id": "Chapter_015_00001",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特打开手提包，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_015_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_015_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "威尔深夜出诊，卡萝尔敬佩他的敬业。她协助丈夫进行紧急手术，目睹生命的脆弱。她试图参与医疗工作，却只能做辅助。她看着丈夫的背影，心生敬意。难道她的价值仅限于旁观者的角色……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_015_00002",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "开始整理衣物。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_015_00003",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔从镇东到镇西，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_015_00004",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "从镇南到镇北，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_015_00005",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "把戈镇都走遍了。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_015_00006",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔从镇东到镇西，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_015_00007",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "从镇南到镇北，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_015_00008",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "把戈镇都走遍了。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_015_00009",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔从镇东到镇西，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_015_00010",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "从镇南到镇北，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_015_00011",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "把戈镇都走遍了。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_015_00012",
+    "type": "dialogue",
+    "speaker": "斯图尔特·斯奈德",
+    "gender": "male",
+    "content": "我们这儿倒是经常有劳工纠纷。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_015_00013",
+    "type": "dialogue",
+    "speaker": "斯图尔特·斯奈德",
+    "gender": "male",
+    "content": "我们这儿倒是经常有劳工纠纷。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_015_00014",
+    "type": "dialogue",
+    "speaker": "斯图尔特·斯奈德",
+    "gender": "male",
+    "content": "我们这儿倒是经常有劳工纠纷。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_015_00015",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "你心里千万别想不开呢！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_015_00016",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "得了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_015_00017",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "你还是开开心吧！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_015_00018",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "宁录是《圣经·旧约全书》中的人物，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_015_00019",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "号称“世上英雄之首”“英勇的猎户”。",
+    "pause_ms": 1000
+  }
+]

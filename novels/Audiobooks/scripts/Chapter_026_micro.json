@@ -1,0 +1,5696 @@
+[
+  {
+    "chunk_id": "Chapter_026_00001",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特太太听到电话铃声响起，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_026_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "年轻裁缝埃里克出现，卡萝尔被他吸引。他热爱艺术，与她志同道合。两人频繁接触，流言再起。危险悄然靠近。难道这段感情会摧毁她的生活……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_026_00002",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "立刻从床上坐了起来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00003",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她的心跳加速了。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00004",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他又到楼上去，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00005",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "走进那个冷飕飕的房间，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00006",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "换上了衣服，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00007",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "茫然若失地咳了几声。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00008",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她佯装睡着了；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_026_00009",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "其实，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00010",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她只是觉得太困，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00011",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不想说话罢了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00012",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他在五斗柜上的一张纸条上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00013",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "留下了出诊的地点。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00014",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她可以清晰地听见铅笔在大理石柜面上嚓嚓嚓的声音。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00015",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他又冷又饿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00016",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "可任劳任怨地出诊去了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00017",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "可她呢，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00018",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "睡眼惺忪，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00019",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "看到他那股硬汉子劲儿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00020",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "越发喜爱他。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00021",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "自然，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00022",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她可以想象到，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00023",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她的丈夫深更半夜赶着马车直奔那个路途遥远的农场，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00024",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "朝那个惊恐万状的病人家走去的情景，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00025",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "想象到孩子们望眼欲穿地站在窗口等候他的情景。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00026",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "在她心目中，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00027",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特突然变得英勇非凡，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00028",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "很像一艘触礁了的大船上抱着无线电继续发报的报务员；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_026_00029",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "又像是一名患着热病的探险家，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00030",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "已被抬担架的人所遗弃，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00031",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但仍然独个儿继续在茫茫无边的丛林中往前行进。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00032",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "转天清晨约莫六点钟，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00033",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "在微弱的晨光里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00034",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "灰蒙蒙的椅子轮廓依稀可辨。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00035",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00036",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她听到他已经走上前廊，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00037",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "来到了取暖火炉跟前，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00038",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "咔嗒咔嗒地在扳弄炉箅，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00039",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "费劲地清除灰渣，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00040",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "又一铲一铲往炉膛里添煤，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00041",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那些煤块在炉膛里鲜蹦活跳，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00042",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "发出一阵阵咝咝声，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00043",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "通风管道里也在呜呜呜地发响，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00044",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这些都是戈镇千家万户日常生活里极其普通的声音，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00045",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00046",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "现在她仿佛头一遭听见；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_026_00047",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她甚至觉得它们就是勇敢、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00048",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "坚忍、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00049",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "瑰丽和自由的象征。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00050",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她心中想象着炉膛里的动人情景：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00051",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "撒上煤末时，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00052",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "火焰变成了一片柠檬黄和金灿灿的颜色，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00053",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一些星星点点的紫色火苗儿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00054",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "像鬼火似的忽闪忽闪，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00055",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一个劲儿在乌黑的煤堆之间往上蹿跳。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00056",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "躺在被窝里真惬意，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00057",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她心里在想，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00058",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "等她起床的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00059",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "屋子里早就温暖如春了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00060",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "唉，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00061",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "好一个没用的女人呀！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00062",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "如果说跟他的聪明能干相比，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00063",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她的远大抱负又算得上什么呢？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00064",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他上床的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00065",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她又醒了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00066",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“好像你是在几分钟前刚出门！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00067",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“我已经出去了四个钟头呢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00068",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "在一个德国佬的灶披间里给一个女人开阑尾炎。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00069",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她差点儿断气了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00070",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但我忙了一阵，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00071",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "好歹又把她拉了回来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00072",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "哈，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00073",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "哈，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00074",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "真是好险啊。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00075",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00076",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "巴尼还说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00077",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "上星期天他打了十只野兔子呢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00078",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n他一合上眼就睡着了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00079",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "只歇了一个钟头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00080",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他又得起床，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00081",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "准备给那些来得特别早的庄稼人看病。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00082",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她惊愕地想到，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00083",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "刚才她只不过是迷迷糊糊地睡了一会儿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00084",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "而他竟然出了远门，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00085",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "给一个陌生的女人做了手术，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00086",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "救了她一命。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00087",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "难怪他一向憎恨懒怠成性的韦斯特莱克和麦加农！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00088",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "像他这样精湛的医术和刻苦耐劳的品质，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00089",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那个整日价优哉游哉的盖伊·波洛克，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00090",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "又恁地了解呢？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00091",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这时，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00092",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特突然发牢骚说：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00093",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“七点过一刻啦！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00094",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你还想不想起来吃早饭？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00095",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”顷刻之间，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00096",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他从一个可尊敬的英雄人物、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00097",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "献身科学的专家，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00098",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "变成了一个脾气相当急躁的普通男子汉，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00099",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他那胡子拉碴的脸儿似乎还需要好好刮一下呢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00100",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们俩在一起喝咖啡，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00101",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "吃烙饼和香肠，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00102",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "谈着麦加农太太的那条吓人的鳄鱼皮腰带。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00103",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "到了白天，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00104",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她忙这忙那，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00105",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "把昨天晚上的幻觉和今天早上的醒悟都给忘得一干二净。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00106",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "二\n一个星期日的下午，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00107",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有个腿上受了重伤的男人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00108",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "从乡下送到医生家里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00109",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔一见病人觉得很面熟。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00110",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这个病人坐在运木材的马车后部的一张摇椅里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00111",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一路上车子颠簸，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00112",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "使他叫苦不迭，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00113",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "脸色显得越发苍白了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00114",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他那一条腿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00115",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "直挺挺地搁在一只盛淀粉的木箱上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00116",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "腿上盖着一条皮马披。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00117",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "赶着马车的是他的那位相貌难看、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00118",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但是很有魄力的妻子。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00119",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她和肯尼科特一块儿扶着自己的丈夫一瘸一瘸地上了台阶，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00120",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "走进屋里去了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00121",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“这个人一斧头把自个儿的腿给砍了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00122",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "砍得够深的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00123",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他的名字叫霍尔沃·纳尔逊，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00124",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "住在离镇九英里远的地方。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00125",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”肯尼科特说。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00126",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔马上奔到房间另一头，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00127",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "按照丈夫的嘱咐把几条毛巾和一盆水端过来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00128",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她脸上的神情兴奋得像小孩儿一样。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00129",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肯尼科特让那个庄稼人坐到一张椅子上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00130",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "笑着说：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00131",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“好了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00132",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "霍尔沃！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00133",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不出一个月，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00134",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你又好出去修篱笆，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00135",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "喝aquavit\n[11]",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00136",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他回到家里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00137",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "发现妻子正坐在炉边，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00138",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "手里拿着一本书在看。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00139",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她那双眼睛里闪烁着一种奇怪的光芒，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00140",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "似乎在期待什么。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00141",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他走到她身边，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00142",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "坐下来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00143",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "问：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00144",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“怎么了？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00145",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00146",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00147",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00148",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“你今天早上出门的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00149",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我看见你把一张纸条放在五斗柜上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00150",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "上面写着‘出诊地点’几个字。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00151",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我想知道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00152",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00153",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00154",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00155",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00156",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00157",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00158",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00159",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00160",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00161",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00162",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00163",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00164",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00165",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00166",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00167",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00168",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00169",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00170",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00171",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00172",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00173",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00174",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00175",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00176",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00177",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00178",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00179",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00180",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00181",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00182",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00183",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00184",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00185",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00186",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00187",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00188",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00189",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00190",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00191",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00192",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00193",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00194",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00195",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00196",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00197",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00198",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00199",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00200",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00201",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00202",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00203",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00204",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00205",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00206",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00207",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00208",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00209",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00210",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00211",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00212",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00213",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00214",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00215",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00216",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00217",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00218",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00219",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00220",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00221",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00222",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00223",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00224",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00225",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00226",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00227",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00228",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00229",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00230",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00231",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00232",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00233",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00234",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00235",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00236",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00237",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00238",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00239",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00240",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00241",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00242",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00243",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00244",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00245",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00246",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00247",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00248",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00249",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00250",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00251",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00252",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00253",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00254",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00255",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00256",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00257",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00258",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00259",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00260",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00261",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00262",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00263",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00264",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00265",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00266",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00267",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00268",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00269",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00270",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00271",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00272",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00273",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00274",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00275",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00276",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00277",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00278",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00279",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00280",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00281",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00282",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00283",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00284",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00285",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00286",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00287",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00288",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00289",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00290",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00291",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00292",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00293",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00294",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00295",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00296",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00297",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00298",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00299",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00300",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00301",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00302",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00303",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00304",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00305",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00306",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00307",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00308",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00309",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00310",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00311",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00312",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00313",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00314",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00315",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00316",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00317",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00318",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00319",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00320",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00321",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00322",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00323",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00324",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00325",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00326",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00327",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00328",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00329",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00330",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00331",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00332",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00333",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00334",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00335",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00336",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00337",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00338",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他回到家里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00339",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "发现妻子正坐在炉边，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00340",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "手里拿着一本书在看。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00341",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她那双眼睛里闪烁着一种奇怪的光芒，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00342",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "似乎在期待什么。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00343",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他走到她身边，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00344",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "坐下来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00345",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "问：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00346",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“怎么了？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00347",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00348",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00349",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00350",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“你今天早上出门的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00351",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我看见你把一张纸条放在五斗柜上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00352",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "上面写着‘出诊地点’几个字。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00353",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我想知道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00354",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00355",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00356",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00357",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00358",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00359",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00360",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00361",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00362",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00363",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00364",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00365",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00366",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00367",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00368",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00369",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00370",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00371",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00372",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00373",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00374",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00375",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00376",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00377",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00378",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00379",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00380",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00381",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00382",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00383",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00384",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00385",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00386",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00387",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00388",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00389",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00390",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00391",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00392",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00393",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00394",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00395",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00396",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00397",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00398",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00399",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00400",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00401",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00402",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00403",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00404",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00405",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00406",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00407",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00408",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00409",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00410",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00411",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00412",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00413",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00414",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00415",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00416",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00417",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00418",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00419",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00420",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00421",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00422",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00423",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00424",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00425",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00426",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00427",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00428",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00429",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00430",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00431",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00432",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00433",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00434",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00435",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00436",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00437",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00438",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00439",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00440",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00441",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00442",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00443",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00444",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00445",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00446",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00447",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00448",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00449",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00450",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00451",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00452",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00453",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00454",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00455",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00456",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00457",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00458",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00459",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00460",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00461",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00462",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00463",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00464",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00465",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00466",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00467",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00468",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00469",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00470",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00471",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00472",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00473",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00474",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00475",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00476",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00477",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00478",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00479",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00480",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00481",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00482",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00483",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00484",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00485",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00486",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00487",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00488",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00489",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00490",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00491",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00492",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00493",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00494",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00495",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00496",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00497",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00498",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00499",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00500",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00501",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00502",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00503",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00504",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00505",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00506",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00507",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00508",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00509",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00510",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00511",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00512",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00513",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00514",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00515",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00516",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00517",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00518",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00519",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00520",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00521",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00522",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00523",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00524",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00525",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00526",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00527",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00528",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00529",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00530",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00531",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00532",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00533",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00534",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00535",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00536",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00537",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00538",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00539",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00540",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00541",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00542",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00543",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00544",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00545",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00546",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00547",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00548",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00549",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00550",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00551",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00552",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00553",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00554",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00555",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00556",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00557",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00558",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00559",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00560",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00561",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00562",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00563",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00564",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00565",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00566",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00567",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00568",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00569",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00570",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00571",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00572",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00573",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00574",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00575",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00576",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00577",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00578",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00579",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00580",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00581",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00582",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00583",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00584",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00585",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00586",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00587",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00588",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00589",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00590",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00591",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00592",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00593",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00594",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00595",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“那真是太危险了！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00596",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我真为你担心！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00597",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“别担心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00598",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00599",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00600",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“一切都会好起来的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00601",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你只要相信我就行了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00602",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00603",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00604",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”她说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00605",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我总觉得有什么不对劲儿。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00606",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "你是不是遇到了什么麻烦？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00607",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“没有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00608",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "亲爱的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00609",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”他回答说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00610",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“我只是去给一个女人做阑尾炎手术。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00611",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n“哦，",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00612",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "她在等候肯尼科特的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00613",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "已不再怜悯自己，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00614",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "而是开始嘲笑自己了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00615",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "她还是头一遭目睹着这候诊室的情景。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00616",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "是的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00617",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "医生自然应当有日本和服宽绸腰带形状的镶板、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00618",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "宽大的长沙发，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00619",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "以及电气通风器，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00620",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "但对病魔缠身而又疲惫不堪的老百姓来说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00621",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "哪怕是一个邋里邋遢的小房间，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00622",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "也就觉得够好了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00623",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "其实，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00624",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "这些老百姓却是医生赖以活命的唯一来源和唯一台柱！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00625",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "不，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00626",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "她可不能责怪肯尼科特。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00627",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "他根本不嫌弃这些破椅子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00628",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "而且如同病人那样，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00629",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "一点儿都没有受不了的感觉。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00630",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "这个地方分明是她自己视而不见——亏她直到如今还一直在各处游说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00631",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "要重建这个市镇！",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00632",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "“我的老天爷呀，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00633",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "你说这个又算是什么天大的奇闻呢？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00634",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "反正戈镇这儿人人都知道她的老娘是个啥货色。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00635",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "那些旅行推销员要是不去缠住她，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00636",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "她好好的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00637",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "恁地会出问题呢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00638",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "当然，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00639",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "我也不信，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00640",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "任她花言巧语就能骗得了我们的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00641",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "不管怎么样，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00642",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "最好赶快把她送到索克镇的感化院去，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00643",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "越快越好，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00644",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "那不就一劳永逸了吗？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00645",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "亲爱的卡萝尔呀，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00646",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "请您喝一杯咖啡，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00647",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "好吗？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00648",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "我相信，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00649",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "我这个博加特大婶直呼其名叫你卡萝尔，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00650",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "你不会见怪吧？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00651",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "你只要想一想，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00652",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "我认识威尔已然很久很久了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00653",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "他的那位可爱的老太太住在此地的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00654",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "我跟她很要好，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00655",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "简直无话不谈呀。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00656",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00657",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "你的那顶毛皮帽子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00658",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "想来一定很贵吧？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00659",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00660",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "你不觉得我们镇上有些人一说起风言风语来很可怕吗？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00661",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "”",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00662",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "“我真闹不明白，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00663",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "人们说话，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00664",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "做事，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00665",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "哪能这样乱来一气呢？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00666",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "他们在背地里干的一些事情，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00667",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "你可能就不知道啦。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00668",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "这个镇就是这个样子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00669",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "多亏我让赛伊受到宗教熏陶，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00670",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "这方才使他心灵始终保持纯洁，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00671",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "没有沾染上这些乌七八糟的东西。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00672",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "就在头两天，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00673",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "说到外面的流言蜚语，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00674",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "我从来都不留意的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00675",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "可是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00676",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "我听得清清楚楚，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00677",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "说哈里·海多克跟明尼阿波利斯一家商号里的女店员勾勾搭搭的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00678",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "可怜巴巴的久恩尼塔至今还蒙在鼓里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00679",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "说起来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00680",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "也许是上帝给她的惩罚吧，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00681",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "因为她自个儿和哈里结婚以前也跟不止一个男人有过什么名堂的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00682",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "嗯，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00683",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "这样的事儿我委实不乐意再提了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00684",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "也许正如赛伊所说的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00685",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "我这个老婆子早就落在时代的后面了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00686",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00687",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "不管怎么说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00688",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "反正我总觉得，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00689",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "出身名门的女人，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00690",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "就不该知道那些骇人的下流勾当。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00691",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "但我还是知道，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00692",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "久恩尼塔至少有一回跟一个年轻小伙子在一起。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00693",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "噢哟哟，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00694",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "他们干的实在是糟糕透顶。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00695",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "此外还有，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00696",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "还有那个杂货铺老板奥利·詹森自以为他很聪明，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00697",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "干的事儿准不会露马脚，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00698",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "可我照样知道他跟一个庄稼汉的老婆吊膀子——还有那个吊儿郎当的打短工的伯恩斯塔姆和纳特·希克斯——”",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00699",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "“你对戈镇的印象怎么样？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_026_00700",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "”",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00701",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "场景转换至：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00702",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "摩根罗思农场",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00703",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "场景转换至：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00704",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "摩根罗思农场",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00705",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "场景转换至：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00706",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "摩根罗思农场",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00707",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "场景转换至：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00708",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "摩根罗思农场",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_026_00709",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "场景转换至：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_026_00710",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "摩根罗思农场",
+    "pause_ms": 1000
+  }
+]

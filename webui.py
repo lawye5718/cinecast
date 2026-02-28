@@ -22,11 +22,95 @@ QWEN_PRESET_VOICES = [
     "Aiden", "Dylan", "Ono_anna", "Ryan", "Sohee", "Uncle_fu", "Vivian",
 ]
 
+# 流式API配置
+STREAM_API_URL = "http://localhost:8000"
+
 # 🌟 弃用名单：eric 和 serena 默认不使用，除非用户主动选择（且仅当次有效）
 DEPRECATED_VOICES = {"eric", "serena"}
 # 优先分配的默认音色顺序（排除 eric/serena）
 DEFAULT_VOICE_ORDER = ["aiden", "dylan", "ryan", "uncle_fu", "ono_anna", "sohee", "vivian"]
 
+
+# --- 流式API功能 ---
+def test_stream_api_connection():
+    """测试流式API连接"""
+    try:
+        response = requests.get(f"{STREAM_API_URL}/health", timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            return f"✅ 流式API连接成功 - 状态: {data.get('status', 'unknown')}"
+        else:
+            return f"❌ 流式API连接失败 - 状态码: {response.status_code}"
+    except Exception as e:
+        return f"❌ 流式API连接异常: {str(e)}"
+
+def get_available_voices():
+    """获取可用音色列表"""
+    try:
+        response = requests.get(f"{STREAM_API_URL}/voices", timeout=5)
+        if response.status_code == 200:
+            return response.json()
+        return None
+    except Exception as e:
+        logger.warning(f"获取音色列表失败: {e}")
+        return None
+
+def set_stream_voice(voice_name: str, audio_file=None):
+    """设置流式API的当前音色"""
+    try:
+        if audio_file:
+            # 上传音频文件进行音色克隆
+            files = {'file': audio_file}
+            data = {'voice_name': voice_name}
+            response = requests.post(
+                f"{STREAM_API_URL}/set_voice",
+                data=data,
+                files=files,
+                timeout=30
+            )
+        else:
+            # 使用预设音色
+            data = {'voice_name': voice_name}
+            response = requests.post(
+                f"{STREAM_API_URL}/set_voice",
+                data=data,
+                timeout=10
+            )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return f"✅ 音色设置成功: {result.get('voice_name', 'unknown')}"
+        else:
+            return f"❌ 音色设置失败: {response.text}"
+    except Exception as e:
+        return f"❌ 音色设置异常: {str(e)}"
+
+def stream_tts_read(text: str, language: str = "zh"):
+    """调用流式API进行实时朗读"""
+    try:
+        params = {'text': text, 'lang': language}
+        response = requests.get(
+            f"{STREAM_API_URL}/read_stream",
+            params=params,
+            timeout=30,
+            stream=True
+        )
+        
+        if response.status_code == 200:
+            # 保存音频到临时文件
+            import tempfile
+            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+                temp_path = f.name
+            return temp_path
+        else:
+            logger.error(f"流式朗读失败: {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        logger.error(f"流式朗读异常: {e}")
+        return None
 
 # --- 新增：大模型连接测试 ---
 def test_llm_connection(model_name, base_url, api_key):
@@ -998,5 +1082,124 @@ with gr.Blocks(title="CineCast Pro 3.0") as ui:
         outputs=[audio_player, status_box],
     )
 
+# --- 新增：流式API独立界面 ---
+with gr.Blocks(title="CineCast 流式朗读API") as stream_ui:
+    gr.Markdown("# 🎵 CineCast 流式实时朗读API")
+    gr.Markdown("""
+    实时文本转语音服务，支持动态音色切换和音色克隆功能。
+    可以实现"边读边推"的流式体验。
+    """)
+    
+    with gr.Row():
+        with gr.Column(scale=1):
+            # API连接测试
+            btn_test_stream_api = gr.Button("🔄 测试流式API连接", variant="secondary")
+            stream_api_status = gr.Textbox(label="API状态", interactive=False, lines=2)
+            
+            # 音色管理
+            gr.Markdown("### 🎤 音色管理")
+            with gr.Tab("预设音色"):
+                preset_voice_selector = gr.Dropdown(
+                    label="选择预设音色",
+                    choices=["aiden", "dylan", "ono_anna", "ryan", "sohee", "uncle_fu", "vivian", "eric", "serena"],
+                    value="aiden"
+                )
+                btn_set_preset_voice = gr.Button("✅ 使用此音色", variant="primary")
+            
+            with gr.Tab("音色克隆"):
+                clone_upload = gr.File(
+                    label="上传参考音频 (WAV/MP3/FLAC)",
+                    file_types=[".wav", ".mp3", ".flac"]
+                )
+                clone_voice_name = gr.Textbox(
+                    label="音色名称",
+                    placeholder="给这个音色起个名字..."
+                )
+                btn_clone_voice = gr.Button("🎯 克隆音色", variant="primary")
+            
+            voice_status = gr.Textbox(label="音色状态", interactive=False, lines=2)
+            
+            # 实时朗读
+            gr.Markdown("### 📖 实时朗读")
+            stream_text_area = gr.TextArea(
+                label="朗读文本",
+                placeholder="请输入要朗读的文本内容...",
+                lines=5
+            )
+            stream_language = gr.Radio(
+                choices=[("中文", "zh"), ("English", "en")],
+                value="zh",
+                label="语言选择"
+            )
+            btn_start_stream = gr.Button("▶️ 开始流式朗读", variant="primary", size="lg")
+            
+        with gr.Column(scale=2):
+            stream_audio_player = gr.Audio(
+                label="实时音频输出",
+                interactive=False,
+                autoplay=True
+            )
+            stream_progress = gr.Progress(label="生成进度")
+            stream_logs = gr.Textbox(
+                label="实时日志",
+                interactive=False,
+                lines=8,
+                max_lines=10
+            )
+    
+    # 事件绑定
+    btn_test_stream_api.click(
+        fn=test_stream_api_connection,
+        inputs=[],
+        outputs=stream_api_status
+    )
+    
+    btn_set_preset_voice.click(
+        fn=lambda voice: set_stream_voice(voice),
+        inputs=[preset_voice_selector],
+        outputs=voice_status
+    )
+    
+    btn_clone_voice.click(
+        fn=lambda file, name: set_stream_voice(name, file) if file else "请上传音频文件",
+        inputs=[clone_upload, clone_voice_name],
+        outputs=voice_status
+    )
+    
+    def stream_read_handler(text, language):
+        if not text.strip():
+            return None, "❌ 请输入朗读文本", gr.update()
+        
+        log_updates = ["🎙️ 开始流式朗读..."]
+        yield None, "\n".join(log_updates), gr.update(value=0.1)
+        
+        # 调用流式API
+        audio_path = stream_tts_read(text, language)
+        
+        if audio_path:
+            log_updates.append("✅ 音频生成完成!")
+            yield audio_path, "\n".join(log_updates), gr.update(value=1.0)
+        else:
+            log_updates.append("❌ 朗读失败，请检查连接")
+            yield None, "\n".join(log_updates), gr.update()
+    
+    btn_start_stream.click(
+        fn=stream_read_handler,
+        inputs=[stream_text_area, stream_language],
+        outputs=[stream_audio_player, stream_logs, stream_progress]
+    )
+
+# 启动选项
 if __name__ == "__main__":
-    ui.launch(inbrowser=True, server_name="127.0.0.1", server_port=7860, theme=theme)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=["main", "stream"], default="main",
+                       help="选择启动模式: main(主界面) 或 stream(流式API界面)")
+    args = parser.parse_args()
+    
+    if args.mode == "stream":
+        print("🚀 启动流式API界面...")
+        stream_ui.launch(inbrowser=True, server_name="127.0.0.1", server_port=7861)
+    else:
+        print("🎬 启动主制片界面...")
+        ui.launch(inbrowser=True, server_name="127.0.0.1", server_port=7860, theme=theme)

@@ -1,0 +1,128 @@
+[
+  {
+    "chunk_id": "Chapter_020_00001",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "卡萝尔心里很不是滋味，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_020_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_020_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "卡萝尔怀孕，生活重心转移。威尔的亲戚来访，干涉她的生活。她感到被家庭琐事淹没。她看着腹中的孩子，心情复杂。新生命即将降临。难道母亲的身份意味着放弃自我……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_020_00002",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "她觉得莱曼夫妇俩好像在嘲笑她。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_020_00003",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "卡萝尔心里很不是滋味，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_020_00004",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "她觉得莱曼夫妇俩好像在嘲笑她。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_020_00005",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "卡萝尔心里很不是滋味，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_020_00006",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "她觉得莱曼夫妇俩好像在嘲笑她。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_020_00007",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "卡萝尔听到这些话后，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_020_00008",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "心里很不是滋味。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_020_00009",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "肯尼科特老太太在厨房里忙活的情景，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_020_00010",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "她对自己的丈夫也开始有了更深一层的了解。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_020_00011",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "肯尼科特老太太在厨房里忙活的情景，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_020_00012",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "她对自己的丈夫也开始有了更深一层的了解。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_020_00013",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "肯尼科特老太太在厨房里忙活的情景，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_020_00014",
+    "type": "action",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "她对自己的丈夫也开始有了更深一层的了解。",
+    "pause_ms": 1000
+  }
+]

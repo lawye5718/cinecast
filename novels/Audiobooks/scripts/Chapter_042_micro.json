@@ -1,0 +1,66 @@
+[
+  {
+    "chunk_id": "Chapter_042_00001",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我不喜欢戈镇，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_042_00002",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "但是我觉得这里的人们还是挺好的。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_042_00003",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "哦，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_042_00004",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我可确实不喜欢呀！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_042_00005",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_042_00006",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "我相信总有一天我会找到一个解决办法的。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_042_00007",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "也许我好比是一颗六角形的钉子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_042_00008",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "解决的办法就是要找到一个六角形的洞眼。",
+    "pause_ms": 1000
+  }
+]

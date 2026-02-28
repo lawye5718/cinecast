@@ -1,0 +1,120 @@
+[
+  {
+    "chunk_id": "Chapter_027_00001",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "场景转换至：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_027_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_027_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "卡萝尔与埃里克关系升温，她试图帮助他追求艺术。威尔虽未察觉，但小镇目光如炬。她陷入道德与情感的挣扎。夜不能寐。内心煎熬。难道爱情真的无罪……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_027_00002",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "摩根罗思农场",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_027_00003",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "场景转换至：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_027_00004",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "摩根罗思农场",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_027_00005",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "场景转换至：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_027_00006",
+    "type": "transition",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "摩根罗思农场",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_027_00007",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你是不是在想我？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_027_00008",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "盖伊，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_027_00009",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你愿意帮助我吗？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_027_00010",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你真是那么可爱，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_027_00011",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "就让我跟你一块儿谈谈我想象中的苦恼吧。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_027_00012",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你真是那么可爱，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_027_00013",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "就让我跟你一块儿谈谈我想象中的苦恼吧。",
+    "pause_ms": 1000
+  }
+]

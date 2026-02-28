@@ -301,8 +301,8 @@ class MLXRenderEngine:
             mx.eval(audio_array) # 强制执行
             audio_data = np.array(audio_array)
             
-            # 异步写入磁盘，避免阻塞下一句的推理
-            self.io_executor.submit(self._async_write_wav, save_path, audio_data.copy(), self.sample_rate)
+            # 同步写入磁盘，确保流式API能够立即读取
+            sf.write(save_path, audio_data, self.sample_rate, format='WAV')
             logger.debug(f"✅ 干音渲染完成: {save_path}")
             return True
             
@@ -494,6 +494,104 @@ class CinecastMLXEngine:
         data, _ = sf.read(path, dtype="float32")
         return data
 
+    def extract_voice_feature(self, audio_data: np.ndarray, sample_rate: int = 24000):
+        """从音频数据中提取音色特征用于克隆
+
+        Args:
+            audio_data: 音频数据数组 (numpy)
+            sample_rate: 采样率，默认24000Hz
+
+        Returns:
+            音色特征向量
+        """
+        engine = self._ensure_render_engine()
+        
+        # 确保音频数据是正确的格式
+        if len(audio_data) == 0:
+            raise ValueError("音频数据为空")
+            
+        # 归一化音频数据
+        if np.max(np.abs(audio_data)) > 1.0:
+            audio_data = audio_data / np.max(np.abs(audio_data))
+            
+        # 保存临时音频文件
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+            tmp_path = f.name
+            sf.write(tmp_path, audio_data, sample_rate)
+        
+        try:
+            # 使用引擎提取特征
+            feature = engine.extract_speaker_embedding(tmp_path)
+            return feature
+        finally:
+            # 清理临时文件
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+    def generate_with_feature(self, text: str, feature, language: str = "zh"): 
+        """使用指定特征生成音频（用于流式API）
+
+        Args:
+            text: 要合成的文本
+            feature: 音色特征
+            language: 语言代码
+
+        Returns:
+            音频数据数组
+        """
+        engine = self._ensure_render_engine()
+        
+        # 构建voice配置 - 根据feature类型选择合适的模式
+        if isinstance(feature, dict) and feature.get("mode") == "preset":
+            # 预设音色模式
+            voice_cfg = {
+                "mode": "preset",
+                "voice": feature.get("voice", "aiden")
+            }
+        else:
+            # 克隆模式
+            voice_cfg = {"mode": "clone"}
+            if isinstance(feature, dict):
+                if "spk_emb" in feature:
+                    voice_cfg["spk_emb"] = feature["spk_emb"]
+                if "ref_audio" in feature:
+                    voice_cfg["ref_audio"] = str(feature["ref_audio"])
+                if "ref_text" in feature:
+                    voice_cfg["ref_text"] = str(feature["ref_text"])
+                if "voice" in feature:
+                    voice_cfg["voice"] = feature["voice"]
+        
+        # 生成音频
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+            tmp_path = f.name
+        
+        try:
+            # 同步渲染，等待完成
+            success = engine.render_dry_chunk(text, voice_cfg, tmp_path)
+            if not success:
+                raise RuntimeError("音频渲染失败")
+            
+            # 等待文件写入完成
+            import time
+            max_wait = 10  # 最多等待10秒
+            waited = 0
+            while waited < max_wait:
+                if os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 0:
+                    break
+                time.sleep(0.1)
+                waited += 0.1
+            
+            if waited >= max_wait:
+                raise RuntimeError("音频文件写入超时")
+                
+            audio_data = self._load_wav(tmp_path)
+            return audio_data
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+    
     def unload_model(self):
         """卸载模型，释放统一内存。
 

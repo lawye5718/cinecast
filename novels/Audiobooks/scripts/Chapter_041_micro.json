@@ -1,0 +1,66 @@
+[
+  {
+    "chunk_id": "Chapter_041_00001",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "什么事？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_041_00002",
+    "type": "dialogue",
+    "speaker": "博加特太太",
+    "gender": "female",
+    "content": "什么事？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_041_00003",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "看来他们娘儿俩好像都不大舒服，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_041_00004",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "这是怎么回事呀？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_041_00005",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "奥拉夫，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_041_00006",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你感觉怎么样？",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_041_00007",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "奥拉夫，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_041_00008",
+    "type": "dialogue",
+    "speaker": "卡萝尔",
+    "gender": "female",
+    "content": "你感觉怎么样？",
+    "pause_ms": 1000
+  }
+]

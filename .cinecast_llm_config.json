@@ -1,0 +1,5 @@
+{
+  "model_name": "qwen3.5-plus",
+  "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "api_key": "sk-44bbcaea142f4aa0ac8aeb96e4b8422b"
+}

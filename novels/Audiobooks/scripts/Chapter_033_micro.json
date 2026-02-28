@@ -1,0 +1,18 @@
+[
+  {
+    "chunk_id": "Chapter_033_00001",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我想，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_033_00002",
+    "type": "dialogue",
+    "speaker": "肯尼科特",
+    "gender": "male",
+    "content": "我们大家都有点累了。",
+    "pause_ms": 1000
+  }
+]

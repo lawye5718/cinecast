@@ -1,0 +1,296 @@
+[
+  {
+    "chunk_id": "Chapter_023_00001",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "谢谢你。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_023_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_023_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "战争爆发，小镇气氛紧张。富翁布雷斯纳汉回乡，卡萝尔被他吸引。他邀请她兜风，言语暧昧。她心动却克制。诱惑就在眼前。难道这段奇遇会是逃离的契机……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_023_00002",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "你的好意我心领了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00003",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00004",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "我还是喜欢自个儿慢慢走。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_023_00005",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "谢谢你。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_023_00006",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "你的好意我心领了，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00007",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "不过，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00008",
+    "type": "dialogue",
+    "speaker": "肯尼科特太太",
+    "gender": "female",
+    "content": "我还是喜欢自个儿慢慢走。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_023_00009",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "七月还没有来临，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00010",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "大草原上已闷热不堪。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_023_00011",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "在烈日暴晒下，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00012",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "地面都龟裂了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_023_00013",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "庄稼人下地干活，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00014",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "跟在播种机和浑身流汗的马匹后面，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00015",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "累得上气不接下气。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_023_00016",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "九月，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00017",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "本是一年之中大自然的色彩最丰富的时节，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00018",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "可是按照本地习俗，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00019",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们不得不都回到戈镇去，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00020",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "孩子们也不能再浪掷韶光，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00021",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "去学习什么跟大地有关的东西，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00022",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "而是应该回教室去学算术，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00023",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "比如说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00024",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "（在那个用不着担心代销佣金或在运货车上短斤缺两的小天地）算一算威廉卖给约翰多少斤土豆这类功课。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_023_00025",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "整个夏天那些太太们常常去游泳，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00026",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "玩得很开心，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00027",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "可现在一听到卡萝尔说“今年冬天让我们到户外去换换空气，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00028",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "滑滑雪，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00029",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "溜溜冰”，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00030",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "却露出怀疑的眼色。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_023_00031",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "在明年开春以前，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00032",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她们的心儿又得闭合起来长达九个月之久的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_023_00033",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "围着暖炉吃精美点心的小圈子生活又要开始了。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_023_00034",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "佩里夫妇对戈镇的复兴抱有坚定的信心。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_023_00035",
+    "type": "description",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "佩里夫妇对戈镇的复兴抱有坚定的信心。",
+    "pause_ms": 1000
+  }
+]

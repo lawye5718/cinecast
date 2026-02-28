@@ -1,0 +1,1176 @@
+[
+  {
+    "chunk_id": "Chapter_012_00001",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔·米尔福德是一个充满活力和梦想的女孩。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_recap_intro",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "前情提要：",
+    "pause_ms": 500
+  },
+  {
+    "chunk_id": "Chapter_012_recap_body",
+    "type": "recap",
+    "speaker": "talkover",
+    "content": "春天到来，卡萝尔在自然中找回活力。她再次遇到伯恩斯塔姆，他谈论阶级与自由。她试图说服富翁道森捐资改建小镇，却被拒绝。她渴望变革，却无人响应。难道金钱真的比美更重要……",
+    "pause_ms": 1500
+  },
+  {
+    "chunk_id": "Chapter_012_00002",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她在布洛杰特学院的生活充满了各种活动和兴趣，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00003",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但她内心深处却有着对未来的迷茫和憧憬。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_012_00004",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔·米尔福德是一个充满活力和梦想的女孩。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00005",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她在布洛杰特学院的生活充满了各种活动和兴趣，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00006",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但她内心深处却有着对未来的迷茫和憧憬。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_012_00007",
+    "type": "dialogue",
+    "speaker": "斯图尔特·斯奈德",
+    "gender": "male",
+    "content": "这些蠢货——大学生，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00008",
+    "type": "dialogue",
+    "speaker": "斯图尔特·斯奈德",
+    "gender": "male",
+    "content": "可叫我讨厌透了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00009",
+    "type": "dialogue",
+    "speaker": "斯图尔特·斯奈德",
+    "gender": "male",
+    "content": "他们真不知道天高地厚。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00010",
+    "type": "dialogue",
+    "speaker": "斯图尔特·斯奈德",
+    "gender": "male",
+    "content": "嘿，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00011",
+    "type": "dialogue",
+    "speaker": "斯图尔特·斯奈德",
+    "gender": "male",
+    "content": "他们应该去农场干活，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00012",
+    "type": "dialogue",
+    "speaker": "斯图尔特·斯奈德",
+    "gender": "male",
+    "content": "就像我那样。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00013",
+    "type": "dialogue",
+    "speaker": "斯图尔特·斯奈德",
+    "gender": "male",
+    "content": "那些工人准会给他们颜色看看的。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_012_00014",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "儿童读物的图书馆。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00015",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "我可要使每一个乡镇都有街心花园和草坪、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00016",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "小巧玲珑的房子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00017",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以及一条漂漂亮亮的大街！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00018",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n卡萝尔在上那堂历史课的时候，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00019",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "心里一直在琢磨着这些事情，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00020",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "说真的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00021",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "越琢磨越得意扬扬呢。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00022",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那样的历史课，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00023",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "可以说是布洛杰特学院里一位无聊透顶的教师和一批二十岁上下不乐意听讲的学生之间展开的一种典型争论，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00024",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "占上风的总是教师。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00025",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "因为不论他提出什么问题来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00026",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他的对手们都得回答，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00027",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "而对手们所提出的那些刁钻古怪的问题，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00028",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他都可以反过来将你一军：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00029",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“难道你还没有上图书馆查过吗？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00030",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "得了吧，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00031",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "劳你驾去查一查吧！",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00032",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”\n那位历史教师是个退休的牧师。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00033",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "今天他说的话里似乎有点儿挖苦的味道。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00034",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他跟喜好活动的查利·霍姆伯格说：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00035",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "“查利，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00036",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "要是我请你告诉我你是否知道英王约翰的事，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00037",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "而你却在一个劲儿追逐那只可恶的苍蝇，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00038",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那我会不会算是打扰了你呢？",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00039",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "”说完，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00040",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他津津有味地花了大约三分钟光景才了解清楚：",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00041",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "事实上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00042",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "全班没有一个人还记得英国《大宪章》制定的确切日期。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00043",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "这时老师仍在讲话，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00044",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔却充耳不闻。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00045",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她的心儿简直沉浸在愉快的遐想之中。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00046",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她正在完成一幢砖木结构的市政厅大会堂的屋顶设计蓝图。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00047",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "仿佛在一个草原乡镇里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00048",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她发现，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00049",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有一个人对她所提出的迂回曲折的大街和两旁有拱顶的人行道的设想表示不太欣赏，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00050",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但是，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00051",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她已经在市议会召开的会议上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00052",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "富于戏剧性地把那个家伙击败了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00053",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "三\n卡萝尔虽然出生在明尼苏达州，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00054",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "但对大草原上乡村的情况并不十分了解。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00055",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她父亲原籍马萨诸塞州，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00056",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "整日笑吟吟，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00057",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不修边幅，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00058",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "博学多闻，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00059",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "和蔼可亲，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00060",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有时也开开玩笑。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00061",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "在她整个童年时代，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00062",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "父亲一直担任曼卡托法官职务。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00063",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "曼卡托虽然不是一个草原市镇，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00064",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "可它的那些花木扶疏的街道和两行榆树间的通幽小径，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00065",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "仿佛跟白绿相映、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00066",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "景色如画的新英格兰一模一样。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00067",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "曼卡托位于壁立万仞的悬崖和明尼苏达河之间，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00068",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "临近特拉弗斯\n[13]\n。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00069",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "最早到达的移民曾经在这里和印第安人签订过协议书，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00070",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "偷窃牲口的盗贼一度也在本州民团的拼命缉捕之下策马飞驰而来。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00071",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那时节，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00072",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔经常爬上那条黑黝黝的大河的堤岸，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00073",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "如饥似渴地听着关于它的种种传说，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00074",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有的是讲大河以西辽阔的大地上黄水滔滔和水牛白骨的故事，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00075",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "有的是讲大河以南关于两岸大堤、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00076",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "爱唱歌的黑人和棕榈树的逸闻，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00077",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "而那条大河却永远神秘莫测地朝着南方流去。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00078",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她仿佛隐隐约约听到，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00079",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "六十年以前，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00080",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "触礁沉没的高烟囱的内河火轮发出的令人惊恐的钟声和哼哧哼哧的沉重的喷气声。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00081",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她仿佛看到在甲板上密集着传教士，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00082",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "头戴大圆顶礼帽的赌徒，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00083",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "以及披着猩红色毛毯的达科他酋长……入夜以后，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00084",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "远远地从河面拐弯处传来了汽笛声，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00085",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "松树林里不断发出桨声的回响，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00086",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "黑黝黝的潋滟的河面上泛起一片橙红色的反光。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00087",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔一家对于自己别出心裁的生活方式很自得其乐。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00088",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "比方欢度圣诞节时，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00089",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他们照例会使人大吃一惊，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00090",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "同时又令人倍感温情脉脉；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_012_00091",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "至于“化装晚会”上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00092",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "既有真情的自然流露，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00093",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "又令人感到荒唐可笑。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00094",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "当卡萝尔一家人在炉边讲述神话故事时，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00095",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "里面出现的兽类，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00096",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "不是深更半夜从壁橱里跳出来吃小女孩的叫人毛骨悚然的怪物，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00097",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "而是一些眉清目秀、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00098",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "和蔼可亲的生灵——有一种驯顺的小东西，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00099",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "浑身毛茸茸的，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00100",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "蓝颜色，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00101",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "住在浴室里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00102",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "会一溜烟地跑过来给孩子们烘暖小脚；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_012_00103",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "再有是一个生锈了的煤油炉子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00104",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "它会发出呜呜呜的响声，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00105",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "还会讲各式各样的故事；",
+    "pause_ms": 400
+  },
+  {
+    "chunk_id": "Chapter_012_00106",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "此外还有一种小动物，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00107",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "每当早上父亲一面刮胡子，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00108",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "一面哼着小曲，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00109",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "孩子们要是能在父亲刚哼上第一句的时候从床上跳下来，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00110",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "把窗子关上，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00111",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "那么，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00112",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "早饭以前这种小动物就会和孩子们在一起玩了。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00113",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "米尔福德法官教导子女的原则，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00114",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "就是让孩子们爱看什么书就看什么书。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00115",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔在父亲那间糊上棕色花墙纸的图书室里，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00116",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "潜心研读了巴尔扎克、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00117",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "拉伯雷\n[14]\n、",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00118",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "梭罗\n[15]\n和马克斯·穆勒\n[16]",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_012_00119",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "斯图尔特·斯奈德是个非常有男子气概的小伙子。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00120",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他皮肤黝黑，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00121",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "和他新近买来的那套带垫肩的衣服的颜色一模一样。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00122",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他身材魁梧，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00123",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肌肉发达，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00124",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "看上去就像一个真正的男子汉。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00125",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他喜欢打篮球，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00126",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "经常参加学校的篮球队，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00127",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "并且在比赛中表现出色。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00128",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "斯图尔特·斯奈德是个非常有男子气概的小伙子。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00129",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他皮肤黝黑，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00130",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "和他新近买来的那套带垫肩的衣服的颜色一模一样。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00131",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他身材魁梧，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00132",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "肌肉发达，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00133",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "看上去就像一个真正的男子汉。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00134",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "他喜欢打篮球，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00135",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "经常参加学校的篮球队，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00136",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "并且在比赛中表现出色。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_012_00137",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "毕业以后，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00138",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她再也没有见过斯图尔特·斯奈德一面。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00139",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔每周给他写一封信——总共也只有一个月光景。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_012_00140",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "毕业以后，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00141",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她再也没有见过斯图尔特·斯奈德一面。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00142",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔每周给他写一封信——总共也只有一个月光景。",
+    "pause_ms": 1000
+  },
+  {
+    "chunk_id": "Chapter_012_00143",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "毕业以后，",
+    "pause_ms": 250
+  },
+  {
+    "chunk_id": "Chapter_012_00144",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "她再也没有见过斯图尔特·斯奈德一面。",
+    "pause_ms": 600
+  },
+  {
+    "chunk_id": "Chapter_012_00145",
+    "type": "narration",
+    "speaker": "narrator",
+    "gender": "unknown",
+    "content": "卡萝尔每周给他写一封信——总共也只有一个月光景。",
+    "pause_ms": 1000
+  }
+]

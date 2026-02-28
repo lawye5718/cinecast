@@ -35,3 +35,8 @@ psutil>=5.9.0
 librosa>=0.10.0
 PyQt6>=6.5.0
 pyqtgraph>=0.13.0
+
+# 流式API支持
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6

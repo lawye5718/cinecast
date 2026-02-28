@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+"""
+CineCast 流式 TTS API (Streaming TTS API)
+实现实时音频流生成，支持网页端动态切换音色。
+"""
+
+import asyncio
+import io
+import logging
+from typing import AsyncGenerator, Optional
+
+import mlx.core as mx
+import numpy as np
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+
+from modules.mlx_tts_engine import MLXRenderEngine
+from modules.asset_manager import AssetManager
+from modules.rhythm_manager import RhythmManager
+from modules.role_manager import RoleManager
+
+logger = logging.getLogger(__name__)
+
+# 全局状态管理
+class GlobalVoiceState:
+    def __init__(self):
+        self.current_voice_config = {
+            "role": "default",
+            "feature": None,
+            "engine": None
+        }
+        self.asset_manager = AssetManager()
+        self.rhythm_manager = RhythmManager()
+    
+    async def initialize_engine(self):
+        """初始化 TTS 引擎"""
+        if self.current_voice_config["engine"] is None:
+            self.current_voice_config["engine"] = MLXRenderEngine()
+            logger.info("🚀 TTS 引擎已初始化")
+    
+    async def set_voice_by_role(self, role_name: str):
+        """通过音色库设置音色"""
+        try:
+            feature = RoleManager.load_voice_feature(role_name, "./voices")
+            self.current_voice_config["feature"] = feature
+            self.current_voice_config["role"] = role_name
+            logger.info(f"🔊 音色已设置为: {role_name}")
+            return {"status": "success", "role": role_name}
+        except Exception as e:
+            logger.error(f"❌ 设置音色失败: {e}")
+            raise HTTPException(status_code=400, detail=f"音色设置失败: {str(e)}")
+    
+    async def set_voice_by_upload(self, audio_bytes: bytes):
+        """通过上传音频设置克隆音色"""
+        try:
+            # TODO: 实现音频特征提取逻辑
+            # 这里需要调用 MLX 引擎的特征提取功能
+            feature = self._extract_feature_from_bytes(audio_bytes)
+            self.current_voice_config["feature"] = feature
+            self.current_voice_config["role"] = "uploaded_clone"
+            logger.info("🔊 克隆音色已设置")
+            return {"status": "success", "role": "uploaded_clone"}
+        except Exception as e:
+            logger.error(f"❌ 克隆音色设置失败: {e}")
+            raise HTTPException(status_code=400, detail=f"音色克隆失败: {str(e)}")
+    
+    def _extract_feature_from_bytes(self, audio_bytes: bytes):
+        """从音频字节中提取特征（待实现）"""
+        # 这是一个占位实现，需要根据实际的 MLX 引擎 API 来完成
+        # 示例：return self.current_voice_config["engine"].extract_feature(audio_bytes)
+        raise NotImplementedError("特征提取功能待实现")
+    
+    async def stream_tts(self, text: str, language: str = "zh") -> AsyncGenerator[bytes, None]:
+        """流式 TTS 生成"""
+        if self.current_voice_config["engine"] is None:
+            await self.initialize_engine()
+        
+        engine = self.current_voice_config["engine"]
+        feature = self.current_voice_config["feature"]
+        
+        # 按句子分割文本
+        sentences = [s["text"] for s in self.rhythm_manager.process_text_with_metadata(text)]
+        
+        for sentence in sentences:
+            if not sentence.strip():
+                continue
+                
+            try:
+                # 使用当前音色配置进行推理
+                if feature is not None:
+                    # 克隆模式
+                    audio_array, sample_rate = engine.generate_voice_clone(sentence, feature)
+                else:
+                    # 默认模式
+                    audio_array, sample_rate = engine._run_base(sentence)
+                
+                # 转换为 WAV 字节流
+                wav_bytes = self._numpy_to_wav_bytes(audio_array, sample_rate)
+                yield wav_bytes
+                
+                # 显式清理 Metal 缓存（针对 Mac mini 内存优化）
+                mx.metal.clear_cache()
+                
+            except Exception as e:
+                logger.error(f"❌ TTS 生成失败: {e}")
+                continue
+
+    def _numpy_to_wav_bytes(self, audio_array: np.ndarray, sample_rate: int) -> bytes:
+        """将 numpy 数组转换为 WAV 字节流"""
+        # 确保是 16-bit PCM 格式
+        if audio_array.dtype != np.int16:
+            audio_array = (audio_array * 32767).astype(np.int16)
+        
+        # 构造 WAV 头部
+        byte_rate = sample_rate * 2  # 16-bit = 2 bytes per sample
+        wav_header = io.BytesIO()
+        wav_header.write(b'RIFF')
+        wav_header.write((36 + len(audio_array) * 2).to_bytes(4, 'little'))
+        wav_header.write(b'WAVE')
+        wav_header.write(b'fmt ')
+        wav_header.write((16).to_bytes(4, 'little'))  # PCM format
+        wav_header.write((1).to_bytes(2, 'little'))   # Mono
+        wav_header.write((1).to_bytes(2, 'little'))   # 1 channel
+        wav_header.write(sample_rate.to_bytes(4, 'little'))
+        wav_header.write(byte_rate.to_bytes(4, 'little'))
+        wav_header.write((2).to_bytes(2, 'little'))   # Block align
+        wav_header.write((16).to_bytes(2, 'little'))  # Bits per sample
+        wav_header.write(b'data')
+        wav_header.write((len(audio_array) * 2).to_bytes(4, 'little'))
+        
+        # 合并头部和音频数据
+        wav_data = wav_header.getvalue() + audio_array.tobytes()
+        return wav_data
+
+# FastAPI 应用实例
+app = FastAPI(title="CineCast Streaming TTS API", version="1.0.0")
+
+# 全局状态实例
+voice_state = GlobalVoiceState()
+
+# 请求模型
+class TTSRequest(BaseModel):
+    text: str
+    language: str = "zh"
+
+# API 路由
+@app.post("/set_voice/role")
+async def set_voice_role(role_name: str = Form(...)):
+    """设置音色库中的音色"""
+    return await voice_state.set_voice_by_role(role_name)
+
+@app.post("/set_voice/upload")
+async def set_voice_upload(file: UploadFile = File(...)):
+    """上传音频文件设置克隆音色"""
+    if not file.content_type.startswith('audio/'):
+        raise HTTPException(status_code=400, detail="请上传音频文件")
+    
+    audio_bytes = await file.read()
+    return await voice_state.set_voice_by_upload(audio_bytes)
+
+@app.post("/tts/stream")
+async def stream_tts(request: TTSRequest):
+    """流式 TTS 生成接口"""
+    return StreamingResponse(
+        voice_state.stream_tts(request.text, request.language),
+        media_type="audio/wav",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive"
+        }
+    )
+
+@app.get("/health")
+async def health_check():
+    """健康检查"""
+    return {"status": "healthy", "service": "CineCast Streaming TTS"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
