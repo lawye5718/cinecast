@@ -1186,7 +1186,7 @@ with gr.Blocks(title="CineCast 流式朗读API") as stream_ui:
     btn_start_stream.click(
         fn=stream_read_handler,
         inputs=[stream_text_area, stream_language],
-        outputs=[stream_audio_player, stream_logs, stream_progress]
+        outputs=[stream_audio_player, stream_logs]
     )
 
 # 启动选项

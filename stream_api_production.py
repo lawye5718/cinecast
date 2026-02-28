@@ -52,20 +52,50 @@ app = FastAPI(title="CineCast Streaming TTS API - Production Ready")
 # =====================================================================
 try:
     import gradio as gr
-    # 拦截旧版网页中的 demo.launch() 防止阻塞 API 服务器
+    import traceback  # 🚨 新增导入用于打印详细错误
+    
+    # 拦截旧版网页中的 launch 防止阻塞
     _original_launch = gr.Blocks.launch
     gr.Blocks.launch = lambda self, *args, **kwargs: None
     
-    import webui  # 导入您原项目中的网页端代码
+    logger.info("正在尝试导入旧版 webui...")
+    import webui  # 🚨 如果 webui.py 里面还有语法错误，这里就会抛出异常
+    logger.info(f"webui模块导入成功，可用属性: {[attr for attr in dir(webui) if not attr.startswith('_')][:10]}")
     
     gr.Blocks.launch = _original_launch # 恢复原方法
     
+    # 动态寻找实例名称（兼容 demo, app, interface 等常见命名）
+    gradio_app_instance = None
+    logger.info("开始搜索Gradio实例...")
     if hasattr(webui, 'demo'):
-        # 将原网页挂载到 /webui 路径
-        app = gr.mount_gradio_app(app, webui.demo, path="/webui")
-        logger.info("✅ 原有 Cinecast 网页端已成功挂载！您可以通过 http://localhost:8888/webui 访问操作！")
+        gradio_app_instance = webui.demo
+        logger.info("找到demo实例")
+    elif hasattr(webui, 'app') and isinstance(webui.app, gr.Blocks):
+        gradio_app_instance = webui.app
+        logger.info("找到app实例")
+    elif hasattr(webui, 'interface'):
+        gradio_app_instance = webui.interface
+        logger.info("找到interface实例")
+    elif hasattr(webui, 'ui') and isinstance(webui.ui, gr.Blocks):
+        gradio_app_instance = webui.ui
+        logger.info("找到ui实例")
+    elif hasattr(webui, 'stream_ui') and isinstance(webui.stream_ui, gr.Blocks):
+        gradio_app_instance = webui.stream_ui
+        logger.info("找到stream_ui实例")
+    else:
+        logger.warning("未找到任何Gradio实例")
+        logger.info(f"webui模块中的Blocks对象: {[attr for attr in dir(webui) if isinstance(getattr(webui, attr, None), gr.Blocks)]}")
+        
+    if gradio_app_instance:
+        app = gr.mount_gradio_app(app, gradio_app_instance, path="/webui")
+        logger.info("✅ 原有 Cinecast 网页端已成功挂载！请访问 http://localhost:8888/webui/ (注意末尾的斜杠)")
+    else:
+        logger.warning("⚠️ 成功导入 webui.py，但在里面没有找到名为 demo / app 的 Gradio 实例。")
+        
 except Exception as e:
-    logger.error(f"⚠️ 挂载原有网页端失败，但 API 将继续运行: {e}")
+    logger.error(f"❌ 挂载原有网页端发生致命错误: {e}")
+    # 🚨 打印完整的报错堆栈，帮我们准确定位 webui.py 里面还剩哪个毒瘤！
+    logger.error(traceback.format_exc())
 
 # CORS 配置
 app.add_middleware(
