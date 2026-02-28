@@ -9,6 +9,7 @@ import io
 import logging
 import tempfile
 import time
+import os
 from typing import Optional, AsyncGenerator
 import mlx.core as mx
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
@@ -210,7 +211,7 @@ async def set_voice(
         logger.error(f"❌ 设置音色失败: {e}")
         raise HTTPException(status_code=500, detail=f"音色设置失败: {str(e)}")
 
-def get_active_feature(self, voice_id: str):
+    def get_active_feature(self, voice_id: str):
         """获取活跃音色特征（实时生效核心）"""
         # 优先级 1: 检查是否是刚上传的临时音色
         if voice_id == "uploaded_clone" and self.current_voice_config["feature"] is not None:

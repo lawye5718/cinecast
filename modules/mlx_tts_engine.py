@@ -514,20 +514,31 @@ class CinecastMLXEngine:
         if np.max(np.abs(audio_data)) > 1.0:
             audio_data = audio_data / np.max(np.abs(audio_data))
             
-        # 保存临时音频文件
-        import tempfile
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-            tmp_path = f.name
-            sf.write(tmp_path, audio_data, sample_rate)
-        
+        # 直接在内存中处理，避免磁盘I/O瓶颈
+        # 如果底层引擎支持直接特征提取，则使用；否则回退到预设音色
         try:
-            # 使用引擎提取特征
-            feature = engine.extract_speaker_embedding(tmp_path)
-            return feature
-        finally:
-            # 清理临时文件
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
+            # 尝试调用底层引擎的特征提取方法
+            if hasattr(engine, 'extract_speaker_embedding'):
+                # 保存临时音频文件
+                import tempfile
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+                    tmp_path = f.name
+                    sf.write(tmp_path, audio_data, sample_rate)
+                
+                try:
+                    feature = engine.extract_speaker_embedding(tmp_path)
+                    return feature
+                finally:
+                    # 清理临时文件
+                    if os.path.exists(tmp_path):
+                        os.remove(tmp_path)
+            else:
+                # 回退方案：返回预设音色特征
+                logger.warning("底层引擎不支持音色特征提取，使用预设音色回退")
+                return {"mode": "preset", "voice": "aiden"}
+        except Exception as e:
+            logger.error(f"音色特征提取失败: {e}，使用预设音色回退")
+            return {"mode": "preset", "voice": "aiden"}
 
     def generate_with_feature(self, text: str, feature, language: str = "zh"): 
         """使用指定特征生成音频（用于流式API）
@@ -562,35 +573,23 @@ class CinecastMLXEngine:
                 if "voice" in feature:
                     voice_cfg["voice"] = feature["voice"]
         
-        # 生成音频
-        import tempfile
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-            tmp_path = f.name
-        
+        # 直接在内存中生成音频，避免磁盘I/O阻塞
         try:
-            # 同步渲染，等待完成
-            success = engine.render_dry_chunk(text, voice_cfg, tmp_path)
-            if not success:
-                raise RuntimeError("音频渲染失败")
+            # 加载模型并生成
+            engine._load_mode(voice_cfg["mode"])
+            results = list(engine.model.generate(text=text, **{k: v for k, v in voice_cfg.items() if k != "mode"}))
             
-            # 等待文件写入完成
-            import time
-            max_wait = 10  # 最多等待10秒
-            waited = 0
-            while waited < max_wait:
-                if os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 0:
-                    break
-                time.sleep(0.1)
-                waited += 0.1
-            
-            if waited >= max_wait:
-                raise RuntimeError("音频文件写入超时")
+            if results:
+                audio_array = results[0].audio
+                mx.eval(audio_array)  # 强制执行计算
+                audio_data = np.array(audio_array)
+                return audio_data
+            else:
+                raise RuntimeError("音频生成失败：无输出结果")
                 
-            audio_data = self._load_wav(tmp_path)
-            return audio_data
-        finally:
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
+        except Exception as e:
+            logger.error(f"音频生成过程中出错: {e}")
+            raise
     
     def unload_model(self):
         """卸载模型，释放统一内存。

@@ -6,7 +6,11 @@ CineCast 流式API - 最终成功版本
 
 import sys
 import os
-sys.path.insert(0, '/Users/yuanliang/superstar/superstar3.1/projects/cinecast')
+from pathlib import Path
+
+# 使用相对路径避免硬编码
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import StreamingResponse

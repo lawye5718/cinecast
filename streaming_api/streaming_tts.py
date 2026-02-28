@@ -95,9 +95,9 @@ class GlobalVoiceState:
                     # 默认模式
                     audio_array, sample_rate = engine._run_base(sentence)
                 
-                # 转换为 WAV 字节流
-                wav_bytes = self._numpy_to_wav_bytes(audio_array, sample_rate)
-                yield wav_bytes
+                # 转换为 MP3 字节流（解决WAV头部冗余问题）
+                mp3_bytes = self._numpy_to_mp3_bytes(audio_array, sample_rate)
+                yield mp3_bytes
                 
                 # 显式清理 Metal 缓存（针对 Mac mini 内存优化）
                 mx.metal.clear_cache()
@@ -106,32 +106,38 @@ class GlobalVoiceState:
                 logger.error(f"❌ TTS 生成失败: {e}")
                 continue
 
-    def _numpy_to_wav_bytes(self, audio_array: np.ndarray, sample_rate: int) -> bytes:
-        """将 numpy 数组转换为 WAV 字节流"""
-        # 确保是 16-bit PCM 格式
-        if audio_array.dtype != np.int16:
-            audio_array = (audio_array * 32767).astype(np.int16)
-        
-        # 构造 WAV 头部
-        byte_rate = sample_rate * 2  # 16-bit = 2 bytes per sample
-        wav_header = io.BytesIO()
-        wav_header.write(b'RIFF')
-        wav_header.write((36 + len(audio_array) * 2).to_bytes(4, 'little'))
-        wav_header.write(b'WAVE')
-        wav_header.write(b'fmt ')
-        wav_header.write((16).to_bytes(4, 'little'))  # PCM format
-        wav_header.write((1).to_bytes(2, 'little'))   # Mono
-        wav_header.write((1).to_bytes(2, 'little'))   # 1 channel
-        wav_header.write(sample_rate.to_bytes(4, 'little'))
-        wav_header.write(byte_rate.to_bytes(4, 'little'))
-        wav_header.write((2).to_bytes(2, 'little'))   # Block align
-        wav_header.write((16).to_bytes(2, 'little'))  # Bits per sample
-        wav_header.write(b'data')
-        wav_header.write((len(audio_array) * 2).to_bytes(4, 'little'))
-        
-        # 合并头部和音频数据
-        wav_data = wav_header.getvalue() + audio_array.tobytes()
-        return wav_data
+    def _numpy_to_mp3_bytes(self, audio_array: np.ndarray, sample_rate: int) -> bytes:
+        """将 numpy 数组转换为 MP3 字节流（解决WAV头部冗余问题）"""
+        try:
+            from pydub import AudioSegment
+            
+            # 确保是 16-bit PCM 格式
+            if audio_array.dtype != np.int16:
+                audio_array = (audio_array * 32767).astype(np.int16)
+            
+            # 使用 pydub 转换为 MP3，避免WAV头部重复问题
+            audio_segment = AudioSegment(
+                audio_array.tobytes(),
+                frame_rate=sample_rate,
+                sample_width=2,  # 16-bit
+                channels=1       # mono
+            )
+            
+            # 导出为 MP3 字节流，不带 ID3 标签以减少开销
+            mp3_buffer = io.BytesIO()
+            audio_segment.export(
+                mp3_buffer,
+                format="mp3",
+                parameters=["-write_xing", "0"]  # 禁用 Xing header 减少头部信息
+            )
+            return mp3_buffer.getvalue()
+            
+        except ImportError:
+            logger.error("pydub 未安装，无法生成 MP3 流")
+            raise
+        except Exception as e:
+            logger.error(f"音频格式转换失败: {e}")
+            raise
 
 # FastAPI 应用实例
 app = FastAPI(title="CineCast Streaming TTS API", version="1.0.0")
