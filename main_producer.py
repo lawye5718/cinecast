@@ -961,5 +961,58 @@ def main():
     except Exception as e:
         logger.error(f"💥 三段式架构执行失败: {e}")
 
+
+def production_pipeline(script_file: str, roles_dir: str = "./voices",
+                        output_path: str = "./output/pipeline_output.wav",
+                        lang: str = "Chinese", config: dict = None):
+    """多角色剧本编排流水线。
+
+    解析"角色名：文本内容"格式的剧本文件，自动匹配角色音色库，
+    实现有声书的多角色实时配音。
+
+    Args:
+        script_file: 剧本文件路径（每行格式为"角色名：文本"）
+        roles_dir: 角色音色库目录
+        output_path: 输出音频文件路径
+        lang: 语言名称
+        config: 可选引擎配置字典
+    """
+    from modules.role_manager import RoleManager
+    from modules.audiobook_orchestrator import AudiobookOrchestrator, parse_script
+
+    logger.info(f"🎬 启动多角色剧本编排流水线: {script_file}")
+
+    # 1. 加载角色库 (Role Bank)
+    role_manager = RoleManager(roles_dir)
+    role_bank = role_manager.load_role_bank()
+
+    # 2. 解析剧本
+    with open(script_file, 'r', encoding='utf-8') as f:
+        text = f.read()
+    script = parse_script(text)
+    logger.info(f"📜 剧本解析完成: {len(script)} 行")
+
+    # 3. 创建编排器（无引擎时仅做解析和韵律处理）
+    orchestrator = AudiobookOrchestrator(
+        engine=None,
+        role_manager=role_manager,
+    )
+
+    # 4. 处理章节
+    audio = orchestrator.process_chapter(script, lang=lang)
+
+    # 5. 保存输出
+    if len(audio) > 0:
+        import soundfile as sf_out
+        os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+        sf_out.write(output_path, audio, 24000, format='WAV')
+        logger.info(f"✅ 多角色音频已保存: {output_path}")
+    else:
+        logger.warning("⚠️ 未生成有效音频")
+
+    # 6. 清理内存
+    orchestrator.clear_memory()
+
+
 if __name__ == "__main__":
     main()
