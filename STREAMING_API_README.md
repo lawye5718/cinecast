@@ -63,11 +63,25 @@ Form Data:
 - file: (可选) 上传的音频文件用于音色克隆
 ```
 
-#### 3. 流式朗读
+#### 3. OpenAI兼容流式朗读
 ```
-GET /read_stream?text=朗读文本&lang=zh
+POST /v1/audio/speech
+Content-Type: application/json
+
+{
+  "model": "qwen3-tts",
+  "input": "要朗读的文本",
+  "voice": "aiden",
+  "response_format": "mp3"
+}
 ```
-返回WAV格式的音频流
+返回MP3格式的音频流（推荐，解决WAV头部冗余问题）
+
+#### 4. 传统流式朗读
+```
+GET /read_stream?text=朗读文本&voice=aiden
+```
+返回MP3格式的音频流
 
 #### 4. 批量生成
 ```
@@ -136,18 +150,29 @@ response = requests.post(
 )
 print(response.json())
 
-# 流式朗读
-response = requests.get(
-    "http://localhost:8000/read_stream",
-    params={"text": "你好，世界！", "lang": "zh"},
+# OpenAI兼容API调用
+response = requests.post(
+    "http://localhost:8000/v1/audio/speech",
+    json={
+        "input": "你好，世界！",
+        "voice": "aiden",
+        "response_format": "mp3"
+    },
     stream=True
 )
 
-# 保存音频
-with open("output.wav", "wb") as f:
+# 保存MP3音频
+with open("output.mp3", "wb") as f:
     for chunk in response.iter_content(chunk_size=8192):
         if chunk:
             f.write(chunk)
+
+# 传统接口调用
+response = requests.get(
+    "http://localhost:8000/read_stream",
+    params={"text": "你好，世界！", "voice": "aiden"},
+    stream=True
+)
 ```
 
 ### JavaScript前端调用
@@ -165,10 +190,30 @@ const setVoice = async (voiceName) => {
     return response.json();
 };
 
-// 流式朗读
-const streamRead = async (text, lang = 'zh') => {
+// OpenAI兼容API调用
+const openaiTTS = async (text, voice = 'aiden') => {
+    const response = await fetch('http://localhost:8000/v1/audio/speech', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            input: text,
+            voice: voice,
+            response_format: 'mp3'
+        })
+    });
+    
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    audio.play();
+};
+
+// 传统接口调用
+const streamRead = async (text, voice = 'aiden') => {
     const response = await fetch(
-        `http://localhost:8000/read_stream?text=${encodeURIComponent(text)}&lang=${lang}`
+        `http://localhost:8000/read_stream?text=${encodeURIComponent(text)}&voice=${voice}`
     );
     
     const audioBlob = await response.blob();
@@ -184,6 +229,8 @@ const streamRead = async (text, lang = 'zh') => {
 2. **音频格式**：上传的参考音频建议为WAV格式，采样率24kHz
 3. **文本长度**：单次请求建议不超过5000字符
 4. **并发限制**：避免同时发起多个长文本请求
+5. **格式优化**：推荐使用MP3格式（`/v1/audio/speech`）避免WAV头部冗余问题
+6. **显存管理**：每句生成后自动执行`mx.metal.clear_cache()`优化内存使用
 
 ## 🛠️ 故障排除
 

@@ -11,7 +11,8 @@ import tempfile
 import time
 from typing import Optional, AsyncGenerator
 import mlx.core as mx
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
+from pydantic import BaseModel
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
@@ -47,6 +48,7 @@ class GlobalVoiceContext:
         self.current_voice_config = {
             "role": "default",
             "feature": None,
+            "voice_name": "aiden",
             "voice_name": "aiden"  # 默认音色
         }
         self.engine = None
@@ -69,6 +71,14 @@ class GlobalVoiceContext:
             except Exception as e:
                 logger.error(f"❌ 流式API引擎初始化失败: {e}")
                 raise
+
+# OpenAI TTS 兼容请求模型
+class OpenAITTSRequest(BaseModel):
+    model: str = "qwen3-tts"
+    input: str
+    voice: str = "aiden"
+    response_format: str = "mp3"
+    speed: float = 1.0
 
 # 全局上下文实例
 global_context = GlobalVoiceContext()
@@ -200,18 +210,34 @@ async def set_voice(
         logger.error(f"❌ 设置音色失败: {e}")
         raise HTTPException(status_code=500, detail=f"音色设置失败: {str(e)}")
 
-async def tts_streaming_generator(text: str, language: str = "zh") -> AsyncGenerator[bytes, None]:
+def get_active_feature(self, voice_id: str):
+        """获取活跃音色特征（实时生效核心）"""
+        # 优先级 1: 检查是否是刚上传的临时音色
+        if voice_id == "uploaded_clone" and self.current_voice_config["feature"] is not None:
+            return self.current_voice_config["feature"]
+        
+        # 优先级 2: 检查本地持久化音色库
+        try:
+            return self.asset_manager.load_role(voice_id)
+        except:
+            # 优先级 3: 最终回退到 aiden 预设
+            return self.asset_manager.load_role("aiden")
+
+async def mp3_stream_generator(text: str, voice_id: str = "aiden") -> AsyncGenerator[bytes, None]:
     """
-    流式音频生成器：按句子生成音频块并立即推送
+    MP3流式生成器：解决WAV头部冗余问题
     """
     if not global_context.is_initialized:
         raise HTTPException(status_code=503, detail="服务未初始化")
     
     try:
+        # 获取活跃音色特征
+        feature = global_context.get_active_feature(voice_id)
+        
         # 按句子分割文本
         segments = global_context.rhythm_manager.process_text_with_metadata(text)
         sentences = [seg['text'] for seg in segments if seg['text'].strip()]
-        logger.info(f"📝 开始流式生成，共 {len(sentences)} 个句子")
+        logger.info(f"📝 开始MP3流式生成，共 {len(sentences)} 个句子")
         
         for i, sentence in enumerate(sentences):
             if not sentence.strip():
@@ -219,31 +245,28 @@ async def tts_streaming_generator(text: str, language: str = "zh") -> AsyncGener
                 
             logger.debug(f"🎵 正在生成第 {i+1}/{len(sentences)} 句: {sentence[:30]}...")
             
-            # 使用当前全局音色配置进行推理
-            current_feature = global_context.current_voice_config["feature"]
-            if current_feature is None:
-                # 如果没有特征，使用默认音色
-                current_feature = global_context.asset_manager.load_role("aiden")
-            
-            # 生成音频
+            # 生成原始PCM数据
             wav_data = global_context.engine.generate_with_feature(
                 sentence.strip(),
-                current_feature,
-                language=language
+                feature,
+                language="zh"
             )
             
-            # 转换为WAV格式字节流
-            audio_buffer = io.BytesIO()
-            sf.write(audio_buffer, wav_data, 24000, format='WAV')
-            audio_bytes = audio_buffer.getvalue()
+            # 将PCM转换为MP3帧（解决WAV头部冗余问题）
+            audio_segment = AudioSegment(
+                (wav_data * 32767).astype(np.int16).tobytes(),
+                frame_rate=24000, sample_width=2, channels=1
+            )
             
-            # 推送音频块
-            yield audio_bytes
+            # 导出为MP3字节，不带ID3标签以减少开销
+            mp3_buf = io.BytesIO()
+            audio_segment.export(mp3_buf, format="mp3", parameters=["-write_xing", "0"])
+            yield mp3_buf.getvalue()
             
-            # 显式清理Metal显存缓存（针对Mac mini优化）
+            # Mac mini显存自愈
             mx.metal.clear_cache()
             
-            logger.debug(f"✅ 第 {i+1} 句音频推送完成")
+            logger.debug(f"✅ 第 {i+1} 句MP3推送完成")
             
     except Exception as e:
         logger.error(f"❌ 流式生成过程中出错: {e}")
@@ -264,12 +287,26 @@ async def read_stream(text: str, lang: str = "zh"):
     logger.info(f"📖 开始流式朗读: {text[:50]}...")
     
     return StreamingResponse(
-        tts_streaming_generator(text, lang),
-        media_type="audio/wav",
+        mp3_stream_generator(text),
+        media_type="audio/mpeg",
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
         }
+    )
+
+@app.post("/v1/audio/speech")
+async def openai_compatible_tts(request: OpenAITTSRequest):
+    """
+    符合OpenAI标准的流式TTS接口
+    支持实时动态音色选择
+    """
+    if not request.input.strip():
+        raise HTTPException(status_code=400, detail="Input text is required")
+    
+    return StreamingResponse(
+        mp3_stream_generator(request.input, request.voice), 
+        media_type="audio/mpeg"
     )
 
 @app.post("/batch_generate")

@@ -8,15 +8,17 @@ import sys
 import os
 sys.path.insert(0, '/Users/yuanliang/superstar/superstar3.1/projects/cinecast')
 
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import mlx.core as mx
 import numpy as np
 import soundfile as sf
 import io
 import logging
 import time
+from pydub import AudioSegment
 
 # 导入项目模块
 from modules.mlx_tts_engine import CinecastMLXEngine as MLXTTSEngine
@@ -37,6 +39,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# OpenAI TTS 兼容请求模型
+class OpenAITTSRequest(BaseModel):
+    model: str = "qwen3-tts"
+    input: str
+    voice: str = "aiden"
+    response_format: str = "mp3"
+    speed: float = 1.0
 
 # 全局状态
 class VoiceContext:
@@ -120,8 +130,8 @@ async def set_voice(voice_name: str = Form(...)):
         logger.error(f"❌ 设置音色失败: {e}")
         return {"error": str(e)}
 
-def generate_audio_chunks(text: str, voice_name: str):
-    """生成音频块的生成器函数"""
+def generate_mp3_chunks(text: str, voice_name: str):
+    """生成MP3音频块的生成器函数（解决WAV头部冗余问题）"""
     if not voice_context.is_ready:
         raise RuntimeError("Service not ready")
     
@@ -148,47 +158,57 @@ def generate_audio_chunks(text: str, voice_name: str):
                 
             logger.info(f"🎵 正在生成第 {i+1}/{len(sentences)} 句: {sentence[:20]}...")
             
-            # 创建临时文件
-            import tempfile
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-                tmp_path = f.name
+            # 直接调用模型生成
+            render_engine._load_mode("preset")
+            results = list(render_engine.model.generate(text=sentence, voice=voice_name))
             
-            try:
-                # 直接调用模型生成
-                render_engine._load_mode("preset")
-                results = list(render_engine.model.generate(text=sentence, voice=voice_name))
+            if results:
+                # 处理音频数据
+                audio_array = results[0].audio
+                mx.eval(audio_array)
+                audio_data = np.array(audio_array)
                 
-                if results:
-                    # 处理音频数据
-                    audio_array = results[0].audio
-                    mx.eval(audio_array)
-                    audio_data = np.array(audio_array)
-                    
-                    # 直接写入文件
-                    sf.write(tmp_path, audio_data, 24000, format='WAV')
-                    
-                    # 读取并返回音频数据
-                    with open(tmp_path, 'rb') as f:
-                        audio_bytes = f.read()
-                    
-                    logger.info(f"✅ 第 {i+1} 句生成完成 ({len(audio_bytes)} bytes)")
-                    yield audio_bytes
-                    
-                    # 清理显存
-                    mx.metal.clear_cache()
-                    
-            finally:
-                # 清理临时文件
-                if os.path.exists(tmp_path):
-                    os.remove(tmp_path)
+                # 将PCM转换为MP3帧（解决WAV头部冗余问题）
+                audio_segment = AudioSegment(
+                    (audio_data * 32767).astype(np.int16).tobytes(),
+                    frame_rate=24000, sample_width=2, channels=1
+                )
+                
+                # 导出为MP3字节，不带ID3标签以减少开销
+                mp3_buf = io.BytesIO()
+                audio_segment.export(mp3_buf, format="mp3", parameters=["-write_xing", "0"])
+                mp3_bytes = mp3_buf.getvalue()
+                
+                logger.info(f"✅ 第 {i+1} 句MP3生成完成 ({len(mp3_bytes)} bytes)")
+                yield mp3_bytes
+                
+                # 清理显存
+                mx.metal.clear_cache()
                     
     except Exception as e:
         logger.error(f"❌ 音频生成失败: {e}")
         raise
 
+@app.post("/v1/audio/speech")
+async def openai_compatible_tts(request: OpenAITTSRequest):
+    """符合OpenAI标准的流式TTS接口"""
+    if not request.input.strip():
+        raise HTTPException(status_code=400, detail="Input text is required")
+    
+    logger.info(f"🎧 OpenAI兼容TTS请求: {request.input[:50]}... 使用音色: {request.voice}")
+    
+    return StreamingResponse(
+        generate_mp3_chunks(request.input, request.voice),
+        media_type="audio/mpeg",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        }
+    )
+
 @app.get("/read_stream")
 async def read_stream(text: str, voice: str = "aiden"):
-    """流式朗读API"""
+    """流式朗读API（兼容旧接口）"""
     if not text.strip():
         return {"error": "Text cannot be empty"}
     
@@ -201,8 +221,8 @@ async def read_stream(text: str, voice: str = "aiden"):
     logger.info(f"📖 开始流式朗读: {text[:50]}... 使用音色: {voice_name}")
     
     return StreamingResponse(
-        generate_audio_chunks(text, voice_name),
-        media_type="audio/wav",
+        generate_mp3_chunks(text, voice_name),
+        media_type="audio/mpeg",
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
