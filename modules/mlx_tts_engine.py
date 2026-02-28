@@ -322,6 +322,196 @@ class MLXRenderEngine:
             # 我们引入一个微小的开销，强制 Python 每处理完一个切片就回收废弃对象
             gc.collect()
 
+class CinecastMLXEngine:
+    """增强型 MLX 推理引擎。
+
+    在 MLXRenderEngine 基础上封装高层接口，支持：
+    - 指令化音色设计 (Voice Design)
+    - NPZ 特征驱动的克隆推理 (Voice Clone)
+    - 多模式统一入口 (generate)
+    - Mac mini 统一内存优化
+
+    可独立使用，也可配合 AudiobookOrchestrator 使用。
+    """
+
+    def __init__(self, model_path: str, tokenizer_path: str = None, config=None):
+        """初始化增强型 MLX 推理引擎。
+
+        Args:
+            model_path: 模型路径（.safetensors 权重目录）
+            tokenizer_path: 分词器路径（可选，默认与 model_path 相同）
+            config: 可选配置字典，与 MLXRenderEngine 的 config 兼容
+        """
+        self.model_path = model_path
+        self.tokenizer_path = tokenizer_path or model_path
+        self.config = config or {}
+        self.cache = {}
+        self._render_engine = None
+        self.sample_rate = 24000
+
+        logger.info(f"🚀 [CinecastMLXEngine] 初始化, 模型路径: {model_path}")
+
+    def _ensure_render_engine(self):
+        """延迟加载底层渲染引擎。"""
+        if self._render_engine is None:
+            self._render_engine = MLXRenderEngine(
+                self.model_path, config=self.config
+            )
+            self.sample_rate = self._render_engine.sample_rate
+        return self._render_engine
+
+    def generate(self, text: str, mode: str = "base", **kwargs):
+        """统一推理入口。
+
+        Args:
+            text: 要合成的文本
+            mode: 推理模式
+                - "design": 指令化音色设计
+                - "clone": NPZ 特征克隆
+                - "custom"/"preset": 内置预设角色
+                - "base": 基础模式
+            **kwargs: 额外参数
+                - instruct: 音色设计指令（design 模式）
+                - prompt_npz: NPZ 特征字典（clone 模式）
+                - language: 语言代码
+
+        Returns:
+            (audio_array, sample_rate) 元组
+        """
+        if mode == "design":
+            return self._run_voice_design(text, kwargs.get("instruct", ""))
+        elif mode == "clone":
+            prompt_npz = kwargs.get("prompt_npz")
+            if prompt_npz is not None:
+                return self.generate_voice_clone(text, prompt_npz)
+            # 无 NPZ 特征时回退到基础模式
+            return self._run_base(text)
+        elif mode in ("custom", "preset"):
+            return self._run_preset(text, kwargs.get("voice"))
+        else:
+            return self._run_base(text)
+
+    def generate_voice_design(self, text: str, instruct: str, lang: str = "zh"):
+        """指令化音色设计。
+
+        通过自然语言描述生成独特的角色音色。
+
+        Args:
+            text: 要合成的文本
+            instruct: 音色设计指令（如"富有磁性的中年男性，语速沉稳"）
+            lang: 语言代码
+
+        Returns:
+            (audio_array, sample_rate) 元组
+        """
+        return self._run_voice_design(text, instruct)
+
+    def generate_voice_clone(self, text: str, role_feature):
+        """利用已保存的特征进行克隆推理。
+
+        Args:
+            text: 要合成的文本
+            role_feature: 从 .npz 加载的特征向量字典
+
+        Returns:
+            (audio_array, sample_rate) 元组
+        """
+        engine = self._ensure_render_engine()
+
+        # 构建克隆模式的 voice_cfg
+        voice_cfg = {"mode": "clone"}
+        if isinstance(role_feature, dict):
+            if "ref_audio" in role_feature:
+                voice_cfg["ref_audio"] = str(role_feature["ref_audio"])
+            if "ref_text" in role_feature:
+                voice_cfg["ref_text"] = str(role_feature["ref_text"])
+            if "spk_emb" in role_feature:
+                voice_cfg["spk_emb"] = role_feature["spk_emb"]
+
+        # 使用临时文件渲染
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+            tmp_path = f.name
+
+        try:
+            engine.render_dry_chunk(text, voice_cfg, tmp_path)
+            audio_data = self._load_wav(tmp_path)
+            return audio_data, self.sample_rate
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+    def _run_voice_design(self, text: str, instruct: str):
+        """执行音色设计推理。"""
+        engine = self._ensure_render_engine()
+
+        voice_cfg = {
+            "mode": "design",
+            "instruct": instruct,
+        }
+
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+            tmp_path = f.name
+
+        try:
+            engine.render_dry_chunk(text, voice_cfg, tmp_path)
+            audio_data = self._load_wav(tmp_path)
+            return audio_data, self.sample_rate
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+    def _run_preset(self, text: str, voice: str = None):
+        """执行预设模式推理。"""
+        engine = self._ensure_render_engine()
+
+        voice_cfg = {"mode": "preset"}
+        if voice:
+            voice_cfg["voice"] = voice
+
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+            tmp_path = f.name
+
+        try:
+            engine.render_dry_chunk(text, voice_cfg, tmp_path)
+            audio_data = self._load_wav(tmp_path)
+            return audio_data, self.sample_rate
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+    def _run_base(self, text: str):
+        """执行基础模式推理。"""
+        return self._run_preset(text)
+
+    @staticmethod
+    def _load_wav(path: str) -> np.ndarray:
+        """从 WAV 文件加载音频数据。"""
+        if not os.path.exists(path):
+            return np.array([], dtype=np.float32)
+        data, _ = sf.read(path, dtype="float32")
+        return data
+
+    def unload_model(self):
+        """卸载模型，释放统一内存。
+
+        建议在章节处理间隙调用，防止 Mac mini 内存膨胀。
+        """
+        if self._render_engine is not None:
+            self._render_engine.destroy()
+            self._render_engine = None
+        self.cache.clear()
+        gc.collect()
+        mx.metal.clear_cache()
+        logger.info("🧹 [CinecastMLXEngine] 模型已卸载，内存已释放")
+
+    def destroy(self):
+        """销毁引擎，释放所有资源。"""
+        self.unload_model()
+
+
 if __name__ == "__main__":
     # 测试代码
     logging.basicConfig(level=logging.DEBUG)
