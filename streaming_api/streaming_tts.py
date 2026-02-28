@@ -51,21 +51,21 @@ class GlobalVoiceState:
             logger.error(f"❌ 设置音色失败: {e}")
             raise HTTPException(status_code=400, detail=f"音色设置失败: {str(e)}")
     
-    async def set_voice_by_upload(self, audio_bytes: bytes):
+    async def set_voice_by_upload(self, audio_bytes: bytes, ref_text: str = ""):
         """通过上传音频设置克隆音色"""
         try:
-            # TODO: 实现音频特征提取逻辑
+            # 实现音频特征提取逻辑
             # 这里需要调用 MLX 引擎的特征提取功能
-            feature = self._extract_feature_from_bytes(audio_bytes)
+            feature = self._extract_feature_from_bytes(audio_bytes, ref_text)
             self.current_voice_config["feature"] = feature
             self.current_voice_config["role"] = "uploaded_clone"
-            logger.info("🔊 克隆音色已设置")
+            logger.info(f"🔊 克隆音色已设置，参考文本：'{ref_text}'")
             return {"status": "success", "role": "uploaded_clone"}
         except Exception as e:
             logger.error(f"❌ 克隆音色设置失败: {e}")
             raise HTTPException(status_code=400, detail=f"音色克隆失败: {str(e)}")
     
-    def _extract_feature_from_bytes(self, audio_bytes: bytes):
+    def _extract_feature_from_bytes(self, audio_bytes: bytes, ref_text: str = ""):
         """从音频字节中提取特征"""
         if self.current_voice_config["engine"] is None:
             raise RuntimeError("TTS 引擎尚未初始化")
@@ -89,8 +89,12 @@ class GlobalVoiceState:
             elif audio_segment.sample_width == 4:
                 samples = samples.astype(np.float32) / 2147483648.0
                 
-            # 调用 MLX 引擎的提取逻辑
-            return self.current_voice_config["engine"].extract_voice_feature(samples)
+            # 调用 MLX 引擎的提取逻辑（透传参考文本）
+            return self.current_voice_config["engine"].extract_voice_feature(
+                samples, 
+                sample_rate=24000, 
+                ref_text=ref_text
+            )
         finally:
             import os
             if os.path.exists(tmp_path):
@@ -182,13 +186,17 @@ async def set_voice_role(role_name: str = Form(...)):
     return await voice_state.set_voice_by_role(role_name)
 
 @app.post("/set_voice/upload")
-async def set_voice_upload(file: UploadFile = File(...)):
+async def set_voice_upload(
+    file: UploadFile = File(...),
+    ref_text: str = Form("")  # 🚨 新增字段
+):
     """上传音频文件设置克隆音色"""
     if not file.content_type.startswith('audio/'):
         raise HTTPException(status_code=400, detail="请上传音频文件")
     
     audio_bytes = await file.read()
-    return await voice_state.set_voice_by_upload(audio_bytes)
+    # 透传 ref_text
+    return await voice_state.set_voice_by_upload(audio_bytes, ref_text)
 
 @app.post("/tts/stream")
 async def stream_tts(request: TTSRequest):

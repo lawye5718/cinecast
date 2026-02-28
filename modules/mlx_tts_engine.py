@@ -511,7 +511,7 @@ class CinecastMLXEngine:
         data, _ = sf.read(path, dtype="float32")
         return data
 
-    def extract_voice_feature(self, audio_data: np.ndarray, sample_rate: int = 24000):
+    def extract_voice_feature(self, audio_data: np.ndarray, sample_rate: int = 24000, ref_text: str = ""):
         """处理并保存克隆音色特征（采用 Zero-Shot 参考音频模式）"""
         # 确保音频数据是正确的格式
         if len(audio_data) == 0:
@@ -536,13 +536,13 @@ class CinecastMLXEngine:
             
             # 保存 24kHz 的标准化参考音频
             sf.write(save_path, audio_data, sample_rate)
-            logger.info(f"✅ 克隆参考音频已永久保存至: {save_path}")
+            logger.info(f"✅ 克隆参考音频已永久保存至: {save_path}，参考文本：'{ref_text}'")
             
             # 返回免特征提取的 Zero-Shot 配置字典
             return {
                 "mode": "clone",
                 "ref_audio": save_path,
-                "ref_text": ""  # 注意：部分Qwen-TTS版本可能需要准确的转录文本
+                "ref_text": ref_text  # 🚨 将空白替换为透传的真实文本
             }
             
         except Exception as e:

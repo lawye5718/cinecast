@@ -144,11 +144,13 @@ async def list_available_voices():
 @app.post("/set_voice")
 async def set_voice(
     voice_name: str = Form(...),
+    ref_text: str = Form(""),  # 🚨 新增：接收参考音频对应的准确文字
     file: Optional[UploadFile] = File(None)
 ):
     """
     设置当前音色
     - voice_name: 音色库中的预设音色名
+    - ref_text: 参考音频对应的准确文字（用于音色克隆）
     - file: 可选的上传音频文件用于音色克隆
     """
     if not global_context.is_initialized:
@@ -157,7 +159,7 @@ async def set_voice(
     try:
         if file:
             # 处理上传的音色克隆
-            logger.info(f"🎤 开始处理上传音色克隆: {file.filename}")
+            logger.info(f"🎤 开始处理上传音色克隆: {file.filename}，参考文本：'{ref_text}'")
             
             # 读取上传的音频文件
             audio_bytes = await file.read()
@@ -179,8 +181,8 @@ async def set_voice(
                 elif audio_segment.sample_width == 4:
                     samples = samples.astype(np.float32) / 2147483648.0
                 
-                # 提取音色特征
-                feature = global_context.engine.extract_voice_feature(samples)
+                # 提取音色特征（透传参考文本）
+                feature = global_context.engine.extract_voice_feature(samples, ref_text=ref_text)
                 
                 # 保存克隆音色
                 clone_name = f"clone_{int(time.time())}"
