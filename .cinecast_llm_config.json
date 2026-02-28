@@ -1,5 +1,5 @@
 {
-  "model_name": "qwen3.5-plus",
-  "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-  "api_key": "sk-44bbcaea142f4aa0ac8aeb96e4b8422b"
+  "model_name": "deepseek-chat",
+  "base_url": "https://api.deepseek.com/v1",
+  "api_key": "sk-5bc8c1990d1b418c829356dbd5f442ae"
 }
