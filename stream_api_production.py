@@ -22,8 +22,18 @@ import soundfile as sf
 import io
 import logging
 import time
-import re  # 🚨 新增导入正则模块
+import re
+import threading  # 🚨 引入线程锁解决并发
+import warnings   # 🚨 引入警告控制
+
+# 屏蔽 Tokenizer 无意义的正则表达式警告
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", module="tiktoken")
+
 from pydub import AudioSegment
+
+# 🚨 全局 GPU 锁，防止多请求同时争抢 Metal 导致进程崩溃
+gpu_lock = threading.Lock()
 
 # 导入项目模块
 from modules.mlx_tts_engine import CinecastMLXEngine as MLXTTSEngine
@@ -56,7 +66,8 @@ class OpenAITTSRequest(BaseModel):
 # 全局状态
 class VoiceContext:
     def __init__(self):
-        self.current_voice = "ryan"
+        # 默认使用原生配置文件中的旁白设定，或 aiden
+        self.current_voice = "aiden" 
         self.engine = None
         self.asset_manager = None
         self.is_ready = False
@@ -73,8 +84,21 @@ class VoiceContext:
                 self.is_ready = True
                 logger.info("✅ 流式API引擎初始化成功")
             except Exception as e:
-                logger.error(f"❌ 引擎初始化失败: {e}")
-                raise
+                pass
+    
+    def get_voice_feature(self, voice_name: str):
+        """🌟 架构回归：利用原生的 AssetManager 解析特征，完美支持克隆"""
+        if not self.is_ready:
+            return {"mode": "preset", "voice": "aiden"}
+            
+        try:
+            # AssetManager 原本就能识别 .cinecast_role_voices.json 里的克隆记录
+            return self.asset_manager.load_role(voice_name)
+        except Exception as e:
+            logger.warning(f"音色 {voice_name} 未在项目中找到，回退到默认: {e}")
+            return {"mode": "preset", "voice": "aiden"}
+            logger.error(f"❌ 引擎初始化失败: {e}")
+            raise
 
 # 全局上下文
 voice_context = VoiceContext()
@@ -136,90 +160,82 @@ async def set_voice(voice_name: str = Form(...)):
         return {"error": str(e)}
 
 def generate_mp3_chunks(text: str, voice_name: str):
-    """生成MP3音频块的生成器函数（解决WAV头部冗余问题）"""
+    """生成MP3音频块的生成器函数（加锁防崩溃 + 支持克隆）"""
     if not voice_context.is_ready:
         raise RuntimeError("Service not ready")
     
     try:
-        # 直接使用已验证的工作方法
-        render_engine = voice_context.engine._ensure_render_engine()
+        # 🚨 架构回归：获取完整的音色特征（可能是预设，也可能是本地的克隆配置）
+        feature = voice_context.get_voice_feature(voice_name)
         
-        # 准备voice配置
-        voice_cfg = {
-            "mode": "preset",
-            "voice": voice_name
-        }
+        # 文本预处理 - 暴力清洗 (保留你之前的修复)
+        safe_text = re.sub(r'[…]+', '。', text)
+        safe_text = re.sub(r'\.{2,}', '。', safe_text)
+        safe_text = re.sub(r'[—]+', '，', safe_text)
+        safe_text = re.sub(r'[-]{2,}', '，', safe_text)
+        safe_text = re.sub(r'[~～]+', '。', safe_text)
+        safe_text = re.sub(r'\s+', ' ', safe_text).strip()
         
-        # 文本预处理 - 简单按句号分割
-        sentences = [s.strip() for s in text.split('。') if s.strip()]
-        if not sentences:
-            return
+        # 按句号、问号、感叹号安全分割
+        sentences = [s.strip() for s in re.split(r'([。！？!?])', safe_text) if s.strip()]
+        
+        # 将句子和标点重新合并，避免标点单独成句
+        merged_sentences = []
+        for i in range(0, len(sentences)-1, 2):
+            merged_sentences.append(sentences[i] + sentences[i+1])
+        if len(sentences) % 2 != 0:
+            merged_sentences.append(sentences[-1])
             
-        if not sentences[-1].endswith(('。', '.', '!', '?', '！', '？')):
-            sentences[-1] += '。'
+        logger.info(f"📝 开始生成 {len(merged_sentences)} 个句子, 使用音色特征: {feature['mode']}")
         
-        logger.info(f"📝 开始生成 {len(sentences)} 个句子")
-        
-        for i, sentence in enumerate(sentences):
-            if not sentence.strip():
-                continue
-                
-            # 🚨 核心修复：终极暴力清洗，消灭一切导致底层 C++ 引擎段错误崩溃的特殊符号
-            safe_sentence = sentence
-            safe_sentence = re.sub(r'[…]+', '。', safe_sentence)       # 替换中文省略号
-            safe_sentence = re.sub(r'\.{2,}', '。', safe_sentence)     # 替换英文省略号
-            safe_sentence = re.sub(r'[—]+', '，', safe_sentence)       # 替换中文破折号
-            safe_sentence = re.sub(r'[-]{2,}', '，', safe_sentence)    # 替换英文破折号
-            safe_sentence = re.sub(r'[~～]+', '。', safe_sentence)     # 替换波浪号
-            safe_sentence = re.sub(r'\s+', ' ', safe_sentence).strip() # 清理异常换行和空白符
-            
-            # 如果清洗后只剩下标点或为空，直接跳过
-            pure_text = re.sub(r'[。，！？；、,.!?;:\'"()\s-]', '', safe_sentence)
+        for i, sentence in enumerate(merged_sentences):
+            # 防止纯标点
+            pure_text = re.sub(r'[。，！？；、,.!?;:\'"()\s-]', '', sentence)
             if not pure_text:
                 continue
                 
-            logger.info(f"🎵 正在生成第 {i+1}/{len(sentences)} 句: {safe_sentence[:20]}...")
+            logger.info(f"🎵 正在生成第 {i+1}/{len(merged_sentences)} 句: {sentence[:20]}...")
             
-            # 直接调用模型生成
-            render_engine._load_mode("preset")
-            results = list(render_engine.model.generate(text=safe_sentence, voice=voice_name))
-            
-            # 🚨 核心防御：防止底层返回空数据导致 numpy tobytes() 崩溃
-            if results and hasattr(results[0], 'audio') and len(results[0].audio) > 0:
-                # 处理音频数据
-                audio_array = results[0].audio
-                mx.eval(audio_array)
-                audio_data = np.array(audio_array)
-                
-                # 再次拦截，防止 numpy 数组 size 为 0
-                if audio_data.size == 0:
-                    logger.warning(f"⚠️ 该句生成的音频数据为空，已跳过: {safe_sentence[:10]}")
+            # 🚨🚨🚨 核心修复：加锁！任何对 MLX 的调用必须在锁内！
+            with gpu_lock:
+                try:
+                    # 🌟 架构回归：调用原本封装好的 generate_with_feature，它原生支持克隆和预设！
+                    audio_data = voice_context.engine.generate_with_feature(
+                        sentence, 
+                        feature, 
+                        language="zh"
+                    )
+                    
+                    if audio_data is not None and audio_data.size > 0:
+                        # 将PCM转换为MP3帧
+                        audio_segment = AudioSegment(
+                            (audio_data * 32767).astype(np.int16).tobytes(),
+                            frame_rate=24000, sample_width=2, channels=1
+                        )
+                        
+                        mp3_buf = io.BytesIO()
+                        audio_segment.export(mp3_buf, format="mp3", parameters=["-write_xing", "0"])
+                        mp3_bytes = mp3_buf.getvalue()
+                        
+                        logger.info(f"✅ 第 {i+1} 句MP3生成完成 ({len(mp3_bytes)} bytes)")
+                        yield mp3_bytes
+                    else:
+                        logger.warning(f"⚠️ 生成音频为空，跳过第 {i+1} 句")
+                        
+                except Exception as ex:
+                    logger.error(f"❌ 当前句子生成异常: {ex}")
                     continue
-                
-                # 将PCM转换为MP3帧（解决WAV头部冗余问题）
-                audio_segment = AudioSegment(
-                    (audio_data * 32767).astype(np.int16).tobytes(),
-                    frame_rate=24000, sample_width=2, channels=1
-                )
-                
-                # 导出为MP3字节，不带ID3标签以减少开销
-                mp3_buf = io.BytesIO()
-                audio_segment.export(mp3_buf, format="mp3", parameters=["-write_xing", "0"])
-                mp3_bytes = mp3_buf.getvalue()
-                
-                logger.info(f"✅ 第 {i+1} 句MP3生成完成 ({len(mp3_bytes)} bytes)")
-                yield mp3_bytes
-                
-            else:
-                logger.warning(f"⚠️ 模型未返回有效的音频数据，已跳过第 {i+1} 句")
-                
-            # 显式清理 Python 垃圾回收与 Mac 显存，防止内存溢出导致进程被 Kill
+                finally:
+                    # 在锁内进行清理，确保下一个请求拿到干净的显存
+                    mx.metal.clear_cache()
+            
+            # 在锁外释放 CPU 资源片刻，防止阻塞其他线程抢锁
             import gc
             gc.collect()
-            mx.metal.clear_cache()
+            time.sleep(0.01) 
                     
     except Exception as e:
-        logger.error(f"❌ 音频生成失败: {e}")
+        logger.error(f"❌ 整体音频生成流失败: {e}")
         raise
 
 @app.post("/v1/audio/speech")
