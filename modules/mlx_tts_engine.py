@@ -512,17 +512,7 @@ class CinecastMLXEngine:
         return data
 
     def extract_voice_feature(self, audio_data: np.ndarray, sample_rate: int = 24000):
-        """从音频数据中提取音色特征用于克隆
-
-        Args:
-            audio_data: 音频数据数组 (numpy)
-            sample_rate: 采样率，默认24000Hz
-
-        Returns:
-            音色特征向量
-        """
-        engine = self._ensure_render_engine()
-        
+        """处理并保存克隆音色特征（采用 Zero-Shot 参考音频模式）"""
         # 确保音频数据是正确的格式
         if len(audio_data) == 0:
             raise ValueError("音频数据为空")
@@ -531,30 +521,32 @@ class CinecastMLXEngine:
         if np.max(np.abs(audio_data)) > 1.0:
             audio_data = audio_data / np.max(np.abs(audio_data))
             
-        # 直接在内存中处理，避免磁盘I/O瓶颈
-        # 如果底层引擎支持直接特征提取，则使用；否则回退到预设音色
         try:
-            # 尝试调用底层引擎的特征提取方法
-            if hasattr(engine, 'extract_speaker_embedding'):
-                # 保存临时音频文件
-                import tempfile
-                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-                    tmp_path = f.name
-                    sf.write(tmp_path, audio_data, sample_rate)
-                
-                try:
-                    feature = engine.extract_speaker_embedding(tmp_path)
-                    return feature
-                finally:
-                    # 清理临时文件
-                    if os.path.exists(tmp_path):
-                        os.remove(tmp_path)
-            else:
-                # 回退方案：返回预设音色特征
-                logger.warning("底层引擎不支持音色特征提取，使用预设音色回退")
-                return {"mode": "preset", "voice": "aiden"}
+            import os
+            import uuid
+            import soundfile as sf
+            
+            # 建立持久化的克隆音频文件夹 (放在项目根目录的 voices/clones 下)
+            clone_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "voices", "clones")
+            os.makedirs(clone_dir, exist_ok=True)
+            
+            # 生成唯一文件名并保存 (不能用 tempfile，因为后续推理还需要读取它)
+            file_name = f"clone_{uuid.uuid4().hex[:8]}.wav"
+            save_path = os.path.join(clone_dir, file_name)
+            
+            # 保存 24kHz 的标准化参考音频
+            sf.write(save_path, audio_data, sample_rate)
+            logger.info(f"✅ 克隆参考音频已永久保存至: {save_path}")
+            
+            # 返回免特征提取的 Zero-Shot 配置字典
+            return {
+                "mode": "clone",
+                "ref_audio": save_path,
+                "ref_text": ""  # 注意：部分Qwen-TTS版本可能需要准确的转录文本
+            }
+            
         except Exception as e:
-            logger.error(f"音色特征提取失败: {e}，使用预设音色回退")
+            logger.error(f"❌ 保存克隆音色失败: {e}，回退到预设音色")
             return {"mode": "preset", "voice": "aiden"}
 
     def generate_with_feature(self, text: str, feature, language: str = "zh"): 
