@@ -22,6 +22,7 @@ import soundfile as sf
 import io
 import logging
 import time
+import re  # 🚨 新增导入正则模块
 from pydub import AudioSegment
 
 # 导入项目模块
@@ -55,7 +56,7 @@ class OpenAITTSRequest(BaseModel):
 # 全局状态
 class VoiceContext:
     def __init__(self):
-        self.current_voice = "aiden"
+        self.current_voice = "ryan"
         self.engine = None
         self.asset_manager = None
         self.is_ready = False
@@ -151,6 +152,9 @@ def generate_mp3_chunks(text: str, voice_name: str):
         
         # 文本预处理 - 简单按句号分割
         sentences = [s.strip() for s in text.split('。') if s.strip()]
+        if not sentences:
+            return
+            
         if not sentences[-1].endswith(('。', '.', '!', '?', '！', '？')):
             sentences[-1] += '。'
         
@@ -160,17 +164,37 @@ def generate_mp3_chunks(text: str, voice_name: str):
             if not sentence.strip():
                 continue
                 
-            logger.info(f"🎵 正在生成第 {i+1}/{len(sentences)} 句: {sentence[:20]}...")
+            # 🚨 核心修复：终极暴力清洗，消灭一切导致底层 C++ 引擎段错误崩溃的特殊符号
+            safe_sentence = sentence
+            safe_sentence = re.sub(r'[…]+', '。', safe_sentence)       # 替换中文省略号
+            safe_sentence = re.sub(r'\.{2,}', '。', safe_sentence)     # 替换英文省略号
+            safe_sentence = re.sub(r'[—]+', '，', safe_sentence)       # 替换中文破折号
+            safe_sentence = re.sub(r'[-]{2,}', '，', safe_sentence)    # 替换英文破折号
+            safe_sentence = re.sub(r'[~～]+', '。', safe_sentence)     # 替换波浪号
+            safe_sentence = re.sub(r'\s+', ' ', safe_sentence).strip() # 清理异常换行和空白符
+            
+            # 如果清洗后只剩下标点或为空，直接跳过
+            pure_text = re.sub(r'[。，！？；、,.!?;:\'"()\s-]', '', safe_sentence)
+            if not pure_text:
+                continue
+                
+            logger.info(f"🎵 正在生成第 {i+1}/{len(sentences)} 句: {safe_sentence[:20]}...")
             
             # 直接调用模型生成
             render_engine._load_mode("preset")
-            results = list(render_engine.model.generate(text=sentence, voice=voice_name))
+            results = list(render_engine.model.generate(text=safe_sentence, voice=voice_name))
             
-            if results:
+            # 🚨 核心防御：防止底层返回空数据导致 numpy tobytes() 崩溃
+            if results and hasattr(results[0], 'audio') and len(results[0].audio) > 0:
                 # 处理音频数据
                 audio_array = results[0].audio
                 mx.eval(audio_array)
                 audio_data = np.array(audio_array)
+                
+                # 再次拦截，防止 numpy 数组 size 为 0
+                if audio_data.size == 0:
+                    logger.warning(f"⚠️ 该句生成的音频数据为空，已跳过: {safe_sentence[:10]}")
+                    continue
                 
                 # 将PCM转换为MP3帧（解决WAV头部冗余问题）
                 audio_segment = AudioSegment(
@@ -186,8 +210,13 @@ def generate_mp3_chunks(text: str, voice_name: str):
                 logger.info(f"✅ 第 {i+1} 句MP3生成完成 ({len(mp3_bytes)} bytes)")
                 yield mp3_bytes
                 
-                # 清理显存
-                mx.metal.clear_cache()
+            else:
+                logger.warning(f"⚠️ 模型未返回有效的音频数据，已跳过第 {i+1} 句")
+                
+            # 显式清理 Python 垃圾回收与 Mac 显存，防止内存溢出导致进程被 Kill
+            import gc
+            gc.collect()
+            mx.metal.clear_cache()
                     
     except Exception as e:
         logger.error(f"❌ 音频生成失败: {e}")
@@ -276,17 +305,17 @@ async def generate_batch(request: dict):
 if __name__ == "__main__":
     import uvicorn
     print("🚀 启动 CineCast 流式 TTS API (生产就绪版)...")
-    print("📍 服务地址: http://localhost:8000")
-    print("📊 API文档: http://localhost:8000/docs")
-    print("🏥 健康检查: http://localhost:8000/health")
-    print("🎤 音色列表: http://localhost:8000/voices")
+    print("📍 服务地址: http://localhost:8888")
+    print("📊 API文档: http://localhost:8888/docs")
+    print("🏥 健康检查: http://localhost:8888/health")
+    print("🎤 音色列表: http://localhost:8888/voices")
     print("⏹️  按 Ctrl+C 停止服务")
     print("-" * 50)
     
     uvicorn.run(
         "stream_api_production:app",
         host="0.0.0.0",
-        port=8000,
+        port=8888,
         reload=False,
         log_level="info"
     )
