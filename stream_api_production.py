@@ -6,6 +6,7 @@ CineCast 流式API - 最终成功版本
 
 import sys
 import os
+import tempfile  # 👈 务必添加这一行！
 from pathlib import Path
 
 # 使用相对路径避免硬编码
