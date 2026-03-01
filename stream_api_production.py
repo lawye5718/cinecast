@@ -216,15 +216,54 @@ async def set_voice(voice_name: str = Form(...)):
 # 🌟 修复二：专为 Anxreader 等阅读 App 设计的单头整段响应架构
 # =====================================================================
 @app.post("/v1/audio/speech")
-async def openai_compatible_tts(request: Request, body: OpenAITTSRequest):
+async def openai_compatible_tts(
+    request: Request,
+    # 使用 Form 和 File 接收 multipart/form-data
+    model: str = Form("qwen3-tts"),
+    input: str = Form(...),
+    voice: str = Form("aiden"),
+    response_format: str = Form("mp3"),
+    reference_audio: UploadFile = File(None)  # 🚨 接收传过来的参考音频
+):
     if not voice_context.is_ready:
         raise HTTPException(status_code=503, detail="TTS 服务未就绪")
     
     try:
-        feature = voice_context.get_voice_feature(body.voice)
+        # 🌟 核心升级：判断是否有参考音频上传
+        feature = None
+        temp_audio_path = None
+        
+        if reference_audio:
+            logger.info(f"🎤 收到带参考音频的克隆请求，基于音频提取特征...")
+            # 将上传的参考音频保存到临时文件
+            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp_file:
+                content = await reference_audio.read()
+                tmp_file.write(content)
+                temp_audio_path = tmp_file.name
+                
+            try:
+                # 读取参考音频，并统一转为 24kHz 单声道
+                audio_segment = AudioSegment.from_file(temp_audio_path)
+                audio_segment = audio_segment.set_frame_rate(24000).set_channels(1)
+                
+                samples = np.array(audio_segment.get_array_of_samples())
+                if audio_segment.sample_width == 2:
+                    samples = samples.astype(np.float32) / 32768.0
+                elif audio_segment.sample_width == 4:
+                    samples = samples.astype(np.float32) / 2147483648.0
+                
+                # 动态提取特征 (这里 ref_text 传原文本作为辅助)
+                feature = voice_context.engine.extract_voice_feature(samples, ref_text=input)
+                logger.info("✅ 临时音频特征提取成功")
+            finally:
+                if temp_audio_path and os.path.exists(temp_audio_path):
+                    os.unlink(temp_audio_path)
+        else:
+            # 如果没有传音频，使用常规的预设/保存的音色
+            feature = voice_context.get_voice_feature(voice)
         
         # 暴力清洗特殊符号
-        safe_text = re.sub(r'[…]+', '。', body.input)
+        safe_text = re.sub(r'[…]+', '。', input)
         safe_text = re.sub(r'\.{2,}', '。', safe_text)
         safe_text = re.sub(r'[—]+', '，', safe_text)
         safe_text = re.sub(r'[-]{2,}', '，', safe_text)
@@ -238,7 +277,8 @@ async def openai_compatible_tts(request: Request, body: OpenAITTSRequest):
         if len(sentences) % 2 != 0:
             merged_sentences.append(sentences[-1])
             
-        logger.info(f"🎧 收到 App 请求，切分为 {len(merged_sentences)} 句，使用音色: {feature['mode']}")
+        mode_str = "临时克隆特征" if reference_audio else feature.get('mode', 'unknown')
+        logger.info(f"🎧 收到请求，切分为 {len(merged_sentences)} 句，使用音色: {mode_str}")
         
         all_audio_chunks = []
         
